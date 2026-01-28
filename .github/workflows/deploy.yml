@@ -33,8 +33,6 @@ jobs:
       - name: Fetch Diego data from Pirque API
         run: |
           curl -s "https://pirque.heartbeatintel.com/api/experts/diego-alcaino" -o src/data/diego.json || echo "{}" > src/data/diego.json
-        env:
-          HEARTBEAT_API_URL: ${{ secrets.HEARTBEAT_API_URL }}
 
       - name: Build
         run: pnpm build
