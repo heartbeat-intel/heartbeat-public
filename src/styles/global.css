@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Inter font - using system font stack with Inter as primary */
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-hb-gray-7 text-hb-black-1;
+  }
+}
+
+/* Custom utilities */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Article content styling */
+.article-content h2 {
+  @apply text-[28px] font-bold text-hb-black-1 mt-8 mb-4 tracking-tight;
+}
+
+.article-content h3 {
+  @apply text-[22px] font-bold text-hb-black-1 mt-6 mb-3;
+}
+
+.article-content p {
+  @apply text-[17px] text-hb-gray-1 leading-relaxed mb-4;
+}
+
+.article-content ul,
+.article-content ol {
+  @apply pl-6 mb-4;
+}
+
+.article-content li {
+  @apply text-[17px] text-hb-gray-1 leading-relaxed mb-2;
+}
+
+.article-content strong {
+  @apply font-bold text-hb-black-1;
+}
+
+.article-content blockquote {
+  @apply border-l-4 border-hb-orange-main pl-6 py-2 my-6 bg-hb-gray-7 rounded-r-lg;
+}
+
+.article-content blockquote p {
+  @apply text-lg italic text-hb-gray-2 mb-0;
+}
+
+.article-content hr {
+  @apply my-8 border-hb-gray-6;
+}
+
+/* Card hover effects */
+.card-hover {
+  @apply transition-all duration-300 ease-out;
+}
+
+.card-hover:hover {
+  @apply -translate-y-1 shadow-hb-hover;
+}
+
+/* Gradient backgrounds */
+.gradient-hero {
+  background: linear-gradient(to bottom right, white 0%, #F5F5F5 50%, #FFDBCC 100%);
+}
+
+.gradient-cta {
+  background: linear-gradient(135deg, #1D1D1F 0%, #222426 100%);
+}

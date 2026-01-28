@@ -1,0 +1,40 @@
+---
+interface Props {
+  variant?: 'default' | 'hot' | 'premium' | 'live' | 'savings' | 'specialty' | 'count';
+  color?: string;
+  class?: string;
+}
+
+const { variant = 'default', color, class: className = '' } = Astro.props;
+
+const variantClasses: Record<string, string> = {
+  default: 'bg-hb-gray-7 text-hb-gray-2',
+  hot: 'bg-red-100 text-red-600',
+  premium: 'bg-hb-orange-4 text-hb-orange-main',
+  live: 'bg-hb-orange-4 text-hb-orange-main',
+  savings: 'bg-green-100 text-green-700',
+  count: 'bg-hb-gray-7 text-hb-gray-2',
+  specialty: '', // Uses custom color
+};
+
+const baseClasses = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide';
+const variantClass = variant === 'specialty' && color
+  ? ''
+  : variantClasses[variant] || variantClasses.default;
+
+const style = variant === 'specialty' && color
+  ? `background-color: ${color}15; color: ${color}`
+  : undefined;
+---
+
+<span
+  class:list={[baseClasses, variantClass, className]}
+  style={style}
+>
+  {variant === 'premium' && (
+    <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" />
+    </svg>
+  )}
+  <slot />
+</span>

@@ -1,0 +1,30 @@
+---
+interface Props {
+  title: string;
+  subtitle: string;
+  logoSrc: string;
+  href: string;
+}
+
+const { title, subtitle, logoSrc, href } = Astro.props;
+---
+
+<a
+  href={href}
+  target="_blank"
+  rel="noopener noreferrer"
+  class="block bg-white rounded-hb-sm p-5 w-full text-left border border-hb-gray-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-hb-sm hover:border-hb-gray-5"
+>
+  <div class="flex items-start justify-between">
+    <div class="flex flex-col gap-2">
+      <div class="flex items-center gap-2">
+        <img src={logoSrc} alt={title} class="h-6" width="84" height="24" />
+        <span class="text-lg font-semibold text-hb-black-1 tracking-tight">{title}</span>
+      </div>
+      <p class="text-sm text-hb-gray-2">{subtitle}</p>
+    </div>
+    <svg class="w-4 h-4 text-hb-gray-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+    </svg>
+  </div>
+</a>

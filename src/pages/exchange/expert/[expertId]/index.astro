@@ -1,0 +1,175 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import Footer from '../../../../components/astro/Footer.astro';
+import Avatar from '../../../../components/ui/Avatar.astro';
+import Badge from '../../../../components/ui/Badge.astro';
+import TabbedContent from '../../../../components/react/TabbedContent';
+import SubscribeModalWrapper from '../../../../components/react/SubscribeModalWrapper';
+import { EXPERTS_DATA, CONTENT_DATA } from '../../../../utils/constants';
+import { fetchExpertProfile, fetchExpertContent } from '../../../../data/fetch';
+import { formatViews } from '../../../../utils/formatters';
+
+// Generate static paths for all experts
+export function getStaticPaths() {
+  return Object.keys(EXPERTS_DATA).map((expertId) => ({
+    params: { expertId },
+  }));
+}
+
+const { expertId } = Astro.params;
+
+// Fetch data at build time
+const expert = await fetchExpertProfile(expertId);
+const content = await fetchExpertContent(expertId);
+
+// Handle 404
+if (!expert) {
+  return Astro.redirect('/exchange');
+}
+
+const staticContent = CONTENT_DATA[expertId] || { lists: [], articles: [] };
+const lists = content?.lists?.length ? content.lists : staticContent.lists;
+const articles = content?.articles?.length ? content.articles : staticContent.articles;
+---
+
+<BaseLayout
+  title={`${expert.name} - Heartbeat Intelligence`}
+  description={expert.description}
+>
+  <!-- Header -->
+  <header class="bg-white border-b border-hb-gray-6 sticky top-0 z-50">
+    <div class="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <a
+          href="/exchange"
+          class="flex items-center gap-2 text-sm text-hb-gray-2 hover:text-hb-black-1 transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back
+        </a>
+        <div class="h-6 w-px bg-hb-gray-6"></div>
+        <a href="/exchange">
+          <img src="/images/logos/heartbeatLogoBlack.svg" alt="Heartbeat" class="h-6" />
+        </a>
+      </div>
+      <a
+        href={expert.socialLinks.linkedin}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-hb-black-1 hover:bg-hb-black-2 rounded-lg transition-colors"
+      >
+        Connect on LinkedIn
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+        </svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section
+    class="py-12 border-b border-hb-gray-6"
+    style={`background: linear-gradient(to bottom right, white 0%, ${expert.color}08 50%, ${expert.color}15 100%)`}
+  >
+    <div class="max-w-[1200px] mx-auto px-6">
+      <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 items-start">
+        <!-- Profile Card -->
+        <div class="bg-white rounded-hb p-6 border border-hb-gray-6 shadow-hb-card flex flex-col items-center gap-4">
+          <Avatar
+            src={expert.avatarUrl}
+            alt={expert.name}
+            size="2xl"
+            borderColor={expert.color}
+            borderWidth={4}
+          />
+          <div class="text-center">
+            <h1 class="text-2xl font-bold text-hb-black-1">{expert.name}</h1>
+            <p class="text-sm text-hb-gray-2 mt-1">{expert.role}</p>
+            <div class="mt-2">
+              <Badge variant="specialty" color={expert.color}>{expert.specialty}</Badge>
+            </div>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="grid grid-cols-3 gap-3 w-full pt-2">
+            <div class="flex flex-col items-center p-3 bg-hb-gray-7 rounded-hb-xs">
+              <span class="text-[22px] font-bold text-hb-black-1">{expert.stats.lists}</span>
+              <span class="text-[11px] text-hb-gray-3 uppercase">Lists</span>
+            </div>
+            <div class="flex flex-col items-center p-3 bg-hb-gray-7 rounded-hb-xs">
+              <span class="text-[22px] font-bold text-hb-black-1">{expert.stats.articles}</span>
+              <span class="text-[11px] text-hb-gray-3 uppercase">Articles</span>
+            </div>
+            <div class="flex flex-col items-center p-3 bg-hb-gray-7 rounded-hb-xs">
+              <span class="text-[22px] font-bold text-hb-black-1">{formatViews(expert.stats.totalViews)}</span>
+              <span class="text-[11px] text-hb-gray-3 uppercase">Views</span>
+            </div>
+          </div>
+
+          <!-- Subscribe Button -->
+          <button
+            id="subscribe-btn"
+            class="w-full py-2.5 px-4 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
+            style={`background-color: ${expert.color}`}
+          >
+            Subscribe to Intel
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Bio & Expertise -->
+        <div class="flex flex-col gap-6">
+          <div>
+            <h2 class="text-[32px] font-bold text-hb-black-1 tracking-tight mb-3">
+              About {expert.name.split(' ')[0]}
+            </h2>
+            <p class="text-[17px] text-hb-gray-1 leading-relaxed">{expert.longBio}</p>
+          </div>
+
+          <div>
+            <p class="text-[13px] font-semibold text-hb-gray-3 uppercase tracking-wide mb-3">
+              Areas of Expertise
+            </p>
+            <div class="flex flex-wrap gap-2">
+              {expert.expertise.map((skill) => (
+                <span class="bg-white text-hb-black-1 px-3 py-1.5 rounded-full text-[13px] font-medium border border-hb-gray-6">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tabbed Content -->
+  <TabbedContent
+    client:visible
+    expertId={expertId}
+    expertColor={expert.color}
+    lists={lists}
+    articles={articles}
+  />
+
+  <Footer maxWidth="1200px" />
+
+  <!-- Subscribe Modal -->
+  <SubscribeModalWrapper client:load />
+</BaseLayout>
+
+<script define:vars={{ expertId, expertName: expert.name, expertColor: expert.color }}>
+  const subscribeBtn = document.getElementById('subscribe-btn');
+
+  if (subscribeBtn) {
+    subscribeBtn.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('openSubscribeModal', {
+        detail: { expertId, expertName, expertColor }
+      }));
+    });
+  }
+</script>

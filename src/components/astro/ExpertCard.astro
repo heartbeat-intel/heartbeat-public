@@ -1,0 +1,71 @@
+---
+import Avatar from '../ui/Avatar.astro';
+import Badge from '../ui/Badge.astro';
+
+interface Props {
+  name: string;
+  role: string;
+  specialty: string;
+  description: string;
+  avatarUrl: string;
+  color: string;
+  stats: { lists: number; views: string };
+  href: string;
+}
+
+const { name, role, specialty, description, avatarUrl, color, stats, href } = Astro.props;
+---
+
+<a
+  href={href}
+  class="group block bg-white rounded-hb p-6 w-full text-left border border-hb-gray-6 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-hb-hover relative overflow-hidden"
+  style={`--accent-color: ${color}`}
+>
+  <!-- Top gradient bar -->
+  <div
+    class="absolute top-0 left-0 right-0 h-1"
+    style={`background: linear-gradient(to right, ${color}, transparent)`}
+  ></div>
+
+  <!-- Profile header -->
+  <div class="flex items-start gap-4 mb-4">
+    <Avatar
+      src={avatarUrl}
+      alt={name}
+      size="xl"
+      borderColor={color}
+      borderWidth={3}
+    />
+    <div class="flex flex-col gap-1">
+      <h3 class="text-[22px] font-bold text-hb-black-1 tracking-tight">{name}</h3>
+      <p class="text-sm text-hb-gray-2 font-medium">{role}</p>
+      <Badge variant="specialty" color={color}>{specialty}</Badge>
+    </div>
+  </div>
+
+  <!-- Description -->
+  <p class="text-[15px] text-hb-gray-1 leading-relaxed mb-4">{description}</p>
+
+  <!-- Stats -->
+  <div class="flex items-center gap-6 mb-4">
+    <div class="flex flex-col">
+      <span class="text-2xl font-bold text-hb-black-1">{stats.lists}</span>
+      <span class="text-xs text-hb-gray-3 uppercase tracking-wide">Intel Lists</span>
+    </div>
+    <div class="h-10 w-px bg-hb-gray-6"></div>
+    <div class="flex flex-col">
+      <span class="text-2xl font-bold text-hb-black-1">{stats.views}</span>
+      <span class="text-xs text-hb-gray-3 uppercase tracking-wide">Views</span>
+    </div>
+  </div>
+
+  <!-- CTA Button -->
+  <div
+    class="flex items-center justify-center gap-2 bg-hb-black-1 text-white py-2 px-4 rounded-hb-xs transition-colors group-hover:bg-[var(--accent-color)]"
+  >
+    <span class="font-semibold text-sm">Access Intelligence</span>
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+    </svg>
+  </div>
+</a>

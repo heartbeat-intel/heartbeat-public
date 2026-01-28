@@ -1,0 +1,30 @@
+{
+  "name": "heartbeat-public",
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "deploy": "wrangler pages deploy dist"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/cloudflare": "^12.0.1",
+    "@astrojs/react": "^4.1.3",
+    "@astrojs/tailwind": "^5.1.3",
+    "@iconify/react": "^5.0.2",
+    "astro": "^5.1.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.2"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "wrangler": "^3.99.0"
+  }
+}

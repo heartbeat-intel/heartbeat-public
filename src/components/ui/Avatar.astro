@@ -1,0 +1,39 @@
+---
+interface Props {
+  src: string;
+  alt: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  borderColor?: string;
+  borderWidth?: number;
+  class?: string;
+}
+
+const {
+  src,
+  alt,
+  size = 'md',
+  borderColor,
+  borderWidth = 3,
+  class: className = '',
+} = Astro.props;
+
+const sizeClasses: Record<string, string> = {
+  sm: 'w-8 h-8',
+  md: 'w-12 h-12',
+  lg: 'w-16 h-16',
+  xl: 'w-20 h-20',
+  '2xl': 'w-24 h-24',
+};
+
+const borderStyle = borderColor
+  ? `border: ${borderWidth}px solid ${borderColor}`
+  : '';
+---
+
+<img
+  src={src}
+  alt={alt}
+  class:list={['rounded-full object-cover', sizeClasses[size], className]}
+  style={borderStyle}
+  loading="lazy"
+/>

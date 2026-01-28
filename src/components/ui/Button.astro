@@ -1,0 +1,62 @@
+---
+interface Props {
+  variant?: 'primary' | 'secondary' | 'ghost' | 'accent';
+  size?: 'sm' | 'md' | 'lg';
+  href?: string;
+  class?: string;
+  color?: string;
+  fullWidth?: boolean;
+  type?: 'button' | 'submit';
+  id?: string;
+}
+
+const {
+  variant = 'primary',
+  size = 'md',
+  href,
+  class: className = '',
+  color,
+  fullWidth = false,
+  type = 'button',
+  id,
+} = Astro.props;
+
+const Tag = href ? 'a' : 'button';
+
+const sizeClasses: Record<string, string> = {
+  sm: 'px-4 py-2 text-sm',
+  md: 'px-5 py-2.5 text-sm',
+  lg: 'px-6 py-3 text-base',
+};
+
+const variantClasses: Record<string, string> = {
+  primary: 'bg-hb-black-1 text-white hover:bg-hb-black-2',
+  secondary: 'bg-white text-hb-black-1 border border-hb-gray-5 hover:bg-hb-gray-7',
+  ghost: 'text-hb-gray-1 hover:text-hb-black-1 hover:bg-hb-gray-7',
+  accent: '', // Uses custom color
+};
+
+const baseClasses = 'inline-flex items-center justify-center gap-2 font-semibold rounded-lg transition-all duration-200';
+const variantClass = variant === 'accent' && color ? '' : variantClasses[variant];
+const widthClass = fullWidth ? 'w-full' : '';
+
+const style = variant === 'accent' && color
+  ? `background-color: ${color}; color: white;`
+  : undefined;
+---
+
+<Tag
+  href={href}
+  type={!href ? type : undefined}
+  id={id}
+  class:list={[baseClasses, sizeClasses[size], variantClass, widthClass, className]}
+  style={style}
+>
+  <slot />
+</Tag>
+
+<style>
+  a:hover, button:hover {
+    opacity: 0.9;
+  }
+</style>

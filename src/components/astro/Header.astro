@@ -1,0 +1,102 @@
+---
+interface Props {
+  showBack?: boolean;
+  backLabel?: string;
+  backHref?: string;
+  rightContent?: 'demo' | 'linkedin' | 'subscribe' | 'share-subscribe';
+  linkedinUrl?: string;
+  expertColor?: string;
+}
+
+const {
+  showBack = false,
+  backLabel = 'Back',
+  backHref = '/exchange',
+  rightContent = 'demo',
+  linkedinUrl,
+  expertColor = '#2563EB',
+} = Astro.props;
+---
+
+<header class="bg-white border-b border-hb-gray-6 sticky top-0 z-50">
+  <div class="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      {showBack && (
+        <a
+          href={backHref}
+          class="flex items-center gap-2 text-sm text-hb-gray-2 hover:text-hb-black-1 transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          {backLabel}
+        </a>
+      )}
+      {showBack && <div class="h-6 w-px bg-hb-gray-6"></div>}
+      <a href="/exchange">
+        <img src="/images/logos/heartbeatLogoBlack.svg" alt="Heartbeat" class="h-7" width="98" height="28" />
+      </a>
+    </div>
+
+    <div class="flex items-center gap-3">
+      {rightContent === 'demo' && (
+        <button
+          id="watch-demo-btn"
+          class="flex items-center gap-2 px-4 py-2 text-sm text-hb-gray-1 hover:text-hb-black-1 hover:bg-hb-gray-7 rounded-lg transition-colors"
+        >
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+          Watch Demo
+        </button>
+      )}
+
+      {rightContent === 'linkedin' && linkedinUrl && (
+        <a
+          href={linkedinUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-hb-black-1 hover:bg-hb-black-2 rounded-lg transition-colors"
+        >
+          Connect on LinkedIn
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
+      )}
+
+      {rightContent === 'share-subscribe' && (
+        <>
+          <button
+            id="share-btn"
+            class="flex items-center gap-2 px-4 py-2 text-sm text-hb-gray-1 hover:text-hb-black-1 hover:bg-hb-gray-7 rounded-lg transition-colors"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+            Share
+          </button>
+          <button
+            id="subscribe-header-btn"
+            class="px-4 py-2 text-sm font-medium text-white rounded-lg transition-opacity hover:opacity-90"
+            style={`background-color: ${expertColor}`}
+          >
+            Subscribe
+          </button>
+        </>
+      )}
+    </div>
+  </div>
+</header>
+
+<script>
+  // Share functionality
+  const shareBtn = document.getElementById('share-btn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(window.location.href);
+      // Could add a toast notification here
+      alert('Link copied to clipboard!');
+    });
+  }
+</script>

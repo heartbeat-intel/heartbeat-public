@@ -1,0 +1,101 @@
+---
+import Badge from '../ui/Badge.astro';
+
+interface Props {
+  type: 'list' | 'article';
+  title: string;
+  description: string;
+  date: string;
+  readTime: string;
+  metric?: number | string;
+  metricLabel?: string;
+  isHot?: boolean;
+  isPremium?: boolean;
+  color: string;
+  href?: string;
+  onClick?: string;
+}
+
+const {
+  type,
+  title,
+  description,
+  date,
+  readTime,
+  metric,
+  metricLabel,
+  isHot = false,
+  isPremium = false,
+  color,
+  href,
+  onClick,
+} = Astro.props;
+
+const Tag = href ? 'a' : 'button';
+const formatMetric = (m: number | string) => typeof m === 'number' ? m.toLocaleString() : m;
+---
+
+<Tag
+  href={href}
+  onclick={onClick}
+  class="group block bg-white rounded-hb-sm p-5 w-full text-left border border-hb-gray-6 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-hb-sm"
+  style={`--accent-color: ${color}`}
+>
+  <!-- Header with type and badges -->
+  <div class="flex items-start justify-between mb-3">
+    <div class="flex items-center gap-2">
+      {type === 'list' ? (
+        <svg class="w-[18px] h-[18px]" style={`color: ${color}`} viewBox="0 0 24 24" fill="currentColor">
+          <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z" />
+        </svg>
+      ) : (
+        <svg class="w-[18px] h-[18px]" style={`color: ${color}`} viewBox="0 0 24 24" fill="currentColor">
+          <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+        </svg>
+      )}
+      <span class="text-[11px] text-hb-gray-3 font-semibold uppercase tracking-wide">{type}</span>
+    </div>
+    <div class="flex items-center gap-2">
+      {isHot && <Badge variant="hot">HOT</Badge>}
+      {isPremium && <Badge variant="premium">PREMIUM</Badge>}
+    </div>
+  </div>
+
+  <!-- Title and description -->
+  <h3 class="text-[17px] font-semibold text-hb-black-1 mb-2 leading-snug group-hover:text-[var(--accent-color)] transition-colors">
+    {title}
+  </h3>
+  <p class="text-sm text-hb-gray-2 mb-4 leading-relaxed line-clamp-2">{description}</p>
+
+  <!-- Footer with date and metrics -->
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-4 text-[13px] text-hb-gray-3">
+      <span>{date}</span>
+      <span>&bull;</span>
+      <span>{readTime}</span>
+    </div>
+    {metric && metricLabel && (
+      <div class="flex items-center gap-1 text-hb-gray-3">
+        {type === 'list' ? (
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+          </svg>
+        ) : (
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+          </svg>
+        )}
+        <span class="text-[13px] font-medium">{formatMetric(metric)} {metricLabel}</span>
+      </div>
+    )}
+  </div>
+</Tag>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

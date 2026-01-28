@@ -1,0 +1,278 @@
+---
+import BaseLayout from '../../../../../layouts/BaseLayout.astro';
+import Footer from '../../../../../components/astro/Footer.astro';
+import Avatar from '../../../../../components/ui/Avatar.astro';
+import Badge from '../../../../../components/ui/Badge.astro';
+import SubscribeModalWrapper from '../../../../../components/react/SubscribeModalWrapper';
+import { EXPERTS_DATA } from '../../../../../utils/constants';
+import { getArticle, getList, getAllContentPaths, type ArticleData, type ListData } from '../../../../../data/content';
+import { markdownToHtml } from '../../../../../utils/formatters';
+
+// Generate static paths for all content
+export function getStaticPaths() {
+  return getAllContentPaths().map(({ expertId, contentType, contentId }) => ({
+    params: { expertId, contentType, contentId },
+  }));
+}
+
+const { expertId, contentType, contentId } = Astro.params;
+
+const isArticle = contentType === 'article';
+const expert = EXPERTS_DATA[expertId];
+const content = isArticle ? getArticle(expertId, contentId) : getList(expertId, contentId);
+
+// Handle 404
+if (!expert || !content) {
+  return Astro.redirect('/exchange');
+}
+
+const articleContent = isArticle ? content as ArticleData : null;
+const listContent = !isArticle ? content as ListData : null;
+---
+
+<BaseLayout
+  title={`${content.title} - ${expert.name} | Heartbeat Intelligence`}
+  description={content.description}
+>
+  <!-- Header -->
+  <header class="bg-white border-b border-hb-gray-6 sticky top-0 z-50">
+    <div class="max-w-[1000px] mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <a
+          href={`/exchange/expert/${expertId}`}
+          class="flex items-center gap-2 text-sm text-hb-gray-2 hover:text-hb-black-1 transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to {expert.name.split(' ')[0]}
+        </a>
+        <div class="h-6 w-px bg-hb-gray-6"></div>
+        <a href="/exchange">
+          <img src="/images/logos/heartbeatLogoBlack.svg" alt="Heartbeat" class="h-6" />
+        </a>
+      </div>
+      <div class="flex items-center gap-2">
+        <button
+          id="share-btn"
+          class="flex items-center gap-2 px-4 py-2 text-sm text-hb-gray-1 hover:text-hb-black-1 hover:bg-hb-gray-7 rounded-lg transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+          Share
+        </button>
+        <button
+          id="subscribe-btn"
+          class="px-4 py-2 text-sm font-medium text-white rounded-lg transition-opacity hover:opacity-90"
+          style={`background-color: ${expert.color}`}
+        >
+          Subscribe
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="max-w-[800px] mx-auto px-6 py-12">
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex items-center gap-2 mb-4">
+        <Badge variant={isArticle ? 'default' : 'default'} class={isArticle ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'}>
+          {isArticle ? 'Article' : 'Intel List'}
+        </Badge>
+        {content.isPremium && <Badge variant="premium">PREMIUM</Badge>}
+        {!isArticle && listContent?.isHot && <Badge variant="hot">HOT</Badge>}
+      </div>
+
+      <h1 class="text-3xl md:text-[42px] font-bold text-hb-black-1 leading-tight tracking-tight mb-4">
+        {content.title}
+      </h1>
+
+      <p class="text-lg text-hb-gray-2 leading-relaxed mb-6">
+        {content.description}
+      </p>
+
+      <div class="flex items-center gap-4 flex-wrap">
+        <a
+          href={`/exchange/expert/${expertId}`}
+          class="flex items-center gap-3 hover:opacity-80 transition-opacity"
+        >
+          <Avatar
+            src={expert.avatarUrl}
+            alt={expert.name}
+            size="sm"
+          />
+          <div>
+            <p class="text-sm font-semibold text-hb-black-1">{expert.name}</p>
+            <p class="text-xs text-hb-gray-3">{expert.role}</p>
+          </div>
+        </a>
+        <div class="h-8 w-px bg-hb-gray-6"></div>
+        <span class="text-sm text-hb-gray-3">{content.date}</span>
+        <span class="text-sm text-hb-gray-3">&bull;</span>
+        <span class="text-sm text-hb-gray-3">{content.readTime}</span>
+        <span class="text-sm text-hb-gray-3">&bull;</span>
+        <div class="flex items-center gap-1 text-hb-gray-3">
+          {isArticle ? (
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+            </svg>
+          ) : (
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+            </svg>
+          )}
+          <span class="text-sm">
+            {isArticle
+              ? `${articleContent!.views.toLocaleString()} views`
+              : `${listContent!.subscribers.toLocaleString()} subscribers`}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <hr class="border-hb-gray-6 mb-8" />
+
+    <!-- Article Content -->
+    {isArticle && articleContent && (
+      <div
+        class="article-content"
+        set:html={markdownToHtml(articleContent.content)}
+      />
+    )}
+
+    <!-- List Content -->
+    {!isArticle && listContent && (
+      <div class="space-y-6">
+        <!-- Methodology -->
+        <div class="bg-hb-gray-7 p-6 rounded-hb-sm border border-hb-gray-6">
+          <p class="text-[13px] font-semibold text-hb-gray-3 uppercase tracking-wide mb-2">
+            Methodology
+          </p>
+          <p class="text-[15px] text-hb-gray-1 leading-relaxed">
+            {listContent.methodology}
+          </p>
+        </div>
+
+        <!-- List Items -->
+        <div class="divide-y divide-hb-gray-7">
+          {listContent.items.map((item, index) => (
+            <div
+              class={`p-5 ${index % 2 === 0 ? 'bg-white' : 'bg-hb-gray-7'} ${
+                index === 0 ? 'rounded-t-hb-sm' : ''
+              } ${index === listContent.items.length - 1 ? 'rounded-b-hb-sm' : ''}`}
+            >
+              <div class="grid grid-cols-[48px_1fr_120px_140px] gap-4 items-center">
+                <div
+                  class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
+                  style={`background-color: ${expert.color}`}
+                >
+                  {item.rank}
+                </div>
+                <div>
+                  <p class="text-base font-semibold text-hb-black-1">{item.name}</p>
+                  <p class="text-[13px] text-hb-gray-3">{item.highlight}</p>
+                </div>
+                <span class="bg-hb-gray-7 text-hb-gray-2 px-3 py-1 rounded-full text-xs text-center">
+                  {item.sector}
+                </span>
+                <p class="text-[15px] font-semibold text-right" style={`color: ${expert.color}`}>
+                  {item.raised}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <!-- Related Content (Articles only) -->
+    {isArticle && articleContent?.relatedContent && articleContent.relatedContent.length > 0 && (
+      <div class="mt-12 pt-8 border-t border-hb-gray-6">
+        <h2 class="text-lg font-bold text-hb-black-1 mb-4">
+          Related from {expert.name.split(' ')[0]}
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {articleContent.relatedContent.map((related) => (
+            <a
+              href={`/exchange/expert/${expertId}/${related.type}/${related.id}`}
+              class="p-4 bg-hb-gray-7 rounded-hb-sm border border-hb-gray-6 transition-all hover:border-current hover:-translate-y-0.5"
+              style={`--tw-border-opacity: 1; border-color: ${expert.color}20;`}
+            >
+              <div class="flex items-center gap-2 mb-2">
+                {related.type === 'article' ? (
+                  <svg class="w-4 h-4" style={`color: ${expert.color}`} viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+                  </svg>
+                ) : (
+                  <svg class="w-4 h-4" style={`color: ${expert.color}`} viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z" />
+                  </svg>
+                )}
+                <span class="text-[11px] text-hb-gray-3 uppercase font-semibold">{related.type}</span>
+              </div>
+              <p class="text-[15px] font-semibold text-hb-black-1">{related.title}</p>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <!-- CTA -->
+    <div
+      class="mt-12 p-8 rounded-hb border"
+      style={`background: linear-gradient(135deg, ${expert.color}10 0%, ${expert.color}05 100%); border-color: ${expert.color}30;`}
+    >
+      <div class="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h3 class="text-xl font-bold text-hb-black-1 mb-1">
+            Get more from {expert.name.split(' ')[0]}
+          </h3>
+          <p class="text-[15px] text-hb-gray-2">
+            Subscribe to access all premium intel and exclusive insights
+          </p>
+        </div>
+        <button
+          id="subscribe-cta-btn"
+          class="px-6 py-3 text-white font-semibold rounded-lg flex items-center gap-2 transition-opacity hover:opacity-90"
+          style={`background-color: ${expert.color}`}
+        >
+          Subscribe Now
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <Footer variant="light" maxWidth="1000px" />
+
+  <!-- Subscribe Modal -->
+  <SubscribeModalWrapper client:visible />
+</BaseLayout>
+
+<script define:vars={{ expertId, expertName: expert.name, expertColor: expert.color }}>
+  // Share functionality
+  const shareBtn = document.getElementById('share-btn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link copied to clipboard!');
+    });
+  }
+
+  // Subscribe buttons
+  const subscribeBtn = document.getElementById('subscribe-btn');
+  const subscribeCta = document.getElementById('subscribe-cta-btn');
+
+  const openModal = () => {
+    window.dispatchEvent(new CustomEvent('openSubscribeModal', {
+      detail: { expertId, expertName, expertColor }
+    }));
+  };
+
+  subscribeBtn?.addEventListener('click', openModal);
+  subscribeCta?.addEventListener('click', openModal);
+</script>
