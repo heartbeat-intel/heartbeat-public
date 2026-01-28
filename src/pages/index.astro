@@ -1,170 +1,105 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Footer from '../components/astro/Footer.astro';
-import ExpertCard from '../components/astro/ExpertCard.astro';
-import DatabaseCard from '../components/astro/DatabaseCard.astro';
-import TrendingList from '../components/astro/TrendingList.astro';
-import Badge from '../components/ui/Badge.astro';
 import VideoPlayer from '../components/react/VideoPlayer';
-import { fetchTrendingContent, fetchExpertProfile } from '../data/fetch';
-
-// Fetch data at build time
-const trendingContent = await fetchTrendingContent(5);
-const diegoData = await fetchExpertProfile('diego-alcaino');
-const andresData = await fetchExpertProfile('andres-bucchi');
-
-// Format views for display
-const formatViews = (views: number) => {
-  if (views >= 1000) {
-    return `${(views / 1000).toFixed(1)}k`;
-  }
-  return views.toString();
-};
-
-const diegoStats = diegoData
-  ? { lists: diegoData.stats.lists, views: formatViews(diegoData.stats.totalViews) }
-  : { lists: 3, views: '16' };
-
-const andresStats = andresData
-  ? { lists: andresData.stats.lists, views: formatViews(andresData.stats.totalViews) }
-  : { lists: 18, views: '2.8k' };
 ---
 
-<BaseLayout title="Heartbeat Intelligence - Trade in intelligence, not just information">
-  <!-- Header -->
-  <header class="bg-white border-b border-hb-gray-6 sticky top-0 z-50">
-    <div class="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
-      <a href="/">
-        <img src="/images/logos/heartbeatLogoBlack.svg" alt="Heartbeat" class="h-7" />
-      </a>
-      <div class="flex items-center gap-4">
-        <VideoPlayer client:visible />
+<BaseLayout title="Heartbeat Intelligence">
+  <main>
+    <!-- Header -->
+    <header class="border-b border-hb-gray-6">
+      <div class="w-[75%] mx-auto min-h-14 flex items-center">
+        <a href="/">
+          <img src="/images/logos/heartbeatLogoBlack.svg" alt="Heartbeat" class="h-7" width="150" height="28" />
+        </a>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- Hero Section -->
-  <section class="gradient-hero py-12 lg:py-16 relative overflow-hidden">
-    <!-- Background glow -->
-    <div
-      class="absolute -top-1/2 -right-1/5 w-[600px] h-[600px] rounded-full bg-hb-orange-main opacity-[0.03] blur-[100px]"
-    ></div>
-
-    <div class="max-w-[1400px] mx-auto px-6 text-center relative">
-      <Badge
-        variant="specialty"
-        color="#FB4C02"
-        class="animate-pulse-glow mb-6"
-      >
-        Intelligence Exchange Platform
-      </Badge>
-
-      <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-hb-black-1 tracking-tight leading-tight max-w-[900px] mx-auto mb-6">
-        Trade in <span class="text-hb-orange-main">intelligence</span>, not just information
-      </h1>
-
-      <p class="text-lg lg:text-xl text-hb-gray-1 max-w-[700px] mx-auto leading-relaxed">
-        Connect with domain experts who curate and monetize exclusive intel.
-        Subscribe to insights that give you an edge.
-      </p>
-    </div>
-  </section>
-
-  <!-- Main Content Grid -->
-  <section class="max-w-[1400px] mx-auto px-6 py-12">
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8">
-      <!-- Left Column - Expert Cards -->
-      <div class="flex flex-col gap-6">
-        <!-- Featured Experts Section -->
-        <div>
-          <p class="text-[13px] font-semibold text-hb-orange-main uppercase tracking-wider mb-2">
-            Featured Experts
+    <!-- Hero Section -->
+    <section class="border-b border-hb-gray-6">
+      <div class="w-[75%] mx-auto flex">
+        <div class="py-12 w-full lg:w-3/4">
+          <h1 class="text-5xl font-bold text-hb-black-1 tracking-tight leading-tight">
+            If it were a fact,
+          </h1>
+          <h1 class="text-5xl font-bold text-hb-black-1 tracking-tight leading-tight">
+            it wouldn't be called <span class="text-hb-orange-main">intelligence</span>
+          </h1>
+          <p class="text-2xl text-hb-black-1 tracking-tight mt-4 max-w-[95%]">
+            Welcome to Heartbeat, a technology layer designed to traffic in intelligence.
           </p>
-          <h2 class="text-[28px] font-bold text-hb-black-1 tracking-tight">
-            Premium Intelligence Providers
-          </h2>
-          <p class="text-hb-gray-2 mt-2">
-            Industry leaders sharing curated intel and exclusive insights
-          </p>
-        </div>
-
-        <!-- Expert Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <ExpertCard
-            name="Diego Alcaino"
-            role="Founder & VC Investor"
-            specialty="Finance & VC"
-            description="Venture capital investor and startup ecosystem builder focused on LatAm and US markets. Curating deal flow insights, investment theses, and market intelligence for founders and investors."
-            avatarUrl="/images/experts/diego-pic.jpeg"
-            color="#2563EB"
-            stats={diegoStats}
-            href="/exchange/expert/diego-alcaino"
-          />
-          <ExpertCard
-            name="Andres Bucchi"
-            role="Chief Data Officer, LATAM Airlines"
-            specialty="Data & AI"
-            description="Leading AI-driven transformation at LATAM Airlines. Ex-Uber, Ex-Sodimac VP of Data & Analytics. Advisor at Heartbeat Intel. Sharing enterprise AI strategies, data architecture insights, and analytics frameworks."
-            avatarUrl="/images/experts/andres-pic.jpeg"
-            color="#7C3AED"
-            stats={andresStats}
-            href="/exchange/expert/andres-bucchi"
-          />
-        </div>
-
-        <!-- Database Cards Section -->
-        <div class="mt-4">
-          <p class="text-[13px] font-semibold text-hb-gray-3 uppercase tracking-wider mb-4">
-            Explore Databases
-          </p>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <DatabaseCard
-              title="Heartbeat Open"
-              subtitle="Intel for everyone — free access"
-              logoSrc="/images/logos/heartbeatOpenLogo.svg"
-              href="https://open.heartbeatintel.com/"
-            />
-            <DatabaseCard
-              title="P I R Q U E"
-              subtitle="USA startup economy database"
-              logoSrc="/images/logos/pirqueLogoBlack.svg"
-              href="https://pirque.heartbeatintel.com/"
-            />
+          <div class="pt-6">
+            <VideoPlayer client:visible buttonStyle="minimal" />
           </div>
         </div>
+        <!-- Vertical divider (desktop only) -->
+        <div class="hidden lg:block w-px bg-gradient-to-b from-transparent via-hb-gray-6 to-hb-gray-6"></div>
+      </div>
+    </section>
 
-        <!-- CTA Section -->
-        <div class="mt-4 p-8 rounded-hb gradient-cta relative overflow-hidden">
-          <div
-            class="absolute top-0 right-0 w-[300px] h-[300px] bg-gradient-radial from-hb-orange-main to-transparent opacity-15 blur-[60px]"
-          ></div>
-          <div class="relative">
-            <h3 class="text-white text-2xl font-bold tracking-tight mb-3">
-              Become an Intelligence Provider
-            </h3>
-            <p class="text-hb-gray-4 text-base max-w-[500px] mb-6">
-              Monetize your expertise. Set up your own Heartbeat and start selling
-              your curated intel to subscribers worldwide.
-            </p>
-            <a
-              href="mailto:human@heartbeatintel.com"
-              class="inline-flex items-center gap-2 bg-hb-orange-main text-white px-6 py-3 rounded-lg font-semibold hover:bg-hb-orange-1 transition-colors"
-            >
-              Book a Demo
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+    <!-- Explore Live Accounts Section -->
+    <section>
+      <div class="w-[75%] mx-auto flex">
+        <!-- Vertical divider -->
+        <div class="w-px bg-gradient-to-t from-transparent via-hb-gray-6 to-hb-gray-6"></div>
+        <div class="py-12 w-full pl-8 lg:pl-16">
+          <h2 class="text-3xl font-bold text-hb-black-1 tracking-tight">
+            Explore live accounts
+          </h2>
+          <p class="text-base text-hb-black-1 tracking-tight mt-2">
+            Setup your own Heartbeat and start monetizing your private intelligence.
+          </p>
+
+          <!-- Cards Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 pt-8">
+            <!-- Heartbeat Open Card -->
+            <a href="https://open.heartbeatintel.com/" target="_blank" rel="noopener noreferrer"
+               class="block border border-hb-gray-6 rounded-lg p-8 hover:shadow-hb-sm transition-shadow">
+              <div class="flex items-center gap-2 mb-2">
+                <img src="/images/logos/heartbeatOpenLogo.svg" alt="" class="h-6" width="26" height="26" />
+                <span class="text-xl font-semibold tracking-tight">Heartbeat Open</span>
+              </div>
+              <p class="text-base text-hb-gray-2 tracking-tight mb-8">
+                Intel for everyone.
+              </p>
+              <span class="inline-flex items-center gap-2 bg-hb-black-1 text-white px-4 py-2 rounded text-sm font-medium">
+                Explore
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </span>
+            </a>
+
+            <!-- PIRQUE Card -->
+            <a href="https://pirque.heartbeatintel.com/" target="_blank" rel="noopener noreferrer"
+               class="block border border-hb-gray-6 rounded-lg p-8 hover:shadow-hb-sm transition-shadow">
+              <div class="flex items-center gap-2 mb-2">
+                <img src="/images/logos/pirqueLogoBlack.svg" alt="" class="h-6" width="26" height="26" />
+                <span class="text-xl font-semibold tracking-tight">P I R Q U E</span>
+              </div>
+              <p class="text-base text-hb-gray-2 tracking-tight mb-8">
+                USA startup economy.
+              </p>
+              <span class="inline-flex items-center gap-2 bg-hb-black-1 text-white px-4 py-2 rounded text-sm font-medium">
+                Explore
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </span>
+            </a>
+
+            <!-- Book Demo Card -->
+            <a href="mailto:human@heartbeatintel.com"
+               class="block border-2 border-dashed border-hb-orange-main bg-hb-orange-4 rounded-lg p-8 flex flex-col items-center justify-center text-center hover:opacity-90 transition-opacity">
+              <svg class="w-6 h-6 text-hb-orange-main mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
               </svg>
+              <span class="text-sm font-bold text-hb-orange-main">
+                Book a demo to start your setup.
+              </span>
             </a>
           </div>
         </div>
       </div>
-
-      <!-- Right Column - Trending Lists -->
-      <div>
-        <TrendingList items={trendingContent} />
-      </div>
-    </div>
-  </section>
-
-  <Footer />
+    </section>
+  </main>
 </BaseLayout>
