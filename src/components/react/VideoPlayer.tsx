@@ -3,9 +3,10 @@ import { Icon } from '@iconify/react';
 
 interface VideoPlayerProps {
   videoId?: string;
+  buttonStyle?: 'default' | 'minimal';
 }
 
-export default function VideoPlayer({ videoId = 'Ym9tZDJoFYI' }: VideoPlayerProps) {
+export default function VideoPlayer({ videoId = 'Ym9tZDJoFYI', buttonStyle = 'default' }: VideoPlayerProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const openVideo = () => {
@@ -44,15 +45,21 @@ export default function VideoPlayer({ videoId = 'Ym9tZDJoFYI' }: VideoPlayerProp
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, [isOpen]);
 
+  const buttonClasses = buttonStyle === 'minimal'
+    ? "flex items-center gap-2 px-4 py-2 text-sm text-hb-black-1 border border-hb-gray-6 rounded hover:bg-hb-gray-7 transition-colors"
+    : "flex items-center gap-2 px-4 py-2 text-sm text-hb-gray-1 hover:text-hb-black-1 hover:bg-hb-gray-7 rounded-lg transition-colors";
+
+  const buttonText = buttonStyle === 'minimal' ? 'Promo Video' : 'Watch Demo';
+
   return (
     <>
       {/* Watch Demo Button - rendered inline where the component is placed */}
       <button
         onClick={openVideo}
-        className="flex items-center gap-2 px-4 py-2 text-sm text-hb-gray-1 hover:text-hb-black-1 hover:bg-hb-gray-7 rounded-lg transition-colors"
+        className={buttonClasses}
       >
         <Icon icon="octicon:play-24" width={16} />
-        Watch Demo
+        {buttonText}
       </button>
 
       {/* Fullscreen Video Overlay */}
