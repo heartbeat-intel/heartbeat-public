@@ -1,6 +1,14 @@
 const VERCEL_ORIGIN = 'https://heartbeat-public.vercel.app';
 
-// All heartbeat-public routes (static + SSR) are served from Vercel
+// Only these hostnames get routed to heartbeat-public (marketing site).
+// All other subdomains (e.g. pirque.heartbeatintel.com) are tenant
+// workspaces and must pass through to the origin (heartbeat-web).
+const MARKETING_HOSTS = [
+  'heartbeatintel.com',
+  'www.heartbeatintel.com',
+];
+
+// Routes on the marketing site served from heartbeat-public on Vercel
 const HEARTBEAT_PUBLIC_ROUTES = [
   '/',
 ];
@@ -15,8 +23,15 @@ const HEARTBEAT_PUBLIC_PREFIXES = [
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    const hostname = url.hostname;
     const path = url.pathname;
 
+    // Tenant subdomains pass through directly to origin (heartbeat-web)
+    if (!MARKETING_HOSTS.includes(hostname)) {
+      return fetch(request);
+    }
+
+    // Marketing site: route specific paths to heartbeat-public on Vercel
     if (shouldServeFromVercel(path)) {
       const vercelUrl = new URL(path + url.search, VERCEL_ORIGIN);
       const vercelRequest = new Request(vercelUrl, {
@@ -32,7 +47,7 @@ export default {
       });
     }
 
-    // Everything else passes through to the original origin (heartbeat-web on Vercel)
+    // Everything else on marketing domain passes through to heartbeat-web
     return fetch(request);
   },
 };
