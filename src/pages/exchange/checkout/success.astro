@@ -137,7 +137,7 @@ import DarkFooter from '../../../components/astro/DarkFooter.astro';
       }
     }
 
-    if (data && data.tenant_url && data.provisioning_status === 'completed') {
+    if (data && data.tenant_url) {
       showState('success');
       const link = document.getElementById('workspace-link') as HTMLAnchorElement;
       link.href = data.login_url || data.tenant_url;
