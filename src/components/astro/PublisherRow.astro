@@ -1,0 +1,61 @@
+---
+import Avatar from '../ui/Avatar.astro';
+import Badge from '../ui/Badge.astro';
+
+interface Publisher {
+  id: string;
+  name: string;
+  role: string;
+  specialty: string;
+  avatarUrl: string;
+  color: string;
+  stats: { lists: number; views: string };
+}
+
+interface Props {
+  publishers: Publisher[];
+}
+
+const { publishers } = Astro.props;
+---
+
+<div class="flex gap-4 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide" style="scrollbar-width: none; -ms-overflow-style: none;">
+  {publishers.map((publisher) => (
+    <a
+      href={`/exchange/publisher/${publisher.id}`}
+      class="group flex-shrink-0 w-[280px] glass-card p-5"
+    >
+      <div class="flex items-center gap-3 mb-3">
+        <Avatar
+          src={publisher.avatarUrl}
+          alt={publisher.name}
+          size="md"
+          borderColor={publisher.color}
+          borderWidth={2}
+        />
+        <div class="min-w-0">
+          <h3 class="text-[15px] font-bold text-white truncate">{publisher.name}</h3>
+          <p class="text-xs text-white/40 truncate">{publisher.role}</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4 mb-3">
+        <div>
+          <span class="text-lg font-bold text-white">{publisher.stats.lists}</span>
+          <span class="text-[10px] text-white/30 uppercase ml-1">Lists</span>
+        </div>
+        <div class="h-5 w-px bg-white/10"></div>
+        <div>
+          <span class="text-lg font-bold text-white">{publisher.stats.views}</span>
+          <span class="text-[10px] text-white/30 uppercase ml-1">Views</span>
+        </div>
+      </div>
+      <Badge variant="specialty" color={publisher.color}>{publisher.specialty}</Badge>
+    </a>
+  ))}
+</div>
+
+<style>
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+</style>

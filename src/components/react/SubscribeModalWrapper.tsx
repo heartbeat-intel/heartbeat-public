@@ -3,21 +3,21 @@ import SubscribeModal from './SubscribeModal';
 
 interface ModalState {
   isOpen: boolean;
-  expertId?: string;
-  expertName?: string;
-  expertColor?: string;
+  publisherId?: string;
+  publisherName?: string;
+  publisherColor?: string;
 }
 
 export default function SubscribeModalWrapper() {
   const [modalState, setModalState] = useState<ModalState>({ isOpen: false });
 
   useEffect(() => {
-    const handleOpen = (event: CustomEvent<{ expertId: string; expertName: string; expertColor: string }>) => {
+    const handleOpen = (event: CustomEvent<{ publisherId: string; publisherName: string; publisherColor: string }>) => {
       setModalState({
         isOpen: true,
-        expertId: event.detail.expertId,
-        expertName: event.detail.expertName,
-        expertColor: event.detail.expertColor,
+        publisherId: event.detail.publisherId,
+        publisherName: event.detail.publisherName,
+        publisherColor: event.detail.publisherColor,
       });
     };
 
@@ -33,9 +33,9 @@ export default function SubscribeModalWrapper() {
     <SubscribeModal
       isOpen={modalState.isOpen}
       onClose={handleClose}
-      expertId={modalState.expertId}
-      expertName={modalState.expertName}
-      accentColor={modalState.expertColor}
+      publisherId={modalState.publisherId}
+      publisherName={modalState.publisherName}
+      accentColor={modalState.publisherColor}
     />
   );
 }

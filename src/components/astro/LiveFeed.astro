@@ -1,0 +1,52 @@
+---
+import Badge from '../ui/Badge.astro';
+
+interface FeedItem {
+  type: 'new_list' | 'new_subscriber' | 'trending' | 'update';
+  text: string;
+  time: string;
+}
+
+interface Props {
+  items?: FeedItem[];
+}
+
+const { items = [] } = Astro.props;
+
+const typeConfig: Record<string, { color: string; icon: string }> = {
+  new_list: { color: 'bg-green-500', icon: '+ ' },
+  new_subscriber: { color: 'bg-blue-500', icon: '' },
+  trending: { color: 'bg-hb-orange-main', icon: '' },
+  update: { color: 'bg-purple-500', icon: '' },
+};
+---
+
+<div class="glass-card p-5 h-full">
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center gap-2">
+      <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+      <h3 class="text-sm font-bold text-white uppercase tracking-wide">Live Feed</h3>
+    </div>
+    <Badge variant="live-dark">Live</Badge>
+  </div>
+
+  {items.length > 0 ? (
+    <div class="space-y-0 divide-y divide-white/5">
+      {items.map((item) => (
+        <div class="py-3 first:pt-0 last:pb-0">
+          <div class="flex items-start gap-2.5">
+            <div class={`w-1.5 h-1.5 rounded-full ${typeConfig[item.type].color} mt-1.5 flex-shrink-0`}></div>
+            <div class="min-w-0 flex-1">
+              <p class="text-[13px] text-white/60 leading-snug">{item.text}</p>
+              <span class="text-[11px] text-white/20 mt-0.5 block">{item.time}</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div class="flex flex-col items-center justify-center py-8 text-center">
+      <p class="text-sm text-white/30">No activity yet. Events will appear here as publishers share intel.</p>
+    </div>
+  )}
+</div>

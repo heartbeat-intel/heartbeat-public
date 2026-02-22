@@ -25,15 +25,40 @@ const sizeClasses: Record<string, string> = {
   '2xl': 'w-24 h-24',
 };
 
+const textSizeClasses: Record<string, string> = {
+  sm: 'text-xs',
+  md: 'text-sm',
+  lg: 'text-base',
+  xl: 'text-lg',
+  '2xl': 'text-xl',
+};
+
 const borderStyle = borderColor
   ? `border: ${borderWidth}px solid ${borderColor}`
   : '';
+
+// Generate initials from alt text (name)
+const initials = alt
+  .split(' ')
+  .map((word) => word[0])
+  .join('')
+  .toUpperCase()
+  .slice(0, 2);
 ---
 
-<img
-  src={src}
-  alt={alt}
-  class:list={['rounded-full object-cover', sizeClasses[size], className]}
-  style={borderStyle}
-  loading="lazy"
-/>
+{src ? (
+  <img
+    src={src}
+    alt={alt}
+    class:list={['rounded-full object-cover', sizeClasses[size], className]}
+    style={borderStyle}
+    loading="lazy"
+  />
+) : (
+  <div
+    class:list={['rounded-full flex items-center justify-center font-bold text-white', sizeClasses[size], textSizeClasses[size], className]}
+    style={`${borderStyle}; background-color: ${borderColor || '#6B6B6B'}`}
+  >
+    {initials}
+  </div>
+)}

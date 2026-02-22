@@ -1,0 +1,86 @@
+---
+import Avatar from '../ui/Avatar.astro';
+import Badge from '../ui/Badge.astro';
+
+interface Props {
+  name: string;
+  role: string;
+  specialty: string;
+  description: string;
+  avatarUrl: string;
+  color: string;
+  stats: { lists: number; views: string };
+  featuredList?: string;
+  href: string;
+}
+
+const { name, role, specialty, description, avatarUrl, color, stats, featuredList, href } = Astro.props;
+---
+
+<a
+  href={href}
+  class="group block glass-card-glow p-8 relative overflow-hidden h-full"
+>
+  <!-- Ambient glow -->
+  <div
+    class="absolute -top-20 -right-20 w-[300px] h-[300px] rounded-full blur-[100px] opacity-20 pointer-events-none"
+    style={`background: ${color}`}
+  ></div>
+
+  <div class="relative z-10">
+    <!-- Top row: badge -->
+    <div class="flex items-center justify-between mb-6">
+      <Badge variant="live-dark">Featured</Badge>
+      <Badge variant="specialty" color={color}>{specialty}</Badge>
+    </div>
+
+    <!-- Profile -->
+    <div class="flex items-start gap-5 mb-6">
+      <Avatar
+        src={avatarUrl}
+        alt={name}
+        size="2xl"
+        borderColor={color}
+        borderWidth={3}
+      />
+      <div class="flex-1">
+        <h2 class="text-2xl lg:text-3xl font-bold text-white tracking-tight mb-1">{name}</h2>
+        <p class="text-sm text-white/40 font-medium mb-3">{role}</p>
+        <p class="text-[15px] text-white/50 leading-relaxed line-clamp-3">{description}</p>
+      </div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="flex items-center gap-6 mb-6">
+      <div class="flex flex-col">
+        <span class="text-3xl font-bold text-white">{stats.lists}</span>
+        <span class="text-xs text-white/30 uppercase tracking-wide">Intel Lists</span>
+      </div>
+      <div class="h-10 w-px bg-white/10"></div>
+      <div class="flex flex-col">
+        <span class="text-3xl font-bold text-white">{stats.views}</span>
+        <span class="text-xs text-white/30 uppercase tracking-wide">Views</span>
+      </div>
+      {featuredList && (
+        <>
+          <div class="h-10 w-px bg-white/10"></div>
+          <div class="flex flex-col flex-1">
+            <span class="text-xs text-white/30 uppercase tracking-wide mb-1">Featured</span>
+            <span class="text-sm font-medium text-white/70 truncate">{featuredList}</span>
+          </div>
+        </>
+      )}
+    </div>
+
+    <!-- CTA -->
+    <div
+      class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 group-hover:shadow-lg"
+      style={`background: ${color}; color: white;`}
+    >
+      View Profile
+      <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </div>
+  </div>
+</a>

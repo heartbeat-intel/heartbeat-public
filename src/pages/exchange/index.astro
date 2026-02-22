@@ -1,172 +1,125 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Footer from '../../components/astro/Footer.astro';
-import ExpertCard from '../../components/astro/ExpertCard.astro';
-import DatabaseCard from '../../components/astro/DatabaseCard.astro';
-import TrendingList from '../../components/astro/TrendingList.astro';
-import Badge from '../../components/ui/Badge.astro';
-import VideoPlayer from '../../components/react/VideoPlayer';
-import { fetchTrendingContent, fetchExpertProfile } from '../../data/fetch';
+import DarkHeader from '../../components/astro/DarkHeader.astro';
+import DarkFooter from '../../components/astro/DarkFooter.astro';
+import HotListCard from '../../components/astro/HotListCard.astro';
+import CategoryPills from '../../components/astro/CategoryPills.astro';
+import PublisherRow from '../../components/astro/PublisherRow.astro';
+import LiveFeed from '../../components/astro/LiveFeed.astro';
+import TrendingListDark from '../../components/astro/TrendingListDark.astro';
+import { fetchTrendingContent, fetchHotLists, fetchAllPublishers } from '../../data/fetch';
+import { formatViews } from '../../utils/formatters';
 
-// Fetch data at build time
 const trendingContent = await fetchTrendingContent(5);
-const diegoData = await fetchExpertProfile('diego-alcaino');
-const andresData = await fetchExpertProfile('andres-bucchi');
+const hotLists = await fetchHotLists();
+const allPublishers = await fetchAllPublishers();
 
-// Format views for display
-const formatViews = (views: number) => {
-  if (views >= 1000) {
-    return `${(views / 1000).toFixed(1)}k`;
-  }
-  return views.toString();
-};
+const hasTrending = trendingContent.length > 0;
+const hasHotLists = hotLists.length > 0;
+const hasPublishers = allPublishers.length > 0;
 
-const diegoStats = diegoData
-  ? { lists: diegoData.stats.lists, views: formatViews(diegoData.stats.totalViews) }
-  : { lists: 3, views: '16' };
+const publisherCards = allPublishers.map((publisher) => ({
+  id: publisher.id,
+  name: publisher.name,
+  role: publisher.role,
+  specialty: publisher.specialty,
+  avatarUrl: publisher.avatarUrl,
+  color: publisher.color,
+  stats: {
+    lists: publisher.stats.lists,
+    views: formatViews(publisher.stats.totalViews),
+  },
+}));
 
-const andresStats = andresData
-  ? { lists: andresData.stats.lists, views: formatViews(andresData.stats.totalViews) }
-  : { lists: 18, views: '2.8k' };
+const publisherCount = allPublishers.length;
+const pageDescription = `Browse ${publisherCount} intelligence publishers on the Heartbeat Exchange. Subscribe to curated research, market analysis, and proprietary data from verified providers.`;
 ---
 
-<BaseLayout title="Heartbeat Intelligence - Trade in intelligence, not just information">
-  <!-- Header -->
-  <header class="bg-white border-b border-hb-gray-6 sticky top-0 z-50">
-    <div class="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
-      <a href="/exchange">
-        <img src="/images/logos/heartbeatLogoBlack.svg" alt="Heartbeat" class="h-7" width="98" height="28" />
-      </a>
-      <div class="flex items-center gap-4">
-        <VideoPlayer client:visible />
-      </div>
-    </div>
-  </header>
+<BaseLayout
+  title="Heartbeat Intelligence Exchange — Curated Research & Market Intelligence"
+  description={pageDescription}
+>
+  <DarkHeader variant="exchange" maxWidth="1400px" />
 
-  <main>
-  <!-- Hero Section -->
-  <section class="gradient-hero py-12 lg:py-16 relative overflow-hidden">
-    <!-- Background glow -->
-    <div
-      class="absolute -top-1/2 -right-1/5 w-[600px] h-[600px] rounded-full bg-hb-orange-main opacity-[0.03] blur-[100px]"
-    ></div>
+  <main class="pt-16">
+    <!-- Publishers — primary content, most SEO value -->
+    <section class="max-w-[1400px] mx-auto px-6 pt-10 pb-6" id="publishers" aria-labelledby="exchange-heading">
+      <header class="mb-8 max-w-2xl">
+        <h1 id="exchange-heading" class="text-3xl md:text-4xl font-bold text-[var(--hb-text-primary)] tracking-tight mb-3">
+          Intelligence Exchange
+        </h1>
+        <p class="text-base text-[var(--hb-text-primary)]/40 leading-relaxed">
+          Subscribe to curated intelligence from verified publishers. Get exclusive research, proprietary data, and real-time market insights delivered to your workspace.
+        </p>
+      </header>
 
-    <div class="max-w-[1400px] mx-auto px-6 text-center relative">
-      <Badge
-        variant="specialty"
-        color="#FB4C02"
-        class="animate-pulse-glow mb-6"
-      >
-        Intelligence Exchange Platform
-      </Badge>
-
-      <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-hb-black-1 tracking-tight leading-tight max-w-[900px] mx-auto mb-6">
-        Trade in <span class="text-hb-orange-main">intelligence</span>, not just information
-      </h1>
-
-      <p class="text-lg lg:text-xl text-hb-gray-1 max-w-[700px] mx-auto leading-relaxed">
-        Connect with domain experts who curate and monetize exclusive intel.
-        Subscribe to insights that give you an edge.
-      </p>
-    </div>
-  </section>
-
-  <!-- Main Content Grid -->
-  <section class="max-w-[1400px] mx-auto px-6 py-12">
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8">
-      <!-- Left Column - Expert Cards -->
-      <div class="flex flex-col gap-6">
-        <!-- Featured Experts Section -->
-        <div>
-          <p class="text-[13px] font-semibold text-hb-orange-main uppercase tracking-wider mb-2">
-            Featured Experts
-          </p>
-          <h2 class="text-[28px] font-bold text-hb-black-1 tracking-tight">
-            Premium Intelligence Providers
-          </h2>
-          <p class="text-hb-gray-2 mt-2">
-            Industry leaders sharing curated intel and exclusive insights
-          </p>
+      {hasPublishers && (
+        <div class="reveal">
+          <PublisherRow publishers={publisherCards} />
         </div>
+      )}
+    </section>
 
-        <!-- Expert Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <ExpertCard
-            name="Diego Alcaino"
-            role="Founder & VC Investor"
-            specialty="Finance & VC"
-            description="Venture capital investor and startup ecosystem builder focused on LatAm and US markets. Curating deal flow insights, investment theses, and market intelligence for founders and investors."
-            avatarUrl="/images/experts/diego-pic.jpeg"
-            color="#2563EB"
-            stats={diegoStats}
-            href="/exchange/expert/diego-alcaino"
-          />
-          <ExpertCard
-            name="Andres Bucchi"
-            role="Chief Data Officer, LATAM Airlines"
-            specialty="Data & AI"
-            description="Leading AI-driven transformation at LATAM Airlines. Ex-Uber, Ex-Sodimac VP of Data & Analytics. Advisor at Heartbeat Intel. Sharing enterprise AI strategies, data architecture insights, and analytics frameworks."
-            avatarUrl="/images/experts/andres-pic.jpeg"
-            color="#7C3AED"
-            stats={andresStats}
-            href="/exchange/expert/andres-bucchi"
-          />
-        </div>
-
-        <!-- Database Cards Section -->
-        <div class="mt-4">
-          <p class="text-[13px] font-semibold text-hb-gray-3 uppercase tracking-wider mb-4">
-            Explore Databases
-          </p>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <DatabaseCard
-              title="Heartbeat Open"
-              subtitle="Intel for everyone — free access"
-              logoSrc="/images/logos/heartbeatOpenLogo.svg"
-              href="https://open.heartbeatintel.com/"
-            />
-            <DatabaseCard
-              title="P I R Q U E"
-              subtitle="USA startup economy database"
-              logoSrc="/images/logos/pirqueLogoBlack.svg"
-              href="https://pirque.heartbeatintel.com/"
-            />
+    <!-- Categories + Trending + Hot Lists -->
+    <section class="max-w-[1400px] mx-auto px-6 py-6">
+      <div class="bento-grid">
+        <!-- Categories -->
+        <div class="col-span-12 lg:col-span-4 reveal">
+          <div class="glass-card p-5 h-full flex flex-col justify-center">
+            <h2 class="text-xs font-bold text-[var(--hb-text-primary)]/30 uppercase tracking-wide mb-3">Browse by Category</h2>
+            <CategoryPills />
           </div>
         </div>
 
-        <!-- CTA Section -->
-        <div class="mt-4 p-8 rounded-hb gradient-cta relative overflow-hidden">
-          <div
-            class="absolute top-0 right-0 w-[300px] h-[300px] bg-gradient-radial from-hb-orange-main to-transparent opacity-15 blur-[60px]"
-          ></div>
-          <div class="relative">
-            <h3 class="text-white text-2xl font-bold tracking-tight mb-3">
-              Become an Intelligence Provider
-            </h3>
-            <p class="text-hb-gray-4 text-base max-w-[500px] mb-6">
-              Monetize your expertise. Set up your own Heartbeat and start selling
-              your curated intel to subscribers worldwide.
-            </p>
-            <a
-              href="mailto:human@heartbeatintel.com"
-              class="inline-flex items-center gap-2 bg-hb-orange-main text-white px-6 py-3 rounded-lg font-semibold hover:bg-hb-orange-1 transition-colors"
-            >
-              Book a Demo
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        <!-- Trending -->
+        <div class="col-span-12 lg:col-span-8 reveal" id="trending" data-reveal-delay="100">
+          {hasTrending ? (
+            <TrendingListDark items={trendingContent} />
+          ) : (
+            <div class="glass-card p-6 h-full flex flex-col items-center justify-center text-center min-h-[140px]">
+              <svg class="w-7 h-7 text-[var(--hb-text-primary)]/15 mb-2" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67z" />
               </svg>
-            </a>
+              <p class="text-sm text-[var(--hb-text-primary)]/25">Trending content will appear here as publishers share intel.</p>
+            </div>
+          )}
+        </div>
+
+        <!-- Hot Lists -->
+        {hasHotLists && hotLists.slice(0, 2).map((list, i) => (
+          <div class="col-span-12 md:col-span-6 lg:col-span-4 reveal" data-reveal-delay={String(i * 100)}>
+            <HotListCard
+              title={list.title}
+              description={list.description}
+              authorName={list.author || 'Publisher'}
+              authorAvatar={undefined}
+              subscribers={list.subscribers || 0}
+              isHot={list.isHot}
+              href={list.publisherId ? `/exchange/publisher/${list.publisherId}/list/${list.id}` : '#'}
+            />
+          </div>
+        ))}
+
+        <!-- Live Feed + Coming Soon -->
+        <div class="col-span-12 lg:col-span-5 reveal">
+          <LiveFeed />
+        </div>
+        <div class="col-span-12 lg:col-span-7 reveal" data-reveal-delay="100">
+          <div class="glass-card p-8 h-full flex flex-col items-center justify-center text-center">
+            <div class="w-12 h-12 rounded-full bg-hb-orange-main/10 flex items-center justify-center mb-4">
+              <svg class="w-6 h-6 text-hb-orange-main" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+            </div>
+            <h2 class="text-lg font-bold text-[var(--hb-text-primary)] mb-2">More publishers coming soon</h2>
+            <p class="text-sm text-[var(--hb-text-primary)]/40 max-w-sm">
+              New intelligence providers are onboarding every week. Check back or become a provider yourself.
+            </p>
           </div>
         </div>
       </div>
-
-      <!-- Right Column - Trending Lists -->
-      <div>
-        <TrendingList items={trendingContent} />
-      </div>
-    </div>
-  </section>
+    </section>
   </main>
 
-  <Footer />
+  <DarkFooter maxWidth="1400px" />
 </BaseLayout>

@@ -1,0 +1,335 @@
+---
+import BaseLayout from '../../../../../layouts/BaseLayout.astro';
+import DarkHeader from '../../../../../components/astro/DarkHeader.astro';
+import DarkFooter from '../../../../../components/astro/DarkFooter.astro';
+import Avatar from '../../../../../components/ui/Avatar.astro';
+import Badge from '../../../../../components/ui/Badge.astro';
+import SubscribeModalWrapper from '../../../../../components/react/SubscribeModalWrapper';
+import { fetchPublisherProfile } from '../../../../../data/fetch';
+import { getArticle, getList, getAllContentPaths, type ArticleData, type ListData } from '../../../../../data/content';
+import { markdownToHtml } from '../../../../../utils/formatters';
+
+export function getStaticPaths() {
+  return getAllContentPaths().map(({ expertId, contentType, contentId }) => ({
+    params: { publisherId: expertId, contentType, contentId },
+  }));
+}
+
+const { publisherId, contentType, contentId } = Astro.params;
+
+const isArticle = contentType === 'article';
+const publisher = await fetchPublisherProfile(publisherId);
+const content = isArticle ? getArticle(publisherId, contentId) : getList(publisherId, contentId);
+
+if (!publisher || !content) {
+  return Astro.redirect('/exchange');
+}
+
+const articleContent = isArticle ? content as ArticleData : null;
+const listContent = !isArticle ? content as ListData : null;
+---
+
+<BaseLayout
+  title={`${content.title} - ${publisher.name} | Heartbeat Intelligence`}
+  description={content.description}
+>
+  <!-- Header -->
+  <DarkHeader
+    variant="content"
+    showBack={true}
+    backHref={`/exchange/publisher/${publisherId}`}
+    backLabel={`Back to ${publisher.name.split(' ')[0]}`}
+    maxWidth="1000px"
+  >
+    <div slot="right-actions" class="flex items-center gap-2">
+      <button
+        id="share-btn"
+        class="flex items-center gap-2 px-4 py-2 text-sm text-white/40 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+        </svg>
+        Share
+      </button>
+      <button
+        id="subscribe-btn"
+        class="px-4 py-2 text-sm font-medium text-white rounded-lg transition-opacity hover:opacity-90"
+        style={`background-color: ${publisher.color}`}
+      >
+        Subscribe
+      </button>
+    </div>
+  </DarkHeader>
+
+  <!-- Content -->
+  <main class="max-w-[800px] mx-auto px-6 py-12 pt-28">
+    <!-- Header -->
+    <div class="mb-8 reveal">
+      <div class="flex items-center gap-2 mb-4">
+        <Badge variant={isArticle ? 'default-dark' : 'default-dark'} class={isArticle ? '!bg-blue-500/15 !text-blue-400' : '!bg-purple-500/15 !text-purple-400'}>
+          {isArticle ? 'Article' : 'Intel List'}
+        </Badge>
+        {content.isPremium && <Badge variant="premium-dark">PREMIUM</Badge>}
+        {!isArticle && listContent?.isHot && <Badge variant="hot-dark">HOT</Badge>}
+      </div>
+
+      <h1 class="text-3xl md:text-[42px] font-bold text-white leading-tight tracking-tight mb-4">
+        {content.title}
+      </h1>
+
+      <p class="text-lg text-white/40 leading-relaxed mb-6">
+        {content.description}
+      </p>
+
+      <div class="flex items-center gap-4 flex-wrap">
+        <a
+          href={`/exchange/publisher/${publisherId}`}
+          class="flex items-center gap-3 hover:opacity-80 transition-opacity"
+        >
+          <Avatar
+            src={publisher.avatarUrl}
+            alt={publisher.name}
+            size="sm"
+          />
+          <div>
+            <p class="text-sm font-semibold text-white">{publisher.name}</p>
+            <p class="text-xs text-white/30">{publisher.role}</p>
+          </div>
+        </a>
+        <div class="h-8 w-px bg-white/10"></div>
+        <span class="text-sm text-white/30">{content.date}</span>
+        <span class="text-sm text-white/20">&bull;</span>
+        <span class="text-sm text-white/30">{content.readTime}</span>
+        <span class="text-sm text-white/20">&bull;</span>
+        <div class="flex items-center gap-1 text-white/30">
+          {isArticle ? (
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+            </svg>
+          ) : (
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+            </svg>
+          )}
+          <span class="text-sm">
+            {isArticle
+              ? `${articleContent!.views.toLocaleString()} views`
+              : `${listContent!.subscribers.toLocaleString()} subscribers`}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <hr class="border-white/[0.06] mb-8" />
+
+    <!-- Article Content with Paywall -->
+    {isArticle && articleContent && (
+      <div class="relative">
+        <div
+          class="article-content-dark"
+          set:html={markdownToHtml(articleContent.content)}
+        />
+
+        <!-- Paywall Overlay -->
+        {articleContent.isPremium && (
+          <div class="absolute bottom-0 left-0 right-0">
+            <!-- Gradient fade -->
+            <div class="h-64 bg-gradient-to-t from-hb-black-1 via-hb-black-1/95 to-transparent"></div>
+            <!-- Subscribe card -->
+            <div class="bg-hb-black-1 pb-8">
+              <div class="glass-card p-8 text-center max-w-[480px] mx-auto">
+                <div
+                  class="inline-flex p-3 rounded-full mb-4"
+                  style={`background-color: ${publisher.color}15`}
+                >
+                  <svg class="w-6 h-6" style={`color: ${publisher.color}`} viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+                  </svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Subscribe to unlock</h3>
+                <p class="text-sm text-white/40 mb-6">
+                  Get full access to this article and all of {publisher.name.split(' ')[0]}'s premium intelligence.
+                </p>
+                <button
+                  id="paywall-subscribe-btn"
+                  class="w-full py-3 px-6 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
+                  style={`background-color: ${publisher.color}`}
+                >
+                  Subscribe Now
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    )}
+
+    <!-- List Content with Paywall -->
+    {!isArticle && listContent && (
+      <div class="space-y-6 relative">
+        <!-- Methodology -->
+        <div class="bg-white/[0.03] p-6 rounded-hb-sm border border-white/[0.06]">
+          <p class="text-[13px] font-semibold text-white/30 uppercase tracking-wide mb-2">
+            Methodology
+          </p>
+          <p class="text-[15px] text-white/50 leading-relaxed">
+            {listContent.methodology}
+          </p>
+        </div>
+
+        <!-- List Items -->
+        <div class="divide-y divide-white/5">
+          {listContent.items.map((item, index) => (
+            <div
+              class={`p-5 ${index % 2 === 0 ? 'bg-white/[0.02]' : 'bg-transparent'} ${
+                index === 0 ? 'rounded-t-hb-sm' : ''
+              } ${index === listContent.items.length - 1 ? 'rounded-b-hb-sm' : ''} ${
+                index >= 3 && listContent.isPremium ? 'blur-sm pointer-events-none select-none' : ''
+              }`}
+            >
+              <div class="grid grid-cols-[48px_1fr_120px_140px] gap-4 items-center">
+                <div
+                  class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
+                  style={`background-color: ${publisher.color}`}
+                >
+                  {item.rank}
+                </div>
+                <div>
+                  <p class="text-base font-semibold text-white">{item.name}</p>
+                  <p class="text-[13px] text-white/30">{item.highlight}</p>
+                </div>
+                <span class="bg-white/5 text-white/50 px-3 py-1 rounded-full text-xs text-center border border-white/10">
+                  {item.sector}
+                </span>
+                <p class="text-[15px] font-semibold text-right" style={`color: ${publisher.color}`}>
+                  {item.raised}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <!-- Paywall for lists -->
+        {listContent.isPremium && listContent.items.length > 3 && (
+          <div class="relative -mt-32">
+            <div class="h-32 bg-gradient-to-t from-hb-black-1 to-transparent"></div>
+            <div class="glass-card p-8 text-center max-w-[480px] mx-auto">
+              <div
+                class="inline-flex p-3 rounded-full mb-4"
+                style={`background-color: ${publisher.color}15`}
+              >
+                <svg class="w-6 h-6" style={`color: ${publisher.color}`} viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold text-white mb-2">Subscribe to unlock</h3>
+              <p class="text-sm text-white/40 mb-6">
+                See the full list and all of {publisher.name.split(' ')[0]}'s premium intelligence.
+              </p>
+              <button
+                id="paywall-subscribe-btn"
+                class="w-full py-3 px-6 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
+                style={`background-color: ${publisher.color}`}
+              >
+                Subscribe Now
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    )}
+
+    <!-- Related Content (Articles only) -->
+    {isArticle && articleContent?.relatedContent && articleContent.relatedContent.length > 0 && (
+      <div class="mt-12 pt-8 border-t border-white/[0.06]">
+        <h2 class="text-lg font-bold text-white mb-4">
+          Related from {publisher.name.split(' ')[0]}
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {articleContent.relatedContent.map((related) => (
+            <a
+              href={`/exchange/publisher/${publisherId}/${related.type}/${related.id}`}
+              class="p-4 glass-card transition-all hover:border-white/[0.15] hover:-translate-y-0.5"
+            >
+              <div class="flex items-center gap-2 mb-2">
+                {related.type === 'article' ? (
+                  <svg class="w-4 h-4" style={`color: ${publisher.color}`} viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+                  </svg>
+                ) : (
+                  <svg class="w-4 h-4" style={`color: ${publisher.color}`} viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z" />
+                  </svg>
+                )}
+                <span class="text-[11px] text-white/30 uppercase font-semibold">{related.type}</span>
+              </div>
+              <p class="text-[15px] font-semibold text-white/80">{related.title}</p>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <!-- CTA -->
+    <div
+      class="mt-12 p-8 rounded-hb border"
+      style={`background: linear-gradient(135deg, ${publisher.color}10 0%, ${publisher.color}05 100%); border-color: ${publisher.color}20;`}
+    >
+      <div class="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h3 class="text-xl font-bold text-white mb-1">
+            Get more from {publisher.name.split(' ')[0]}
+          </h3>
+          <p class="text-[15px] text-white/40">
+            Subscribe to access all premium intel and exclusive insights
+          </p>
+        </div>
+        <button
+          id="subscribe-cta-btn"
+          class="px-6 py-3 text-white font-semibold rounded-lg flex items-center gap-2 transition-opacity hover:opacity-90"
+          style={`background-color: ${publisher.color}`}
+        >
+          Subscribe Now
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <DarkFooter showValueProps={false} maxWidth="1000px" />
+
+  <!-- Subscribe Modal -->
+  <SubscribeModalWrapper client:visible />
+</BaseLayout>
+
+<script define:vars={{ publisherUuid: publisher.id, publisherName: publisher.name, publisherColor: publisher.color }}>
+  const shareBtn = document.getElementById('share-btn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link copied to clipboard!');
+    });
+  }
+
+  const subscribeBtn = document.getElementById('subscribe-btn');
+  const subscribeCta = document.getElementById('subscribe-cta-btn');
+  const paywallBtn = document.getElementById('paywall-subscribe-btn');
+
+  const openModal = () => {
+    window.dispatchEvent(new CustomEvent('openSubscribeModal', {
+      detail: { publisherId: publisherUuid, publisherName, publisherColor }
+    }));
+  };
+
+  subscribeBtn?.addEventListener('click', openModal);
+  subscribeCta?.addEventListener('click', openModal);
+  paywallBtn?.addEventListener('click', openModal);
+</script>

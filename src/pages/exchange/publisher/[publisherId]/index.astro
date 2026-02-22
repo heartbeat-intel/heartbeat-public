@@ -1,0 +1,152 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import DarkHeader from '../../../../components/astro/DarkHeader.astro';
+import DarkFooter from '../../../../components/astro/DarkFooter.astro';
+import Avatar from '../../../../components/ui/Avatar.astro';
+import Badge from '../../../../components/ui/Badge.astro';
+import TabbedContent from '../../../../components/react/TabbedContent';
+import SubscribeModalWrapper from '../../../../components/react/SubscribeModalWrapper';
+import { CONTENT_DATA } from '../../../../utils/constants';
+import { fetchPublisherProfile, fetchPublisherContent, fetchAllPublishers } from '../../../../data/fetch';
+import { formatViews } from '../../../../utils/formatters';
+
+export async function getStaticPaths() {
+  const publishers = await fetchAllPublishers();
+  return publishers.map((p) => ({ params: { publisherId: p.slug } }));
+}
+
+const { publisherId } = Astro.params;
+
+const publisher = await fetchPublisherProfile(publisherId);
+const content = await fetchPublisherContent(publisherId);
+
+if (!publisher) {
+  return Astro.redirect('/exchange');
+}
+
+const staticContent = CONTENT_DATA[publisherId] || { lists: [], articles: [] };
+const lists = content?.lists?.length ? content.lists : staticContent.lists;
+const articles = content?.articles?.length ? content.articles : staticContent.articles;
+---
+
+<BaseLayout
+  title={`${publisher.name} - Heartbeat Intelligence`}
+  description={publisher.description}
+>
+  <!-- Header -->
+  <DarkHeader
+    variant="publisher"
+    showBack={true}
+    backHref="/exchange"
+    backLabel="Exchange"
+    maxWidth="1200px"
+  />
+
+  <!-- Hero Section -->
+  <section class="pt-16">
+    <div
+      class="publisher-hero py-12 border-b border-[var(--hb-border)] relative overflow-hidden"
+      data-publisher-color={publisher.color}
+    >
+      <div class="max-w-[1200px] mx-auto px-6">
+        <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 items-start reveal">
+          <!-- Profile Card -->
+          <div class="publisher-profile-card glass-card p-6 flex flex-col items-center gap-4">
+            <Avatar
+              src={publisher.avatarUrl}
+              alt={publisher.name}
+              size="2xl"
+              borderColor={publisher.color}
+              borderWidth={4}
+            />
+            <div class="text-center">
+              <h1 class="text-2xl font-bold text-[var(--hb-text-primary)]">{publisher.name}</h1>
+              <p class="text-sm text-[var(--hb-text-tertiary)] mt-1">{publisher.role}</p>
+              <div class="mt-2">
+                <Badge variant="specialty" color={publisher.color}>{publisher.specialty}</Badge>
+              </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-3 gap-3 w-full pt-2">
+              <div class="flex flex-col items-center p-3 bg-[var(--hb-pill-bg)] rounded-hb-xs">
+                <span class="text-[22px] font-bold text-[var(--hb-text-primary)]">{publisher.stats.lists}</span>
+                <span class="text-[11px] text-[var(--hb-text-muted)] uppercase">Lists</span>
+              </div>
+              <div class="flex flex-col items-center p-3 bg-[var(--hb-pill-bg)] rounded-hb-xs">
+                <span class="text-[22px] font-bold text-[var(--hb-text-primary)]">{publisher.stats.articles}</span>
+                <span class="text-[11px] text-[var(--hb-text-muted)] uppercase">Articles</span>
+              </div>
+              <div class="flex flex-col items-center p-3 bg-[var(--hb-pill-bg)] rounded-hb-xs">
+                <span class="text-[22px] font-bold text-[var(--hb-text-primary)]">{formatViews(publisher.stats.totalViews)}</span>
+                <span class="text-[11px] text-[var(--hb-text-muted)] uppercase">Views</span>
+              </div>
+            </div>
+
+            <!-- Subscribe Button -->
+            <button
+              id="subscribe-btn"
+              class="w-full py-2.5 px-4 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
+              style={`background-color: ${publisher.color}`}
+            >
+              Subscribe to Intel
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Bio & Expertise -->
+          <div class="flex flex-col gap-6">
+            <div>
+              <h2 class="text-[32px] font-bold text-[var(--hb-text-primary)] tracking-tight mb-3">
+                About {publisher.name.split(' ')[0]}
+              </h2>
+              <p class="text-[17px] text-[var(--hb-text-secondary)] leading-relaxed">{publisher.longBio}</p>
+            </div>
+
+            <div>
+              <p class="text-[13px] font-semibold text-[var(--hb-text-muted)] uppercase tracking-wide mb-3">
+                Areas of Expertise
+              </p>
+              <div class="flex flex-wrap gap-2">
+                {publisher.expertise.map((skill) => (
+                  <span class="bg-[var(--hb-pill-bg)] text-[var(--hb-text-secondary)] px-3 py-1.5 rounded-full text-[13px] font-medium border border-[var(--hb-border)]">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tabbed Content -->
+  <TabbedContent
+    client:visible
+    publisherId={publisherId}
+    publisherColor={publisher.color}
+    lists={lists}
+    articles={articles}
+    theme="dark"
+  />
+
+  <DarkFooter maxWidth="1200px" />
+
+  <!-- Subscribe Modal -->
+  <SubscribeModalWrapper client:load />
+</BaseLayout>
+
+<script define:vars={{ publisherUuid: publisher.id, publisherName: publisher.name, publisherColor: publisher.color }}>
+  const subscribeBtn = document.getElementById('subscribe-btn');
+
+  if (subscribeBtn) {
+    subscribeBtn.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('openSubscribeModal', {
+        detail: { publisherId: publisherUuid, publisherName, publisherColor }
+      }));
+    });
+  }
+</script>
