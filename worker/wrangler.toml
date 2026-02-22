@@ -1,0 +1,12 @@
+name = "heartbeat-router"
+main = "router.js"
+compatibility_date = "2024-01-01"
+
+# Route configuration — deploy this Worker on heartbeatintel.com
+# After deploying, add a Workers Route in the Cloudflare dashboard:
+#   Route pattern: *heartbeatintel.com/*
+#   Worker: heartbeat-router
+#
+# Or via wrangler:
+#   wrangler deploy
+# Then in dashboard: Workers Routes > Add Route
