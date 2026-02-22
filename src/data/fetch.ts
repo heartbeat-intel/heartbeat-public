@@ -131,7 +131,7 @@ export async function fetchPublisherProfile(publisherSlug: string): Promise<Publ
   try {
     const response = await fetch(
       `${EXCHANGE_API_URL}/api/v1/publishers/${publisherSlug}`,
-      { signal: AbortSignal.timeout(5000) }
+      { signal: AbortSignal.timeout(10000) }
     );
 
     if (!response.ok) {
@@ -153,8 +153,8 @@ export async function fetchPublisherProfile(publisherSlug: string): Promise<Publ
 export async function fetchPublisherContent(publisherSlug: string): Promise<{ lists: ContentItem[]; articles: ContentItem[] }> {
   try {
     const [listsResponse, articlesResponse] = await Promise.all([
-      fetch(`${EXCHANGE_API_URL}/api/v1/publishers/${publisherSlug}/lists`, { signal: AbortSignal.timeout(5000) }),
-      fetch(`${EXCHANGE_API_URL}/api/v1/publishers/${publisherSlug}/articles`, { signal: AbortSignal.timeout(5000) }),
+      fetch(`${EXCHANGE_API_URL}/api/v1/publishers/${publisherSlug}/lists`, { signal: AbortSignal.timeout(10000) }),
+      fetch(`${EXCHANGE_API_URL}/api/v1/publishers/${publisherSlug}/articles`, { signal: AbortSignal.timeout(10000) }),
     ]);
 
     const lists: ContentItem[] = [];

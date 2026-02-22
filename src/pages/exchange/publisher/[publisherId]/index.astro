@@ -7,15 +7,12 @@ import Badge from '../../../../components/ui/Badge.astro';
 import TabbedContent from '../../../../components/react/TabbedContent';
 import SubscribeModalWrapper from '../../../../components/react/SubscribeModalWrapper';
 import { CONTENT_DATA } from '../../../../utils/constants';
-import { fetchPublisherProfile, fetchPublisherContent, fetchAllPublishers } from '../../../../data/fetch';
+import { fetchPublisherProfile, fetchPublisherContent } from '../../../../data/fetch';
 import { formatViews } from '../../../../utils/formatters';
 
-export async function getStaticPaths() {
-  const publishers = await fetchAllPublishers();
-  return publishers.map((p) => ({ params: { publisherId: p.slug } }));
-}
+export const prerender = false;
 
-const { publisherId } = Astro.params;
+const publisherId = Astro.params.publisherId!;
 
 const publisher = await fetchPublisherProfile(publisherId);
 const content = await fetchPublisherContent(publisherId);

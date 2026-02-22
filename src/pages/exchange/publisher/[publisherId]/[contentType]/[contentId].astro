@@ -6,16 +6,14 @@ import Avatar from '../../../../../components/ui/Avatar.astro';
 import Badge from '../../../../../components/ui/Badge.astro';
 import SubscribeModalWrapper from '../../../../../components/react/SubscribeModalWrapper';
 import { fetchPublisherProfile } from '../../../../../data/fetch';
-import { getArticle, getList, getAllContentPaths, type ArticleData, type ListData } from '../../../../../data/content';
+import { getArticle, getList, type ArticleData, type ListData } from '../../../../../data/content';
 import { markdownToHtml } from '../../../../../utils/formatters';
 
-export function getStaticPaths() {
-  return getAllContentPaths().map(({ publisherId, contentType, contentId }) => ({
-    params: { publisherId, contentType, contentId },
-  }));
-}
+export const prerender = false;
 
-const { publisherId, contentType, contentId } = Astro.params;
+const publisherId = Astro.params.publisherId!;
+const contentType = Astro.params.contentType!;
+const contentId = Astro.params.contentId!;
 
 const isArticle = contentType === 'article';
 const publisher = await fetchPublisherProfile(publisherId);
