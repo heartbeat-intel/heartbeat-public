@@ -96,6 +96,9 @@ import DarkFooter from '../../../components/astro/DarkFooter.astro';
       return;
     }
 
+    let data: any = null;
+
+    // Try authenticated complete endpoint first (provisions user + generates login URL)
     try {
       const accessToken = localStorage.getItem('exchange_access_token');
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -110,28 +113,44 @@ import DarkFooter from '../../../components/astro/DarkFooter.astro';
         body: JSON.stringify({ session_id: sessionId }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `Checkout completion failed: ${response.status}`);
+      if (response.ok) {
+        data = await response.json();
       }
+    } catch (_) {
+      // Auth failed — fall through to public status endpoint
+    }
 
-      const data = await response.json();
+    // Fall back to public status endpoint (no auth required)
+    if (!data) {
+      try {
+        const response = await fetch(`${API_BASE}/api/v1/payments/checkout/status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: sessionId }),
+        });
 
-      if (data.tenant_url && data.provisioning_status === 'completed') {
-        showState('success');
-        const link = document.getElementById('workspace-link') as HTMLAnchorElement;
-        link.href = data.login_url || data.tenant_url;
-        document.getElementById('success-message')!.textContent =
-          `Your subscription to ${data.workspace_name || 'the workspace'} is now active.`;
-      } else if (data.provisioning_status === 'pending') {
-        showState('provisioning');
-      } else {
-        showState('success');
+        if (response.ok) {
+          data = await response.json();
+        }
+      } catch (_) {
+        // Both endpoints failed
       }
-    } catch (error) {
+    }
+
+    if (data && data.tenant_url && data.provisioning_status === 'completed') {
+      showState('success');
+      const link = document.getElementById('workspace-link') as HTMLAnchorElement;
+      link.href = data.login_url || data.tenant_url;
+      document.getElementById('success-message')!.textContent =
+        `Your subscription to ${data.workspace_name || 'the workspace'} is now active.`;
+    } else if (data && data.provisioning_status === 'pending') {
+      showState('provisioning');
+    } else if (data) {
+      showState('success');
+    } else {
       showState('error');
       document.getElementById('error-message')!.textContent =
-        error instanceof Error ? error.message : 'An unexpected error occurred.';
+        'Could not verify checkout status. Your payment was received — please check your email for access details.';
     }
   }
 
