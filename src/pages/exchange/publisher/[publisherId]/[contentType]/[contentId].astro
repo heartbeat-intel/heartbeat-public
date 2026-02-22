@@ -10,8 +10,8 @@ import { getArticle, getList, getAllContentPaths, type ArticleData, type ListDat
 import { markdownToHtml } from '../../../../../utils/formatters';
 
 export function getStaticPaths() {
-  return getAllContentPaths().map(({ expertId, contentType, contentId }) => ({
-    params: { publisherId: expertId, contentType, contentId },
+  return getAllContentPaths().map(({ publisherId, contentType, contentId }) => ({
+    params: { publisherId, contentType, contentId },
   }));
 }
 

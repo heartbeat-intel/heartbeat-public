@@ -89,6 +89,7 @@ export interface ContentItem {
   views?: number;
   listType?: string;
   publisherId?: string;
+  author?: string;
 }
 
 export const CONTENT_DATA: Record<string, { lists: ContentItem[]; articles: ContentItem[] }> = {};
