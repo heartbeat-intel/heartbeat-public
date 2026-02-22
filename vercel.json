@@ -1,0 +1,175 @@
+{
+  "framework": "astro",
+  "buildCommand": "pnpm build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/api/v1/publishers/:path*",
+      "destination": "https://heartbeat-exchange-598945484330.us-central1.run.app/api/v1/publishers/:path*"
+    },
+    {
+      "source": "/api/v1/catalog/:path*",
+      "destination": "https://heartbeat-exchange-598945484330.us-central1.run.app/api/v1/catalog/:path*"
+    },
+    {
+      "source": "/api/v1/products/:path*",
+      "destination": "https://heartbeat-exchange-598945484330.us-central1.run.app/api/v1/products/:path*"
+    },
+    {
+      "source": "/api/v1/collections/:path*",
+      "destination": "https://heartbeat-exchange-598945484330.us-central1.run.app/api/v1/collections/:path*"
+    },
+    {
+      "source": "/api/v1/payments/:path*",
+      "destination": "https://heartbeat-exchange-598945484330.us-central1.run.app/api/v1/payments/:path*"
+    },
+    {
+      "source": "/api/v1/auth/:path*",
+      "destination": "https://heartbeat-exchange-598945484330.us-central1.run.app/api/v1/auth/:path*"
+    },
+    {
+      "source": "/api/v1/me/:path*",
+      "destination": "https://heartbeat-exchange-598945484330.us-central1.run.app/api/v1/me/:path*"
+    },
+    {
+      "source": "/api/v1/workspace/:path*",
+      "destination": "https://aorta-api-web-production-598945484330.us-central1.run.app/api/v1/:path*"
+    },
+    {
+      "source": "/api/v1/:path*",
+      "destination": "https://aorta-api-web-production-598945484330.us-central1.run.app/api/v1/:path*"
+    },
+    {
+      "source": "/login",
+      "destination": "https://heartbeat.vercel.app/login"
+    },
+    {
+      "source": "/instant-login",
+      "destination": "https://heartbeat.vercel.app/instant-login"
+    },
+    {
+      "source": "/keywords/:path*",
+      "destination": "https://heartbeat.vercel.app/keywords/:path*"
+    },
+    {
+      "source": "/people/:path*",
+      "destination": "https://heartbeat.vercel.app/people/:path*"
+    },
+    {
+      "source": "/organizations/:path*",
+      "destination": "https://heartbeat.vercel.app/organizations/:path*"
+    },
+    {
+      "source": "/library/:path*",
+      "destination": "https://heartbeat.vercel.app/library/:path*"
+    },
+    {
+      "source": "/lists/:path*",
+      "destination": "https://heartbeat.vercel.app/lists/:path*"
+    },
+    {
+      "source": "/ledger/:path*",
+      "destination": "https://heartbeat.vercel.app/ledger/:path*"
+    },
+    {
+      "source": "/search/:path*",
+      "destination": "https://heartbeat.vercel.app/search/:path*"
+    },
+    {
+      "source": "/search",
+      "destination": "https://heartbeat.vercel.app/search"
+    },
+    {
+      "source": "/geos/:path*",
+      "destination": "https://heartbeat.vercel.app/geos/:path*"
+    },
+    {
+      "source": "/menu/:path*",
+      "destination": "https://heartbeat.vercel.app/menu/:path*"
+    },
+    {
+      "source": "/operator",
+      "destination": "https://heartbeat.vercel.app/operator"
+    },
+    {
+      "source": "/checkout",
+      "destination": "https://heartbeat.vercel.app/checkout"
+    },
+    {
+      "source": "/emails/:path*",
+      "destination": "https://heartbeat.vercel.app/emails/:path*"
+    },
+    {
+      "source": "/cagr",
+      "destination": "https://heartbeat.vercel.app/cagr"
+    },
+    {
+      "source": "/facts/:path*",
+      "destination": "https://heartbeat.vercel.app/facts/:path*"
+    },
+    {
+      "source": "/s/:path*",
+      "destination": "https://heartbeat.vercel.app/s/:path*"
+    },
+    {
+      "source": "/terminology/:path*",
+      "destination": "https://heartbeat.vercel.app/terminology/:path*"
+    },
+    {
+      "source": "/publisher/:path*",
+      "destination": "https://heartbeat.vercel.app/publisher/:path*"
+    },
+    {
+      "source": "/rawdata/:path*",
+      "destination": "https://heartbeat.vercel.app/rawdata/:path*"
+    },
+    {
+      "source": "/shortcuts",
+      "destination": "https://heartbeat.vercel.app/shortcuts"
+    },
+    {
+      "source": "/urls/:path*",
+      "destination": "https://heartbeat.vercel.app/urls/:path*"
+    },
+    {
+      "source": "/suggested-entities/:path*",
+      "destination": "https://heartbeat.vercel.app/suggested-entities/:path*"
+    },
+    {
+      "source": "/taggingrules/:path*",
+      "destination": "https://heartbeat.vercel.app/taggingrules/:path*"
+    },
+    {
+      "source": "/categories/:path*",
+      "destination": "https://heartbeat.vercel.app/categories/:path*"
+    },
+    {
+      "source": "/sections/:path*",
+      "destination": "https://heartbeat.vercel.app/sections/:path*"
+    },
+    {
+      "source": "/settings",
+      "destination": "https://heartbeat.vercel.app/settings"
+    },
+    {
+      "source": "/users/:path*",
+      "destination": "https://heartbeat.vercel.app/users/:path*"
+    },
+    {
+      "source": "/clients/:path*",
+      "destination": "https://heartbeat.vercel.app/clients/:path*"
+    },
+    {
+      "source": "/cities/:path*",
+      "destination": "https://heartbeat.vercel.app/cities/:path*"
+    },
+    {
+      "source": "/exchange/subscriptions",
+      "destination": "https://heartbeat.vercel.app/exchange/subscriptions"
+    },
+    {
+      "source": "/exchange/checkout/cancel",
+      "destination": "https://heartbeat.vercel.app/exchange/checkout/cancel"
+    }
+  ]
+}
