@@ -1,15 +1,22 @@
 const CF_PAGES_ORIGIN = 'https://heartbeat-public.pages.dev';
+const VERCEL_ORIGIN = 'https://heartbeat-public.vercel.app';
 
+// Exact static routes served from Cloudflare Pages
 const STATIC_ROUTES = [
   '/',
   '/exchange',
 ];
 
+// Prefixes for static assets served from Cloudflare Pages
 const STATIC_PREFIXES = [
-  '/exchange/',
   '/_astro/',
   '/images/',
   '/fonts/',
+];
+
+// Prefixes for SSR routes served from Vercel
+const SSR_PREFIXES = [
+  '/exchange/publisher/',
 ];
 
 export default {
@@ -17,6 +24,23 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
+    // SSR routes go to Vercel (serverless functions)
+    if (shouldServeFromVercel(path)) {
+      const vercelUrl = new URL(path + url.search, VERCEL_ORIGIN);
+      const vercelRequest = new Request(vercelUrl, {
+        method: request.method,
+        headers: request.headers,
+        body: request.body,
+      });
+      const response = await fetch(vercelRequest);
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+      });
+    }
+
+    // Static routes go to Cloudflare Pages
     if (shouldServeFromPages(path)) {
       const pagesUrl = new URL(path + url.search, CF_PAGES_ORIGIN);
       const pagesRequest = new Request(pagesUrl, {
@@ -32,10 +56,19 @@ export default {
       });
     }
 
-    // Everything else passes through to the original origin (Vercel)
+    // Everything else passes through to the original origin (Vercel/heartbeat-web)
     return fetch(request);
   },
 };
+
+function shouldServeFromVercel(path) {
+  for (const prefix of SSR_PREFIXES) {
+    if (path.startsWith(prefix)) {
+      return true;
+    }
+  }
+  return false;
+}
 
 function shouldServeFromPages(path) {
   if (STATIC_ROUTES.includes(path) || STATIC_ROUTES.includes(path + '/')) {
@@ -45,6 +78,14 @@ function shouldServeFromPages(path) {
     if (path.startsWith(prefix)) {
       return true;
     }
+  }
+  // /exchange/checkout/success is still static
+  if (path.startsWith('/exchange/checkout/')) {
+    return true;
+  }
+  // /exchange and /exchange/ (exact) are static, but not /exchange/publisher/*
+  if (path === '/exchange' || path === '/exchange/') {
+    return true;
   }
   return false;
 }
