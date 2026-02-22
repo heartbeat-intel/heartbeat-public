@@ -1,50 +1,55 @@
 import { useState } from 'react';
 import { Icon } from '@iconify/react';
 import type { ContentItem } from '../../utils/constants';
-import { EXPERT_TENANTS } from '../../utils/constants';
-
 interface TabbedContentProps {
-  expertId: string;
-  expertColor: string;
+  publisherId: string;
+  publisherColor: string;
   lists: ContentItem[];
   articles: ContentItem[];
+  theme?: 'light' | 'dark';
 }
 
 export default function TabbedContent({
-  expertId,
-  expertColor,
+  publisherId,
+  publisherColor,
   lists,
   articles,
+  theme = 'dark',
 }: TabbedContentProps) {
   const [activeTab, setActiveTab] = useState<'lists' | 'articles'>('lists');
+  const isDark = theme === 'dark';
 
   const handleListClick = (list: ContentItem) => {
-    const tenant = EXPERT_TENANTS[expertId];
-    if (tenant && list.listType) {
-      window.open(`https://${tenant}.heartbeatintel.com/lists/${list.listType}/${list.id}`, '_blank');
+    if (publisherId && list.listType) {
+      window.open(`https://${publisherId}.heartbeatintel.com/lists/${list.listType}/${list.id}`, '_blank');
     }
   };
+
+  const borderColor = isDark ? 'border-white/10' : 'border-hb-gray-6';
+  const textPrimary = isDark ? 'text-white' : 'text-hb-black-1';
+  const textSecondary = isDark ? 'text-white/40' : 'text-hb-gray-3';
+  const countBg = isDark ? 'bg-white/5 text-white/40' : 'bg-hb-gray-7 text-hb-gray-2';
 
   return (
     <div className="max-w-[1200px] mx-auto px-6 py-10">
       {/* Tabs */}
-      <div className="border-b border-hb-gray-6 pb-0">
+      <div className={`border-b ${borderColor} pb-0`}>
         <div className="flex gap-8">
           <button
             onClick={() => setActiveTab('lists')}
             className={`pb-4 px-0 font-semibold text-[15px] flex items-center gap-2 transition-colors ${
               activeTab === 'lists'
-                ? 'text-hb-black-1 border-b-2'
-                : 'text-hb-gray-3 hover:text-hb-black-1'
+                ? `${textPrimary} border-b-2`
+                : `${textSecondary} hover:${textPrimary}`
             }`}
             style={{
-              borderColor: activeTab === 'lists' ? expertColor : 'transparent',
+              borderColor: activeTab === 'lists' ? publisherColor : 'transparent',
               marginBottom: activeTab === 'lists' ? '-1px' : 0,
             }}
           >
             <Icon icon="mdi:format-list-bulleted" width={18} />
             <span>Intel Lists</span>
-            <span className="bg-hb-gray-7 text-hb-gray-2 text-[11px] px-2 py-0.5 rounded-full">
+            <span className={`${countBg} text-[11px] px-2 py-0.5 rounded-full`}>
               {lists.length}
             </span>
           </button>
@@ -52,17 +57,17 @@ export default function TabbedContent({
             onClick={() => setActiveTab('articles')}
             className={`pb-4 px-0 font-semibold text-[15px] flex items-center gap-2 transition-colors ${
               activeTab === 'articles'
-                ? 'text-hb-black-1 border-b-2'
-                : 'text-hb-gray-3 hover:text-hb-black-1'
+                ? `${textPrimary} border-b-2`
+                : `${textSecondary} hover:${textPrimary}`
             }`}
             style={{
-              borderColor: activeTab === 'articles' ? expertColor : 'transparent',
+              borderColor: activeTab === 'articles' ? publisherColor : 'transparent',
               marginBottom: activeTab === 'articles' ? '-1px' : 0,
             }}
           >
             <Icon icon="mdi:file-document-outline" width={18} />
             <span>Articles</span>
-            <span className="bg-hb-gray-7 text-hb-gray-2 text-[11px] px-2 py-0.5 rounded-full">
+            <span className={`${countBg} text-[11px] px-2 py-0.5 rounded-full`}>
               {articles.length}
             </span>
           </button>
@@ -78,7 +83,8 @@ export default function TabbedContent({
                 key={list.id}
                 type="list"
                 item={list}
-                color={expertColor}
+                color={publisherColor}
+                theme={theme}
                 onClick={() => handleListClick(list)}
               />
             ))}
@@ -90,13 +96,14 @@ export default function TabbedContent({
             {articles.map((article) => (
               <a
                 key={article.id}
-                href={`/exchange/expert/${expertId}/article/${article.id}`}
+                href={`/exchange/publisher/${publisherId}/article/${article.id}`}
                 className="block"
               >
                 <ContentCard
                   type="article"
                   item={article}
-                  color={expertColor}
+                  color={publisherColor}
+                  theme={theme}
                 />
               </a>
             ))}
@@ -112,19 +119,38 @@ function ContentCard({
   type,
   item,
   color,
+  theme = 'dark',
   onClick,
 }: {
   type: 'list' | 'article';
   item: ContentItem;
   color: string;
+  theme?: 'light' | 'dark';
   onClick?: () => void;
 }) {
   const Tag = onClick ? 'button' : 'div';
+  const isDark = theme === 'dark';
+
+  const cardClasses = isDark
+    ? 'group bg-white/[0.03] rounded-xl p-5 w-full text-left border border-white/[0.06] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-white/[0.12] hover:shadow-lg hover:shadow-black/20'
+    : 'group bg-white rounded-xl p-5 w-full text-left border border-hb-gray-6 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg';
+
+  const titleColor = isDark ? 'text-white' : 'text-hb-black-1';
+  const descColor = isDark ? 'text-white/40' : 'text-hb-gray-2';
+  const metaColor = isDark ? 'text-white/30' : 'text-hb-gray-3';
+  const typeColor = isDark ? 'text-white/30' : 'text-hb-gray-3';
+
+  const hotBadge = isDark
+    ? 'bg-red-500/15 text-red-400'
+    : 'bg-red-100 text-red-600';
+  const premiumBadge = isDark
+    ? 'bg-hb-orange-main/15 text-hb-orange-3'
+    : 'bg-hb-orange-4 text-hb-orange-main';
 
   return (
     <Tag
       onClick={onClick}
-      className="group bg-white rounded-xl p-5 w-full text-left border border-hb-gray-6 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg"
+      className={cardClasses}
       style={{ '--accent-color': color } as React.CSSProperties}
     >
       {/* Header */}
@@ -135,18 +161,18 @@ function ContentCard({
             width={18}
             color={color}
           />
-          <span className="text-[11px] text-hb-gray-3 font-semibold uppercase tracking-wide">
+          <span className={`text-[11px] ${typeColor} font-semibold uppercase tracking-wide`}>
             {type}
           </span>
         </div>
         <div className="flex items-center gap-2">
           {item.isHot && (
-            <span className="bg-red-100 text-red-600 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+            <span className={`${hotBadge} text-[10px] font-semibold px-2 py-0.5 rounded-full`}>
               HOT
             </span>
           )}
           {item.isPremium && (
-            <span className="bg-hb-orange-4 text-hb-orange-main text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+            <span className={`${premiumBadge} text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1`}>
               <Icon icon="mdi:crown" width={10} />
               PREMIUM
             </span>
@@ -155,16 +181,16 @@ function ContentCard({
       </div>
 
       {/* Title and description */}
-      <h3 className="text-[17px] font-semibold text-hb-black-1 mb-2 leading-snug">
+      <h3 className={`text-[17px] font-semibold ${titleColor} mb-2 leading-snug`}>
         {item.title}
       </h3>
-      <p className="text-sm text-hb-gray-2 mb-4 leading-relaxed line-clamp-2">
+      <p className={`text-sm ${descColor} mb-4 leading-relaxed line-clamp-2`}>
         {item.description}
       </p>
 
       {/* Footer */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4 text-[13px] text-hb-gray-3">
+        <div className={`flex items-center gap-4 text-[13px] ${metaColor}`}>
           <span>{item.date}</span>
           <span>&bull;</span>
           <span>{item.readTime}</span>

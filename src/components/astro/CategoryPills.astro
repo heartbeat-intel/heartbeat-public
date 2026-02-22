@@ -1,0 +1,25 @@
+---
+interface Props {
+  categories?: string[];
+  activeCategory?: string;
+}
+
+const {
+  categories = ['All', 'Finance & VC', 'Data & AI', 'Tech', 'Strategy', 'Markets'],
+  activeCategory = 'All',
+} = Astro.props;
+---
+
+<div class="flex flex-wrap gap-2">
+  {categories.map((cat) => (
+    <button
+      class={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+        cat === activeCategory
+          ? 'bg-hb-orange-main text-white'
+          : 'bg-white/5 text-white/50 border border-white/10 hover:bg-white/10 hover:text-white/70'
+      }`}
+    >
+      {cat}
+    </button>
+  ))}
+</div>

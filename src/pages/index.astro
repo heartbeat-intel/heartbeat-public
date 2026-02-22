@@ -1,105 +1,226 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import VideoPlayer from '../components/react/VideoPlayer';
+import DarkHeader from '../components/astro/DarkHeader.astro';
+import DarkFooter from '../components/astro/DarkFooter.astro';
+import HeartbeatPulse from '../components/react/HeartbeatPulse';
+import AnimatedCounter from '../components/react/AnimatedCounter';
+import PublisherCardDark from '../components/astro/PublisherCardDark.astro';
+import Badge from '../components/ui/Badge.astro';
+import { fetchAllPublishers } from '../data/fetch';
+
+// Fetch real data at build time
+const allPublishers = await fetchAllPublishers();
+
+// Compute real stats from fetched data
+const totalLists = allPublishers.reduce((sum, e) => sum + (e.stats?.lists || 0), 0);
+const totalPublishers = allPublishers.length;
+const totalViews = allPublishers.reduce((sum, e) => sum + (e.stats?.totalViews || 0), 0);
 ---
 
-<BaseLayout title="Heartbeat Intelligence">
-  <main>
-    <!-- Header -->
-    <header class="border-b border-hb-gray-6">
-      <div class="w-[75%] mx-auto min-h-14 flex items-center">
-        <a href="/">
-          <img src="/images/logos/heartbeatLogoBlack.svg" alt="Heartbeat" class="h-7" width="150" height="28" />
-        </a>
-      </div>
-    </header>
+<BaseLayout title="Heartbeat Intelligence — Trade in intelligence, not just information">
+  <!-- ============================================
+       STICKY NAVIGATION
+       ============================================ -->
+  <DarkHeader variant="home" />
 
-    <!-- Hero Section -->
-    <section class="border-b border-hb-gray-6">
-      <div class="w-[75%] mx-auto flex">
-        <div class="py-12 w-full lg:w-3/4">
-          <h1 class="text-5xl font-bold text-hb-black-1 tracking-tight leading-tight">
-            If it were a fact,
+  <main>
+    <!-- ============================================
+         DARK HERO with Animated Pulse Background
+         ============================================ -->
+    <section class="hero-dark min-h-[90vh] flex items-center relative pt-16">
+      <HeartbeatPulse client:visible />
+
+      <div class="max-w-[1200px] mx-auto px-6 py-24 lg:py-32 relative z-10 w-full">
+        <div class="max-w-[800px]">
+          <!-- Badge -->
+          <div class="animate-fade-up mb-8">
+            <Badge variant="specialty" color="#FB4C02" class="animate-pulse-glow">
+              Intelligence Exchange Platform
+            </Badge>
+          </div>
+
+          <!-- Main headline -->
+          <h1 class="animate-fade-up-delay-1 text-4xl md:text-5xl lg:text-title-3xl font-bold text-white tracking-tight leading-[1.1] mb-6">
+            If it were a fact,<br />
+            it wouldn't be called
+            <span class="text-gradient-orange"> intelligence</span>
           </h1>
-          <h1 class="text-5xl font-bold text-hb-black-1 tracking-tight leading-tight">
-            it wouldn't be called <span class="text-hb-orange-main">intelligence</span>
-          </h1>
-          <p class="text-2xl text-hb-black-1 tracking-tight mt-4 max-w-[95%]">
-            Welcome to Heartbeat, a technology layer designed to traffic in intelligence.
+
+          <!-- Sub-headline -->
+          <p class="animate-fade-up-delay-2 text-lg lg:text-xl text-white/60 max-w-[600px] leading-relaxed mb-10">
+            A technology layer that structures your data and produces private intelligence.
+            Connect with publishers. Subscribe to insights that give you an edge.
           </p>
-          <div class="pt-6">
-            <VideoPlayer client:visible buttonStyle="minimal" />
+
+          <!-- CTA Buttons -->
+          <div class="animate-fade-up-delay-3 flex flex-wrap gap-4">
+            <a
+              href="/exchange"
+              class="inline-flex items-center gap-2 bg-hb-orange-main text-white px-8 py-3.5 rounded-lg text-base font-semibold hover:bg-hb-orange-1 transition-all hover:shadow-hb-glow"
+            >
+              Explore Exchange
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
           </div>
         </div>
-        <!-- Vertical divider (desktop only) -->
-        <div class="hidden lg:block w-px bg-gradient-to-b from-transparent via-hb-gray-6 to-hb-gray-6"></div>
+      </div>
+
+      <!-- Bottom gradient fade -->
+      <div class="absolute bottom-0 left-0 right-0 h-32 hero-bottom-fade"></div>
+    </section>
+
+    <!-- ============================================
+         SOCIAL PROOF - Animated Stats (only if data exists)
+         ============================================ -->
+    {(totalPublishers > 0 || totalLists > 0) && (
+      <section class="bg-hb-black-1 py-20">
+        <div class="max-w-[1200px] mx-auto px-6 reveal">
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="stat-card p-8 text-center" data-reveal-delay="0">
+              <div class="text-4xl lg:text-5xl font-bold text-white tracking-tight mb-2">
+                <AnimatedCounter client:visible end={totalLists} suffix="+" />
+              </div>
+              <p class="text-sm text-white/40 font-medium uppercase tracking-wider">Intel Lists Published</p>
+            </div>
+
+            <div class="stat-card p-8 text-center" data-reveal-delay="100">
+              <div class="text-4xl lg:text-5xl font-bold text-hb-orange-main tracking-tight mb-2">
+                <AnimatedCounter client:visible end={totalPublishers} />
+              </div>
+              <p class="text-sm text-white/40 font-medium uppercase tracking-wider">Publishers</p>
+            </div>
+
+            <div class="stat-card p-8 text-center" data-reveal-delay="200">
+              <div class="text-4xl lg:text-5xl font-bold text-white tracking-tight mb-2">
+                {totalViews >= 1000 ? (
+                  <AnimatedCounter client:visible end={Math.round(totalViews / 1000)} suffix="k+" />
+                ) : (
+                  <AnimatedCounter client:visible end={totalViews} />
+                )}
+              </div>
+              <p class="text-sm text-white/40 font-medium uppercase tracking-wider">Total Views</p>
+            </div>
+
+            <div class="stat-card p-8 text-center" data-reveal-delay="300">
+              <div class="text-4xl lg:text-5xl font-bold text-white tracking-tight mb-2">
+                <AnimatedCounter client:visible end={2} />
+              </div>
+              <p class="text-sm text-white/40 font-medium uppercase tracking-wider">Live Databases</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- ============================================
+         HOW IT WORKS - 3 Step Flow
+         ============================================ -->
+    <section id="how-it-works" class="bg-hb-black-1 py-24 border-t border-white/5">
+      <div class="max-w-[1200px] mx-auto px-6">
+        <!-- Section header -->
+        <div class="text-center mb-16 reveal">
+          <p class="text-[13px] font-semibold text-hb-orange-main uppercase tracking-wider mb-3">How It Works</p>
+          <h2 class="text-3xl lg:text-4xl font-bold text-white tracking-tight">
+            From raw data to actionable intelligence
+          </h2>
+          <p class="text-white/40 mt-3 max-w-[500px] mx-auto">
+            Three steps to transform how you create, share, and monetize expertise.
+          </p>
+        </div>
+
+        <!-- Steps -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-4 reveal">
+          <!-- Step 1 -->
+          <div class="step-connector text-center lg:text-left" data-reveal-delay="0">
+            <div class="w-14 h-14 rounded-2xl bg-hb-orange-main/10 flex items-center justify-center mx-auto lg:mx-0 mb-5">
+              <svg class="w-7 h-7 text-hb-orange-main" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+              </svg>
+            </div>
+            <div class="text-xs font-bold text-hb-orange-main uppercase tracking-widest mb-2">Step 1</div>
+            <h3 class="text-xl font-bold text-white tracking-tight mb-2">Structure Your Data</h3>
+            <p class="text-[15px] text-white/40 leading-relaxed">
+              Ingest raw data — organizations, people, research — and tag it with keywords, geographies, and custom taxonomies.
+            </p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="step-connector text-center lg:text-left" data-reveal-delay="150">
+            <div class="w-14 h-14 rounded-2xl bg-hb-orange-main/10 flex items-center justify-center mx-auto lg:mx-0 mb-5">
+              <svg class="w-7 h-7 text-hb-orange-main" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+              </svg>
+            </div>
+            <div class="text-xs font-bold text-hb-orange-main uppercase tracking-widest mb-2">Step 2</div>
+            <h3 class="text-xl font-bold text-white tracking-tight mb-2">Produce Intelligence</h3>
+            <p class="text-[15px] text-white/40 leading-relaxed">
+              Curate intel lists and articles from your structured data. Your expertise transforms information into intelligence.
+            </p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="text-center lg:text-left" data-reveal-delay="300">
+            <div class="w-14 h-14 rounded-2xl bg-hb-orange-main/10 flex items-center justify-center mx-auto lg:mx-0 mb-5">
+              <svg class="w-7 h-7 text-hb-orange-main" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+              </svg>
+            </div>
+            <div class="text-xs font-bold text-hb-orange-main uppercase tracking-widest mb-2">Step 3</div>
+            <h3 class="text-xl font-bold text-white tracking-tight mb-2">Monetize & Share</h3>
+            <p class="text-[15px] text-white/40 leading-relaxed">
+              Publish to the Intelligence Exchange. Subscribers worldwide pay for your curated intel via Stripe-powered subscriptions.
+            </p>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- Explore Live Accounts Section -->
-    <section>
-      <div class="w-[75%] mx-auto flex">
-        <!-- Vertical divider -->
-        <div class="w-px bg-gradient-to-t from-transparent via-hb-gray-6 to-hb-gray-6"></div>
-        <div class="py-12 w-full pl-8 lg:pl-16">
-          <h2 class="text-3xl font-bold text-hb-black-1 tracking-tight">
-            Explore live accounts
+    <!-- ============================================
+         FEATURED PUBLISHERS
+         ============================================ -->
+    <section id="publishers" class="bg-hb-black-2 py-24 border-t border-white/5">
+      <div class="max-w-[1200px] mx-auto px-6">
+        <div class="text-center mb-12 reveal">
+          <p class="text-[13px] font-semibold text-hb-orange-main uppercase tracking-wider mb-3">Featured Publishers</p>
+          <h2 class="text-3xl lg:text-4xl font-bold text-white tracking-tight">
+            Premium intelligence providers
           </h2>
-          <p class="text-base text-hb-black-1 tracking-tight mt-2">
-            Setup your own Heartbeat and start monetizing your private intelligence.
+          <p class="text-white/40 mt-3 max-w-[500px] mx-auto">
+            Industry leaders sharing curated intel and exclusive insights
           </p>
+        </div>
 
-          <!-- Cards Grid -->
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 pt-8">
-            <!-- Heartbeat Open Card -->
-            <a href="https://open.heartbeatintel.com/" target="_blank" rel="noopener noreferrer"
-               class="block border border-hb-gray-6 rounded-lg p-8 hover:shadow-hb-sm transition-shadow">
-              <div class="flex items-center gap-2 mb-2">
-                <img src="/images/logos/heartbeatOpenLogo.svg" alt="" class="h-6" width="26" height="26" />
-                <span class="text-xl font-semibold tracking-tight">Heartbeat Open</span>
-              </div>
-              <p class="text-base text-hb-gray-2 tracking-tight mb-8">
-                Intel for everyone.
-              </p>
-              <span class="inline-flex items-center gap-2 bg-hb-black-1 text-white px-4 py-2 rounded text-sm font-medium">
-                Explore
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-              </span>
-            </a>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-[900px] mx-auto reveal">
+          {allPublishers.map((publisher) => (
+            <PublisherCardDark
+              name={publisher.name}
+              role={publisher.role}
+              specialty={publisher.specialty}
+              description={publisher.description}
+              avatarUrl={publisher.avatarUrl}
+              color={publisher.color}
+              stats={{ lists: publisher.stats.lists, views: '0' }}
+              href={`/exchange/publisher/${publisher.slug}`}
+            />
+          ))}
+        </div>
 
-            <!-- PIRQUE Card -->
-            <a href="https://pirque.heartbeatintel.com/" target="_blank" rel="noopener noreferrer"
-               class="block border border-hb-gray-6 rounded-lg p-8 hover:shadow-hb-sm transition-shadow">
-              <div class="flex items-center gap-2 mb-2">
-                <img src="/images/logos/pirqueLogoBlack.svg" alt="" class="h-6" width="26" height="26" />
-                <span class="text-xl font-semibold tracking-tight">P I R Q U E</span>
-              </div>
-              <p class="text-base text-hb-gray-2 tracking-tight mb-8">
-                USA startup economy.
-              </p>
-              <span class="inline-flex items-center gap-2 bg-hb-black-1 text-white px-4 py-2 rounded text-sm font-medium">
-                Explore
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-              </span>
-            </a>
-
-            <!-- Book Demo Card -->
-            <a href="mailto:human@heartbeatintel.com"
-               class="block border-2 border-dashed border-hb-orange-main bg-hb-orange-4 rounded-lg p-8 flex flex-col items-center justify-center text-center hover:opacity-90 transition-opacity">
-              <svg class="w-6 h-6 text-hb-orange-main mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-              </svg>
-              <span class="text-sm font-bold text-hb-orange-main">
-                Book a demo to start your setup.
-              </span>
-            </a>
-          </div>
+        <div class="text-center mt-8">
+          <a
+            href="/exchange"
+            class="inline-flex items-center gap-2 text-sm font-semibold text-hb-orange-3 hover:text-hb-orange-main transition-colors"
+          >
+            View all on the Exchange
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
         </div>
       </div>
     </section>
   </main>
+
+  <DarkFooter />
 </BaseLayout>

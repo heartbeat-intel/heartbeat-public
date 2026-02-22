@@ -1,0 +1,35 @@
+---
+interface Props {
+  colSpan?: number;
+  rowSpan?: number;
+  variant?: 'glass' | 'glass-glow' | 'solid-dark' | 'gradient';
+  href?: string;
+  class?: string;
+}
+
+const {
+  colSpan = 1,
+  rowSpan = 1,
+  variant = 'glass',
+  href,
+  class: className = '',
+} = Astro.props;
+
+const variantClasses: Record<string, string> = {
+  glass: 'glass-card',
+  'glass-glow': 'glass-card-glow',
+  'solid-dark': 'bg-hb-black-2 border border-white/[0.06] rounded-hb transition-all duration-300 hover:-translate-y-0.5 hover:border-white/[0.12]',
+  gradient: 'bg-gradient-to-br from-hb-orange-main/10 to-hb-orange-main/5 border border-hb-orange-main/20 rounded-hb transition-all duration-300 hover:-translate-y-0.5 hover:border-hb-orange-main/40',
+};
+
+const Tag = href ? 'a' : 'div';
+const style = `grid-column: span ${colSpan}; grid-row: span ${rowSpan};`;
+---
+
+<Tag
+  href={href}
+  class:list={[variantClasses[variant], 'p-6', className]}
+  style={style}
+>
+  <slot />
+</Tag>

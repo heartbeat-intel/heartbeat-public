@@ -1,0 +1,147 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import DarkHeader from '../../../components/astro/DarkHeader.astro';
+import DarkFooter from '../../../components/astro/DarkFooter.astro';
+---
+
+<BaseLayout title="Subscription Complete — Heartbeat Intelligence">
+  <DarkHeader variant="exchange" maxWidth="800px" />
+
+  <main class="pt-16 min-h-[70vh] flex items-center justify-center">
+    <div class="max-w-[500px] mx-auto px-6 text-center" id="checkout-container">
+      <!-- Loading state -->
+      <div id="loading-state">
+        <div class="w-12 h-12 border-3 border-hb-orange-main border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+        <h1 class="text-2xl font-bold text-white mb-2">Completing your subscription...</h1>
+        <p class="text-white/40">Please wait while we set up your access.</p>
+      </div>
+
+      <!-- Success state (hidden by default) -->
+      <div id="success-state" class="hidden">
+        <div class="w-16 h-16 bg-green-500/15 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg class="w-8 h-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-white mb-2">Subscription Active!</h1>
+        <p class="text-white/40 mb-6" id="success-message">Your subscription is now active.</p>
+        <a
+          id="workspace-link"
+          href="/exchange"
+          class="inline-flex items-center gap-2 bg-hb-orange-main text-white px-6 py-3 rounded-lg font-semibold hover:bg-hb-orange-1 transition-colors"
+        >
+          Go to Workspace
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+
+      <!-- Provisioning state (hidden by default) -->
+      <div id="provisioning-state" class="hidden">
+        <div class="w-16 h-16 bg-blue-500/15 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg class="w-8 h-8 text-blue-400 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-white mb-2">Setting Up Your Workspace...</h1>
+        <p class="text-white/40 mb-6">Your payment was successful. We're provisioning your workspace now. This usually takes a few seconds.</p>
+        <a
+          href="/exchange"
+          class="inline-flex items-center gap-2 border border-white/20 text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/5 transition-colors"
+        >
+          Back to Exchange
+        </a>
+      </div>
+
+      <!-- Error state (hidden by default) -->
+      <div id="error-state" class="hidden">
+        <div class="w-16 h-16 bg-red-500/15 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg class="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-white mb-2">Something went wrong</h1>
+        <p class="text-white/40 mb-6" id="error-message">We couldn't complete your subscription.</p>
+        <a
+          href="/exchange"
+          class="inline-flex items-center gap-2 border border-white/20 text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/5 transition-colors"
+        >
+          Back to Exchange
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <DarkFooter maxWidth="800px" />
+</BaseLayout>
+
+<script>
+  const API_BASE = '';
+
+  async function completeCheckout() {
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
+    const cancelled = params.get('cancelled');
+
+    if (cancelled !== null) {
+      showState('error');
+      document.getElementById('error-message')!.textContent = 'Checkout was cancelled.';
+      return;
+    }
+
+    if (!sessionId) {
+      showState('error');
+      document.getElementById('error-message')!.textContent = 'Missing session ID.';
+      return;
+    }
+
+    try {
+      const accessToken = localStorage.getItem('exchange_access_token');
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (accessToken) {
+        headers['Authorization'] = `Bearer ${accessToken}`;
+      }
+
+      const response = await fetch(`${API_BASE}/api/v1/payments/checkout/complete`, {
+        method: 'POST',
+        headers,
+        credentials: 'include',
+        body: JSON.stringify({ session_id: sessionId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `Checkout completion failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.tenant_url && data.provisioning_status === 'completed') {
+        showState('success');
+        const link = document.getElementById('workspace-link') as HTMLAnchorElement;
+        link.href = data.login_url || data.tenant_url;
+        document.getElementById('success-message')!.textContent =
+          `Your subscription to ${data.workspace_name || 'the workspace'} is now active.`;
+      } else if (data.provisioning_status === 'pending') {
+        showState('provisioning');
+      } else {
+        showState('success');
+      }
+    } catch (error) {
+      showState('error');
+      document.getElementById('error-message')!.textContent =
+        error instanceof Error ? error.message : 'An unexpected error occurred.';
+    }
+  }
+
+  function showState(state: string) {
+    document.getElementById('loading-state')!.classList.add('hidden');
+    document.getElementById('success-state')!.classList.add('hidden');
+    document.getElementById('provisioning-state')!.classList.add('hidden');
+    document.getElementById('error-state')!.classList.add('hidden');
+    document.getElementById(`${state}-state`)!.classList.remove('hidden');
+  }
+
+  completeCheckout();
+</script>

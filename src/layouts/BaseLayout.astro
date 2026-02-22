@@ -3,9 +3,19 @@ interface Props {
   title: string;
   description?: string;
   ogImage?: string;
+  theme?: 'dark' | 'light';
 }
 
-const { title, description = 'Trade in intelligence, not just information. Connect with domain experts who curate and monetize exclusive intel.', ogImage = '/images/logos/heartbeatLogoBlack.svg' } = Astro.props;
+const {
+  title,
+  description = 'Trade in intelligence, not just information. Connect with publishers who curate and monetize exclusive intel.',
+  ogImage = '/images/logos/heartbeatLogoBlack.svg',
+  theme = 'dark',
+} = Astro.props;
+
+const bodyClass = theme === 'dark'
+  ? 'min-h-screen bg-hb-black-1 text-white'
+  : 'min-h-screen bg-hb-gray-7 text-hb-black-1';
 ---
 
 <!DOCTYPE html>
@@ -37,9 +47,21 @@ const { title, description = 'Trade in intelligence, not just information. Conne
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
     <title>{title}</title>
+
+    <!-- Prevent flash of wrong theme -->
+    <script is:inline>
+      (function() {
+        var stored = localStorage.getItem('hb-theme');
+        var theme = stored === 'light' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
   </head>
-  <body class="min-h-screen bg-hb-gray-7">
+  <body class="min-h-screen bg-[var(--hb-bg-primary)] text-[var(--hb-text-primary)]">
+    <div class="noise-overlay"></div>
     <slot />
+    <script src="../scripts/reveal.ts"></script>
+    <script src="../scripts/theme.ts"></script>
   </body>
 </html>
 

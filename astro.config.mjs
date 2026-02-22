@@ -14,5 +14,13 @@ export default defineConfig({
     ssr: {
       noExternal: ['@iconify/react'],
     },
+    server: {
+      proxy: {
+        '/api/v1': {
+          target: 'https://heartbeat-exchange-598945484330.us-central1.run.app',
+          changeOrigin: true,
+        },
+      },
+    },
   },
 });

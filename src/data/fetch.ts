@@ -1,23 +1,46 @@
-import { EXPERTS_DATA, EXPERT_TENANTS, CONTENT_DATA, STATIC_TRENDING_LISTS } from '../utils/constants';
-import type { ExpertData, ContentItem, TrendingItem } from '../utils/constants';
+import { CONTENT_DATA, STATIC_TRENDING_LISTS, EXCHANGE_API_URL } from '../utils/constants';
+import type { PublisherData, ContentItem, TrendingItem } from '../utils/constants';
 
-// API response types
-export interface ApiExpertProfile {
-  id: number;
+// API response types from Exchange catalog
+export interface ApiPublisherProfile {
+  id: string;
+  slug: string;
   name: string;
-  role: string;
-  specialty: string;
-  description: string;
-  avatar_url: string | null;
-  color: string;
-  linkedin: string | null;
-  lists_count: number;
-  articles_count: number;
-  content_count: number;
-  total_views: number;
-  subscribers: string;
-  articles: ApiArticle[];
-  lists: ApiList[];
+  role: string | null;
+  specialty: string | null;
+  description: string | null;
+  logo_url: string | null;
+  color: string | null;
+  long_bio: string | null;
+  linkedin_url: string | null;
+  twitter_url: string | null;
+  expertise: string[];
+  monthly_price_cents: number;
+  yearly_price_cents: number;
+  stats: {
+    lists_count: number;
+    articles_count: number;
+    subscribers: number;
+  };
+  products: unknown[];
+  collections: unknown[];
+}
+
+export interface ApiFeaturedPublisher {
+  id: string;
+  slug: string;
+  name: string;
+  role: string | null;
+  specialty: string | null;
+  description: string | null;
+  logo_url: string | null;
+  color: string | null;
+  expertise: string[];
+  stats: {
+    lists_count: number;
+    articles_count: number;
+    subscribers: number;
+  };
 }
 
 export interface ApiArticle {
@@ -48,123 +71,132 @@ export interface ApiTrendingContent {
   author: string;
   hot: boolean;
   views: string;
-  expert_id: number | null;
+  publisher_id: number | null;
   content_id: string;
   content_type: 'article' | 'list';
 }
 
+function toPublisherData(pub: ApiFeaturedPublisher): PublisherData {
+  return {
+    id: pub.id,
+    slug: pub.slug,
+    name: pub.name,
+    role: pub.role || 'Publisher',
+    specialty: pub.specialty || 'Intelligence',
+    description: pub.description || '',
+    longBio: pub.description || '',
+    avatarUrl: pub.logo_url || '',
+    color: pub.color || '#2563EB',
+    stats: {
+      lists: pub.stats.lists_count,
+      articles: pub.stats.articles_count,
+      totalViews: 0,
+    },
+    socialLinks: {
+      linkedin: '#',
+      twitter: '#',
+    },
+    expertise: pub.expertise || [],
+  };
+}
+
+function detailToPublisherData(pub: ApiPublisherProfile): PublisherData {
+  return {
+    id: pub.id,
+    slug: pub.slug,
+    name: pub.name,
+    role: pub.role || 'Publisher',
+    specialty: pub.specialty || 'Intelligence',
+    description: pub.description || '',
+    longBio: pub.long_bio || pub.description || '',
+    avatarUrl: pub.logo_url || '',
+    color: pub.color || '#2563EB',
+    stats: {
+      lists: pub.stats.lists_count,
+      articles: pub.stats.articles_count,
+      totalViews: 0,
+    },
+    socialLinks: {
+      linkedin: pub.linkedin_url || '#',
+      twitter: pub.twitter_url || '#',
+    },
+    expertise: pub.expertise || [],
+  };
+}
+
 /**
- * Fetch expert profile data from tenant API
+ * Fetch publisher profile data from Exchange catalog API
  */
-export async function fetchExpertProfile(expertId: string): Promise<ExpertData | null> {
-  const tenant = EXPERT_TENANTS[expertId];
-  const staticData = EXPERTS_DATA[expertId];
-
-  if (!tenant) {
-    return staticData || null;
-  }
-
+export async function fetchPublisherProfile(publisherSlug: string): Promise<PublisherData | null> {
   try {
     const response = await fetch(
-      `https://${tenant}.heartbeatintel.com/api/v1/public/experts/${expertId}/`,
+      `${EXCHANGE_API_URL}/api/v1/publishers/${publisherSlug}`,
       { signal: AbortSignal.timeout(5000) }
     );
 
     if (!response.ok) {
-      console.warn(`Failed to fetch expert ${expertId}: ${response.status}`);
-      return staticData || null;
+      console.warn(`Failed to fetch publisher ${publisherSlug}: ${response.status}`);
+      return null;
     }
 
-    const apiData: ApiExpertProfile = await response.json();
-
-    // Merge API data with static data (static takes priority for rich content)
-    if (staticData) {
-      return {
-        ...staticData,
-        stats: {
-          lists: apiData.lists_count,
-          articles: apiData.articles_count,
-          totalViews: apiData.total_views,
-        },
-      };
-    }
-
-    // Convert API data to our format
-    return {
-      id: apiData.id.toString(),
-      name: apiData.name,
-      role: apiData.role || 'Expert',
-      specialty: apiData.specialty || 'Intelligence',
-      description: apiData.description || '',
-      longBio: apiData.description || '',
-      avatarUrl: apiData.avatar_url || '',
-      color: apiData.color || '#2563EB',
-      stats: {
-        lists: apiData.lists_count,
-        articles: apiData.articles_count,
-        totalViews: apiData.total_views,
-      },
-      socialLinks: {
-        linkedin: apiData.linkedin || '#',
-        twitter: '#',
-      },
-      expertise: ['Intelligence', 'Analysis', 'Research'],
-    };
+    const apiData: ApiPublisherProfile = await response.json();
+    return detailToPublisherData(apiData);
   } catch (error) {
-    console.error(`Error fetching expert ${expertId}:`, error);
-    return staticData || null;
+    console.error(`Error fetching publisher ${publisherSlug}:`, error);
+    return null;
   }
 }
 
 /**
- * Fetch expert content (lists and articles) from tenant API
+ * Fetch publisher content (lists and articles) from Exchange catalog API
  */
-export async function fetchExpertContent(expertId: string): Promise<{ lists: ContentItem[]; articles: ContentItem[] }> {
-  const tenant = EXPERT_TENANTS[expertId];
-  const staticContent = CONTENT_DATA[expertId];
-
-  if (!tenant) {
-    return staticContent || { lists: [], articles: [] };
-  }
-
+export async function fetchPublisherContent(publisherSlug: string): Promise<{ lists: ContentItem[]; articles: ContentItem[] }> {
   try {
-    const response = await fetch(
-      `https://${tenant}.heartbeatintel.com/api/v1/public/experts/${expertId}/`,
-      { signal: AbortSignal.timeout(5000) }
-    );
+    const [listsResponse, articlesResponse] = await Promise.all([
+      fetch(`${EXCHANGE_API_URL}/api/v1/publishers/${publisherSlug}/lists`, { signal: AbortSignal.timeout(5000) }),
+      fetch(`${EXCHANGE_API_URL}/api/v1/publishers/${publisherSlug}/articles`, { signal: AbortSignal.timeout(5000) }),
+    ]);
 
-    if (!response.ok) {
-      return staticContent || { lists: [], articles: [] };
+    const lists: ContentItem[] = [];
+    const articles: ContentItem[] = [];
+
+    if (listsResponse.ok) {
+      const listsData = await listsResponse.json();
+      for (const list of listsData.items || []) {
+        lists.push({
+          id: list.id,
+          title: list.title,
+          description: list.description || '',
+          date: list.date || '',
+          readTime: list.read_time || '',
+          subscribers: list.subscribers,
+          isHot: list.is_hot,
+          isPremium: list.is_premium,
+          listType: list.list_type,
+        });
+      }
     }
 
-    const apiData: ApiExpertProfile = await response.json();
+    if (articlesResponse.ok) {
+      const articlesData = await articlesResponse.json();
+      for (const article of articlesData.items || []) {
+        articles.push({
+          id: article.id,
+          title: article.title,
+          description: article.description || '',
+          date: article.date || '',
+          readTime: article.read_time || '',
+          views: article.views,
+          isPremium: article.is_premium,
+          isHot: article.is_hot,
+        });
+      }
+    }
 
-    return {
-      lists: apiData.lists.map((list) => ({
-        id: list.id,
-        title: list.title,
-        description: list.description,
-        date: list.date || '',
-        readTime: list.read_time || '',
-        subscribers: list.subscribers,
-        isHot: list.is_hot,
-        isPremium: list.is_premium,
-        listType: list.list_type,
-      })),
-      articles: apiData.articles.map((article) => ({
-        id: article.id,
-        title: article.title,
-        description: article.description,
-        date: article.date || '',
-        readTime: article.read_time || '',
-        views: article.views,
-        isPremium: article.is_premium,
-        isHot: article.is_hot,
-      })),
-    };
+    return { lists, articles };
   } catch (error) {
-    console.error(`Error fetching content for ${expertId}:`, error);
-    return staticContent || { lists: [], articles: [] };
+    console.error(`Error fetching content for ${publisherSlug}:`, error);
+    return { lists: [], articles: [] };
   }
 }
 
@@ -173,9 +205,8 @@ export async function fetchExpertContent(expertId: string): Promise<{ lists: Con
  */
 export async function fetchTrendingContent(limit: number = 5): Promise<TrendingItem[]> {
   try {
-    // Try fetching from pirque as the primary source
     const response = await fetch(
-      `https://pirque.heartbeatintel.com/api/v1/public/trending/?limit=${limit}`,
+      `${EXCHANGE_API_URL}/api/v1/catalog/trending?limit=${limit}`,
       { signal: AbortSignal.timeout(5000) }
     );
 
@@ -183,16 +214,16 @@ export async function fetchTrendingContent(limit: number = 5): Promise<TrendingI
       return STATIC_TRENDING_LISTS;
     }
 
-    const apiData: ApiTrendingContent[] = await response.json();
+    const apiData = await response.json();
 
-    return apiData.map((item) => ({
+    return (apiData.items || []).map((item: { title: string; publisher_name: string; publisher_slug: string; slug: string; item_type: string }) => ({
       title: item.title,
-      author: item.author,
-      hot: item.hot,
-      views: item.views,
-      expertId: item.expert_id?.toString() || 'andres-bucchi',
-      contentId: item.content_id,
-      contentType: item.content_type,
+      author: item.publisher_name,
+      hot: false,
+      views: '0',
+      publisherId: item.publisher_slug,
+      contentId: item.slug,
+      contentType: item.item_type === 'article' ? 'article' : 'list',
     }));
   } catch (error) {
     console.error('Error fetching trending content:', error);
@@ -201,24 +232,65 @@ export async function fetchTrendingContent(limit: number = 5): Promise<TrendingI
 }
 
 /**
- * Get all expert IDs for static path generation
+ * Fetch hot lists across all publishers
  */
-export function getAllExpertIds(): string[] {
-  return Object.keys(EXPERTS_DATA);
+export async function fetchHotLists(): Promise<ContentItem[]> {
+  const hotLists: ContentItem[] = [];
+
+  for (const [publisherId, content] of Object.entries(CONTENT_DATA)) {
+    for (const list of content.lists) {
+      if (list.isHot) {
+        hotLists.push({ ...list, publisherId });
+      }
+    }
+  }
+
+  return hotLists;
+}
+
+/**
+ * Fetch all publisher profiles from Exchange API
+ */
+export async function fetchAllPublishers(): Promise<(PublisherData & { id: string })[]> {
+  try {
+    const response = await fetch(
+      `${EXCHANGE_API_URL}/api/v1/publishers/featured?limit=10`,
+      { signal: AbortSignal.timeout(5000) }
+    );
+
+    if (!response.ok) {
+      console.warn(`Failed to fetch featured publishers: ${response.status}`);
+      return [];
+    }
+
+    const apiData: ApiFeaturedPublisher[] = await response.json();
+    return apiData.map((pub) => ({ ...toPublisherData(pub), id: pub.slug }));
+  } catch (error) {
+    console.error('Error fetching all publishers:', error);
+    return [];
+  }
+}
+
+/**
+ * Get all publisher slugs for static path generation
+ */
+export async function getAllPublisherSlugs(): Promise<string[]> {
+  const publishers = await fetchAllPublishers();
+  return publishers.map((p) => p.slug);
 }
 
 /**
  * Get all content paths for static generation
  */
-export function getAllContentPaths(): { expertId: string; contentType: string; contentId: string }[] {
-  const paths: { expertId: string; contentType: string; contentId: string }[] = [];
+export function getAllContentPaths(): { publisherId: string; contentType: string; contentId: string }[] {
+  const paths: { publisherId: string; contentType: string; contentId: string }[] = [];
 
-  for (const [expertId, content] of Object.entries(CONTENT_DATA)) {
+  for (const [publisherId, content] of Object.entries(CONTENT_DATA)) {
     for (const list of content.lists) {
-      paths.push({ expertId, contentType: 'list', contentId: list.id });
+      paths.push({ publisherId, contentType: 'list', contentId: list.id });
     }
     for (const article of content.articles) {
-      paths.push({ expertId, contentType: 'article', contentId: article.id });
+      paths.push({ publisherId, contentType: 'article', contentId: article.id });
     }
   }
 
