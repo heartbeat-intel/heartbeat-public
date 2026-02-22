@@ -9,14 +9,14 @@ const STATIC_ROUTES = [
 
 // Prefixes for static assets served from Cloudflare Pages
 const STATIC_PREFIXES = [
-  '/_astro/',
   '/images/',
   '/fonts/',
 ];
 
-// Prefixes for SSR routes served from Vercel
-const SSR_PREFIXES = [
+// Prefixes for routes served from Vercel (SSR pages + build assets)
+const VERCEL_PREFIXES = [
   '/exchange/publisher/',
+  '/_astro/',
 ];
 
 export default {
@@ -62,7 +62,7 @@ export default {
 };
 
 function shouldServeFromVercel(path) {
-  for (const prefix of SSR_PREFIXES) {
+  for (const prefix of VERCEL_PREFIXES) {
     if (path.startsWith(prefix)) {
       return true;
     }
