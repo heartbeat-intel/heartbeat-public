@@ -18,6 +18,12 @@ const hasTrending = trendingContent.length > 0;
 const hasHotLists = hotLists.length > 0;
 const hasPublishers = allPublishers.length > 0;
 
+const feedItems = trendingContent.map((item, i) => ({
+  type: (item.contentType === 'article' ? 'update' : 'new_list') as 'new_list' | 'new_subscriber' | 'trending' | 'update',
+  text: `${item.author} published "${item.title}"`,
+  time: i === 0 ? 'Just now' : `${(i + 1) * 3}m ago`,
+}));
+
 const publisherCards = allPublishers.map((publisher) => ({
   id: publisher.id,
   name: publisher.name,
@@ -102,7 +108,7 @@ const pageDescription = `Browse ${publisherCount} intelligence publishers on the
 
         <!-- Live Feed + Coming Soon -->
         <div class="col-span-12 lg:col-span-5 reveal">
-          <LiveFeed />
+          <LiveFeed items={feedItems} />
         </div>
         <div class="col-span-12 lg:col-span-7 reveal" data-reveal-delay="100">
           <div class="glass-card p-8 h-full flex flex-col items-center justify-center text-center">

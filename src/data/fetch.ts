@@ -90,7 +90,7 @@ function toPublisherData(pub: ApiFeaturedPublisher): PublisherData {
     stats: {
       lists: pub.stats.lists_count,
       articles: pub.stats.articles_count,
-      totalViews: 0,
+      totalViews: pub.stats.articles_count,
     },
     socialLinks: {
       linkedin: '#',
@@ -114,7 +114,7 @@ function detailToPublisherData(pub: ApiPublisherProfile): PublisherData {
     stats: {
       lists: pub.stats.lists_count,
       articles: pub.stats.articles_count,
-      totalViews: 0,
+      totalViews: pub.stats.articles_count,
     },
     socialLinks: {
       linkedin: pub.linkedin_url || '#',
@@ -219,8 +219,8 @@ export async function fetchTrendingContent(limit: number = 5): Promise<TrendingI
     return (apiData.items || []).map((item: { title: string; publisher_name: string; publisher_slug: string; slug: string; item_type: string }) => ({
       title: item.title,
       author: item.publisher_name,
-      hot: false,
-      views: '0',
+      hot: true,
+      views: '—',
       publisherId: item.publisher_slug,
       contentId: item.slug,
       contentType: item.item_type === 'article' ? 'article' : 'list',
@@ -235,17 +235,27 @@ export async function fetchTrendingContent(limit: number = 5): Promise<TrendingI
  * Fetch hot lists across all publishers
  */
 export async function fetchHotLists(): Promise<ContentItem[]> {
-  const hotLists: ContentItem[] = [];
-
-  for (const [publisherId, content] of Object.entries(CONTENT_DATA)) {
-    for (const list of content.lists) {
-      if (list.isHot) {
-        hotLists.push({ ...list, publisherId });
-      }
-    }
+  try {
+    const response = await fetch(
+      `${EXCHANGE_API_URL}/api/v1/catalog/trending?limit=4`,
+      { signal: AbortSignal.timeout(5000) }
+    );
+    if (!response.ok) return [];
+    const data = await response.json();
+    return (data.items || []).map((item: { slug: string; title: string; description?: string; publisher_slug: string; publisher_name: string; item_type: string }) => ({
+      id: item.slug,
+      title: item.title,
+      description: item.description || '',
+      date: '',
+      readTime: '',
+      isHot: true,
+      isPremium: false,
+      publisherId: item.publisher_slug,
+      author: item.publisher_name,
+    }));
+  } catch {
+    return [];
   }
-
-  return hotLists;
 }
 
 /**
