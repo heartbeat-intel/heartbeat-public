@@ -3,10 +3,7 @@ main = "router.js"
 compatibility_date = "2024-01-01"
 
 # Route configuration — deploy this Worker on heartbeatintel.com
-# After deploying, add a Workers Route in the Cloudflare dashboard:
+# The route must be configured in the Cloudflare dashboard:
 #   Route pattern: *heartbeatintel.com/*
 #   Worker: heartbeat-router
-#
-# Or via wrangler:
-#   wrangler deploy
-# Then in dashboard: Workers Routes > Add Route
+# The zone is on a different CF account than the Workers account.
