@@ -6,7 +6,7 @@ import Avatar from '../../../../../components/ui/Avatar.astro';
 import Badge from '../../../../../components/ui/Badge.astro';
 import SubscribeModalWrapper from '../../../../../components/react/SubscribeModalWrapper';
 import { fetchPublisherProfile } from '../../../../../data/fetch';
-import { getArticle, getList, type ArticleData, type ListData } from '../../../../../data/content';
+import { fetchArticle, fetchList, getArticle, getList, type ArticleData, type ListData } from '../../../../../data/content';
 import { markdownToHtml } from '../../../../../utils/formatters';
 
 export const prerender = false;
@@ -17,7 +17,10 @@ const contentId = Astro.params.contentId!;
 
 const isArticle = contentType === 'article';
 const publisher = await fetchPublisherProfile(publisherId);
-const content = isArticle ? getArticle(publisherId, contentId) : getList(publisherId, contentId);
+// Try API fetch first, fall back to static data
+const content = isArticle
+  ? (await fetchArticle(publisherId, contentId)) || getArticle(publisherId, contentId)
+  : (await fetchList(publisherId, contentId)) || getList(publisherId, contentId);
 
 if (!publisher || !content) {
   return Astro.redirect('/exchange');
