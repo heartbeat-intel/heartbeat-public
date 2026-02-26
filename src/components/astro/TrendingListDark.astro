@@ -1,7 +1,6 @@
 ---
 import Badge from '../ui/Badge.astro';
 import type { TrendingItem } from '../../utils/constants';
-import { API_BASE_URL } from '../../utils/constants';
 
 interface Props {
   items: TrendingItem[];
@@ -9,11 +8,6 @@ interface Props {
 }
 
 const { items, isLoading = false } = Astro.props;
-
-function getTenantUrl(item: TrendingItem): string {
-  const basePath = item.contentType === 'article' ? 'library' : 'lists';
-  return `https://${item.publisherId}.${API_BASE_URL}/${basePath}/${item.contentId}`;
-}
 ---
 
 <div class="glass-card p-5 h-full">
@@ -40,9 +34,7 @@ function getTenantUrl(item: TrendingItem): string {
     <div class="flex flex-col">
       {items.map((item) => (
         <a
-          href={getTenantUrl(item)}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={`/exchange/publisher/${item.publisherId}/${item.contentType}/${item.contentId}`}
           class="py-3 border-b border-white/5 last:border-b-0 cursor-pointer transition-all duration-200 hover:bg-white/[0.03] -mx-3 px-3 rounded-lg"
         >
           <div class="flex items-start justify-between gap-2 mb-1.5">

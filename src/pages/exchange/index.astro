@@ -9,7 +9,6 @@ import LiveFeed from '../../components/astro/LiveFeed.astro';
 import TrendingListDark from '../../components/astro/TrendingListDark.astro';
 import { fetchTrendingContent, fetchHotLists, fetchAllPublishers } from '../../data/fetch';
 import { formatViews } from '../../utils/formatters';
-import { API_BASE_URL } from '../../utils/constants';
 
 const trendingContent = await fetchTrendingContent(5);
 const hotLists = await fetchHotLists();
@@ -102,7 +101,7 @@ const pageDescription = `Browse ${publisherCount} intelligence publishers on the
               authorAvatar={undefined}
               subscribers={list.subscribers || 0}
               isHot={list.isHot}
-              href={list.publisherId ? `https://${list.publisherId}.${API_BASE_URL}/lists/${list.id}` : '#'}
+              href={list.publisherId ? `/exchange/publisher/${list.publisherId}/list/${list.id}` : '#'}
             />
           </div>
         ))}
