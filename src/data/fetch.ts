@@ -253,7 +253,8 @@ export async function fetchHotLists(): Promise<ContentItem[]> {
       publisherId: item.publisher_slug,
       author: item.publisher_name,
     }));
-  } catch {
+  } catch (error) {
+    console.error('Error fetching hot lists:', error);
     return [];
   }
 }
