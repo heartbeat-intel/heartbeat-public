@@ -94,6 +94,34 @@ export interface ContentItem {
 
 export const CONTENT_DATA: Record<string, { lists: ContentItem[]; articles: ContentItem[] }> = {};
 
+// Mapping of publisher slugs to tenant subdomains for workspace list/article links.
+export const PUBLISHER_TENANTS: Record<string, string> = {
+  pirque: 'pirque',
+  bryan: 'bmoff',
+  jpaldea: 'jpaldea',
+  'andres-bucchi': 'bucchi',
+};
+
+export const getPublisherTenant = (publisherSlug: string): string => {
+  return PUBLISHER_TENANTS[publisherSlug.toLowerCase()] || publisherSlug;
+};
+
+// Fixed expertise categories — must match backend ExpertiseCategory enum.
+export const EXPERTISE_CATEGORIES = [
+  'Finance',
+  'Tech',
+  'AI & Data',
+  'Strategy',
+  'Markets',
+  'Venture Capital',
+  'Healthcare',
+  'Energy',
+  'Real Estate',
+  'Crypto',
+  'Macro',
+  'ESG',
+] as const;
+
 // API URLs
 export const EXCHANGE_API_URL = import.meta.env.PUBLIC_EXCHANGE_API_URL || 'https://heartbeat-exchange-598945484330.us-central1.run.app';
 export const API_BASE_URL = import.meta.env.PUBLIC_API_BASE_URL || 'heartbeatintel.com';

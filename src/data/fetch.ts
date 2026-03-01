@@ -262,12 +262,17 @@ export async function fetchHotLists(): Promise<ContentItem[]> {
 /**
  * Fetch all publisher profiles from Exchange API
  */
-export async function fetchAllPublishers(): Promise<(PublisherData & { id: string })[]> {
+export async function fetchAllPublishers(category?: string): Promise<(PublisherData & { id: string })[]> {
   try {
-    const response = await fetch(
-      `${EXCHANGE_API_URL}/api/v1/publishers/featured?limit=10`,
-      { signal: AbortSignal.timeout(5000) }
-    );
+    let url = `${EXCHANGE_API_URL}/api/v1/publishers/featured?limit=100`;
+    if (category) {
+      url += `&category=${encodeURIComponent(category)}`;
+    }
+
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(5000),
+      cache: 'no-store',
+    });
 
     if (!response.ok) {
       console.warn(`Failed to fetch featured publishers: ${response.status}`);

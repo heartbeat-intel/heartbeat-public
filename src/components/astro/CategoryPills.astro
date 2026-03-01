@@ -1,25 +1,29 @@
 ---
+import { EXPERTISE_CATEGORIES } from '../../utils/constants';
+
 interface Props {
-  categories?: string[];
   activeCategory?: string;
 }
 
-const {
-  categories = ['All', 'Finance & VC', 'Data & AI', 'Tech', 'Strategy', 'Markets'],
-  activeCategory = 'All',
-} = Astro.props;
+const { activeCategory } = Astro.props;
+const categories = ['All', ...EXPERTISE_CATEGORIES];
 ---
 
 <div class="flex flex-wrap gap-2">
-  {categories.map((cat) => (
-    <button
-      class={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-        cat === activeCategory
-          ? 'bg-hb-orange-main text-white'
-          : 'bg-white/5 text-white/50 border border-white/10 hover:bg-white/10 hover:text-white/70'
-      }`}
-    >
-      {cat}
-    </button>
-  ))}
+  {categories.map((cat) => {
+    const isActive = cat === 'All' ? !activeCategory : cat === activeCategory;
+    const href = cat === 'All' ? '/exchange' : `/exchange?category=${encodeURIComponent(cat)}`;
+    return (
+      <a
+        href={href}
+        class={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+          isActive
+            ? 'bg-hb-orange-main text-white'
+            : 'bg-white/5 text-white/50 border border-white/10 hover:bg-white/10 hover:text-white/70'
+        }`}
+      >
+        {cat}
+      </a>
+    );
+  })}
 </div>
