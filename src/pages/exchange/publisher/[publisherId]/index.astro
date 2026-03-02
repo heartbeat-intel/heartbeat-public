@@ -111,18 +111,6 @@ const articles = content?.articles?.length ? content.articles : staticContent.ar
               <p class="text-[17px] text-[var(--hb-text-secondary)] leading-relaxed">{publisher.longBio}</p>
             </div>
 
-            <div>
-              <p class="text-[13px] font-semibold text-[var(--hb-text-muted)] uppercase tracking-wide mb-3">
-                Areas of Expertise
-              </p>
-              <div class="flex flex-wrap gap-2">
-                {publisher.expertise.map((skill) => (
-                  <span class="bg-[var(--hb-pill-bg)] text-[var(--hb-text-secondary)] px-3 py-1.5 rounded-full text-[13px] font-medium border border-[var(--hb-border)]">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </div>
