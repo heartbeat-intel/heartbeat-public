@@ -5,7 +5,7 @@ import Badge from '../ui/Badge.astro';
 interface Props {
   name: string;
   role: string;
-  specialty: string;
+  expertise: string[];
   description: string;
   avatarUrl: string;
   color: string;
@@ -14,7 +14,7 @@ interface Props {
   href: string;
 }
 
-const { name, role, specialty, description, avatarUrl, color, stats, featuredList, href } = Astro.props;
+const { name, role, expertise, description, avatarUrl, color, stats, featuredList, href } = Astro.props;
 ---
 
 <a
@@ -31,7 +31,18 @@ const { name, role, specialty, description, avatarUrl, color, stats, featuredLis
     <!-- Top row: badge -->
     <div class="flex items-center justify-between mb-6">
       <Badge variant="live-dark">Featured</Badge>
-      <Badge variant="specialty" color={color}>{specialty}</Badge>
+      {expertise.length > 0 && (
+        <div class="flex flex-wrap gap-1">
+          {expertise.slice(0, 2).map((tag) => (
+            <span
+              class="px-2 py-0.5 rounded-full text-[11px] font-semibold"
+              style={`background-color: ${color}20; color: ${color};`}
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
 
     <!-- Profile -->

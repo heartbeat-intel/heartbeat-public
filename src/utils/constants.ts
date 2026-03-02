@@ -4,7 +4,6 @@ export interface PublisherData {
   slug: string;
   name: string;
   role: string;
-  specialty: string;
   description: string;
   longBio: string;
   avatarUrl: string;

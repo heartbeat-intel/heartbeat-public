@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Icon } from '@iconify/react';
 import type { ContentItem } from '../../utils/constants';
+import { getPublisherTenant } from '../../utils/constants';
 interface TabbedContentProps {
   publisherId: string;
   publisherColor: string;
@@ -21,7 +22,8 @@ export default function TabbedContent({
 
   const handleListClick = (list: ContentItem) => {
     if (publisherId && list.listType) {
-      window.open(`https://${publisherId}.heartbeatintel.com/lists/${list.listType}/${list.id}`, '_blank');
+      const tenant = getPublisherTenant(publisherId);
+      window.open(`https://${tenant}.heartbeatintel.com/lists/${list.listType}/${list.id}`, '_blank');
     }
   };
 

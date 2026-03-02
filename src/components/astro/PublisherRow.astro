@@ -6,7 +6,7 @@ interface Publisher {
   id: string;
   name: string;
   role: string;
-  specialty: string;
+  expertise: string[];
   avatarUrl: string;
   color: string;
   stats: { lists: number; views: string };
@@ -49,7 +49,18 @@ const { publishers } = Astro.props;
           <span class="text-[10px] text-white/30 uppercase ml-1">Articles</span>
         </div>
       </div>
-      <Badge variant="specialty" color={publisher.color}>{publisher.specialty}</Badge>
+      {publisher.expertise.length > 0 && (
+        <div class="flex flex-wrap gap-1">
+          {publisher.expertise.slice(0, 2).map((tag) => (
+            <span
+              class="px-1.5 py-0.5 rounded-full text-[10px] font-semibold"
+              style={`background-color: ${publisher.color}20; color: ${publisher.color};`}
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
     </a>
   ))}
 </div>
