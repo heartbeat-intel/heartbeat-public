@@ -1,6 +1,4 @@
 ---
-import VideoPlayer from '../react/VideoPlayer';
-
 interface Props {
   variant?: 'home' | 'exchange' | 'publisher' | 'content';
   showBack?: boolean;
@@ -45,23 +43,11 @@ const {
       </a>
     </div>
 
-    <!-- Center nav (home/exchange only) -->
+    <!-- Center nav -->
     {(variant === 'home' || variant === 'exchange') && (
       <nav class="hidden md:flex items-center gap-8">
-        {variant === 'home' && (
-          <>
-            <a href="#how-it-works" class="text-sm text-white/40 hover:text-white transition-colors">How It Works</a>
-            <a href="#publishers" class="text-sm text-white/40 hover:text-white transition-colors">Publishers</a>
-            <a href="/exchange" class="text-sm text-white/40 hover:text-white transition-colors">Exchange</a>
-          </>
-        )}
-        {variant === 'exchange' && (
-          <>
-            <a href="/" class="text-sm text-white/40 hover:text-white transition-colors">Home</a>
-            <a href="#publishers" class="text-sm text-white/40 hover:text-white transition-colors">Publishers</a>
-            <a href="#trending" class="text-sm text-white/40 hover:text-white transition-colors">Trending</a>
-          </>
-        )}
+        <a href="/" class="text-sm text-white/40 hover:text-white transition-colors">Home</a>
+        <a href="/exchange" class="text-sm text-white/40 hover:text-white transition-colors">Exchange</a>
       </nav>
     )}
 
@@ -86,15 +72,12 @@ const {
       </button>
 
       {(variant === 'home' || variant === 'exchange') && (
-        <>
-          <VideoPlayer client:visible />
-          <a
-            href="mailto:human@heartbeatintel.com"
-            class="inline-flex items-center gap-2 bg-hb-orange-main text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-hb-orange-1 transition-colors"
-          >
-            Book a Demo
-          </a>
-        </>
+        <a
+          href="mailto:human@heartbeatintel.com?subject=New%20Publisher%20Sign%20Up&body=Hi%2C%20I%27d%20like%20to%20create%20a%20workspace%20and%20become%20a%20publisher%20on%20the%20Heartbeat%20Exchange."
+          class="inline-flex items-center gap-2 bg-hb-orange-main text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-hb-orange-1 transition-colors"
+        >
+          Sign Up
+        </a>
       )}
     </div>
   </div>

@@ -89,7 +89,7 @@ function toPublisherData(pub: ApiFeaturedPublisher): PublisherData {
     stats: {
       lists: pub.stats.lists_count,
       articles: pub.stats.articles_count,
-      totalViews: pub.stats.articles_count,
+      totalViews: pub.stats.subscribers,
     },
     socialLinks: {
       linkedin: '#',
@@ -112,7 +112,7 @@ function detailToPublisherData(pub: ApiPublisherProfile): PublisherData {
     stats: {
       lists: pub.stats.lists_count,
       articles: pub.stats.articles_count,
-      totalViews: pub.stats.articles_count,
+      totalViews: pub.stats.subscribers,
     },
     socialLinks: {
       linkedin: pub.linkedin_url || '#',
@@ -229,30 +229,72 @@ export async function fetchTrendingContent(limit: number = 5): Promise<TrendingI
   }
 }
 
+export interface FeedItem {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  type: 'list' | 'article';
+  listType?: string;
+  publisherName: string;
+  publisherSlug: string;
+  publisherColor: string;
+  isPremium: boolean;
+}
+
 /**
- * Fetch hot lists across all publishers
+ * Fetch recent content across all publishers for the exchange feed
  */
-export async function fetchHotLists(): Promise<ContentItem[]> {
+export async function fetchExchangeFeed(publishers: PublisherData[]): Promise<FeedItem[]> {
   try {
-    const response = await fetch(
-      `${EXCHANGE_API_URL}/api/v1/catalog/trending?limit=4`,
-      { signal: AbortSignal.timeout(5000) }
+    const results = await Promise.all(
+      publishers.map(async (pub) => {
+        const { lists, articles } = await fetchPublisherContent(pub.slug);
+        const items: FeedItem[] = [];
+
+        for (const list of lists) {
+          items.push({
+            id: list.id,
+            title: list.title,
+            description: list.description,
+            date: list.date,
+            type: 'list',
+            listType: list.listType,
+            publisherName: pub.name,
+            publisherSlug: pub.slug,
+            publisherColor: pub.color,
+            isPremium: list.isPremium,
+          });
+        }
+
+        for (const article of articles) {
+          items.push({
+            id: article.id,
+            title: article.title,
+            description: article.description,
+            date: article.date,
+            type: 'article',
+            publisherName: pub.name,
+            publisherSlug: pub.slug,
+            publisherColor: pub.color,
+            isPremium: article.isPremium,
+          });
+        }
+
+        return items;
+      })
     );
-    if (!response.ok) return [];
-    const data = await response.json();
-    return (data.items || []).map((item: { slug: string; title: string; description?: string; publisher_slug: string; publisher_name: string; item_type: string }) => ({
-      id: item.slug,
-      title: item.title,
-      description: item.description || '',
-      date: '',
-      readTime: '',
-      isHot: true,
-      isPremium: false,
-      publisherId: item.publisher_slug,
-      author: item.publisher_name,
-    }));
+
+    return results
+      .flat()
+      .sort((a, b) => {
+        if (!a.date && !b.date) return 0;
+        if (!a.date) return 1;
+        if (!b.date) return -1;
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      });
   } catch (error) {
-    console.error('Error fetching hot lists:', error);
+    console.error('Error fetching exchange feed:', error);
     return [];
   }
 }

@@ -201,7 +201,7 @@ const totalViews = allPublishers.reduce((sum, e) => sum + (e.stats?.totalViews |
               description={publisher.description}
               avatarUrl={publisher.avatarUrl}
               color={publisher.color}
-              stats={{ lists: publisher.stats.lists, views: '0' }}
+              subscribers={publisher.stats.totalViews}
               href={`/exchange/publisher/${publisher.slug}`}
             />
           ))}

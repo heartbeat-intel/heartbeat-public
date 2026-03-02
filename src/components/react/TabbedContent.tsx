@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Icon } from '@iconify/react';
 import type { ContentItem } from '../../utils/constants';
-import { getPublisherTenant } from '../../utils/constants';
+import { getPublisherTenant, API_BASE_URL } from '../../utils/constants';
 interface TabbedContentProps {
   publisherId: string;
   publisherColor: string;
@@ -23,7 +23,7 @@ export default function TabbedContent({
   const handleListClick = (list: ContentItem) => {
     if (publisherId && list.listType) {
       const tenant = getPublisherTenant(publisherId);
-      window.open(`https://${tenant}.heartbeatintel.com/lists/${list.listType}/${list.id}`, '_blank');
+      window.open(`https://${tenant}.${API_BASE_URL}/lists/${list.listType}/${list.id}?ref=exchange&publisher=${publisherId}`, '_blank');
     }
   };
 
@@ -197,6 +197,12 @@ function ContentCard({
           <span>&bull;</span>
           <span>{item.readTime}</span>
         </div>
+        {onClick && (
+          <div className={`flex items-center gap-1 text-[12px] ${metaColor} opacity-0 group-hover:opacity-100 transition-opacity`}>
+            <span>Open in workspace</span>
+            <Icon icon="mdi:open-in-new" width={14} />
+          </div>
+        )}
       </div>
     </Tag>
   );
