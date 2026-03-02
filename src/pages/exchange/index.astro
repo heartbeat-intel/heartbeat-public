@@ -7,6 +7,7 @@ import DarkFooter from '../../components/astro/DarkFooter.astro';
 import CategoryPills from '../../components/astro/CategoryPills.astro';
 import PublisherCardDark from '../../components/astro/PublisherCardDark.astro';
 import { fetchAllPublishers, fetchExchangeFeed } from '../../data/fetch';
+import { getPublisherTenant } from '../../utils/constants';
 
 const categoryParam = Astro.url.searchParams.get('category') || undefined;
 
@@ -28,6 +29,14 @@ const publisherCards = filteredPublishers.map((publisher) => ({
   subscribers: publisher.stats.totalViews,
   href: `/exchange/publisher/${publisher.slug}`,
 }));
+
+// Build tenant content URL for a feed item
+function getTenantContentUrl(item: { type: string; listType?: string; id: string; publisherSlug: string }) {
+  const tenant = getPublisherTenant(item.publisherSlug);
+  const base = `https://${tenant}.heartbeatintel.com`;
+  if (item.type === 'article') return `${base}/library/${item.id}`;
+  return `${base}/lists/${item.listType || 'library'}/${item.id}`;
+}
 
 // Fetch recent content from all publishers
 const feedItems = await fetchExchangeFeed(allPublishers);
@@ -120,7 +129,7 @@ const pageDescription = `Browse ${publisherCount} intelligence publishers on the
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           {feedItems.slice(0, 12).map((item) => (
             <a
-              href={`/exchange/publisher/${item.publisherSlug}/${item.type}/${item.id}`}
+              href={getTenantContentUrl(item)}
               class="group flex items-start gap-4 p-4 rounded-lg border border-[var(--hb-border)] hover:border-[var(--hb-border-hover,var(--hb-border))] hover:bg-[var(--hb-bg-secondary)] transition-all duration-200"
             >
               <div
