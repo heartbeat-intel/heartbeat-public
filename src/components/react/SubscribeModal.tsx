@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Icon } from '@iconify/react';
-import { PRICING_TIERS } from '../../utils/constants';
+import type { PricingTier } from '../../utils/constants';
 
 const API_BASE = import.meta.env.PUBLIC_EXCHANGE_API_URL || '';
 
@@ -12,6 +12,8 @@ interface SubscribeModalProps {
   publisherName?: string;
   accentColor?: string;
   publisherId?: string;
+  monthlyPriceCents?: number;
+  yearlyPriceCents?: number;
 }
 
 export default function SubscribeModal({
@@ -20,6 +22,8 @@ export default function SubscribeModal({
   publisherName,
   accentColor = '#FB4C02',
   publisherId,
+  monthlyPriceCents,
+  yearlyPriceCents,
 }: SubscribeModalProps) {
   const [selectedTier, setSelectedTier] = useState<string>('yearly');
   const [step, setStep] = useState<Step>('pricing');
@@ -35,7 +39,51 @@ export default function SubscribeModal({
     }
   }, [step]);
 
-  const selectedPricing = PRICING_TIERS.find((t) => t.id === selectedTier);
+  const pricingTiers = useMemo(() => {
+    const tiers: PricingTier[] = [];
+
+    if (monthlyPriceCents) {
+      tiers.push({
+        id: 'monthly',
+        name: 'Monthly',
+        price: monthlyPriceCents / 100,
+        period: '/month',
+        pricePerMonth: monthlyPriceCents / 100,
+        features: [
+          'Full access to all intel lists',
+          'New releases as they publish',
+          'Cancel anytime',
+        ],
+      });
+    }
+
+    if (yearlyPriceCents) {
+      const yearlyPrice = yearlyPriceCents / 100;
+      const monthlyEquiv = yearlyPrice / 12;
+      const monthlyPrice = monthlyPriceCents ? monthlyPriceCents / 100 : 29;
+      const savings = (monthlyPrice * 12) - yearlyPrice;
+
+      tiers.push({
+        id: 'yearly',
+        name: 'Yearly',
+        price: yearlyPrice,
+        period: '/year',
+        pricePerMonth: monthlyEquiv,
+        popular: true,
+        savings: savings > 0 ? `Save $${Math.round(savings)}` : undefined,
+        features: [
+          'Full access to all intel lists',
+          'New releases as they publish',
+          'Priority support',
+          '2 months free',
+        ],
+      });
+    }
+
+    return tiers;
+  }, [monthlyPriceCents, yearlyPriceCents]);
+
+  const selectedPricing = pricingTiers.find((t) => t.id === selectedTier);
 
   const handleContinue = () => {
     if (!publisherId) {
@@ -221,7 +269,7 @@ export default function SubscribeModal({
           {step === 'pricing' && (
             <>
               <div className="flex gap-4 mb-4">
-                {PRICING_TIERS.map((tier) => (
+                {pricingTiers.map((tier) => (
                   <button
                     key={tier.id}
                     onClick={() => setSelectedTier(tier.id)}
