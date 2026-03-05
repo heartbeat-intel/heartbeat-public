@@ -18,9 +18,11 @@ export interface PublisherData {
     twitter: string;
   };
   expertise: string[];
+  monthlyPriceCents: number;
+  yearlyPriceCents: number;
 }
 
-// Pricing tiers
+// Pricing tier type (generated dynamically from publisher data)
 export interface PricingTier {
   id: string;
   name: string;
@@ -31,36 +33,6 @@ export interface PricingTier {
   popular?: boolean;
   savings?: string;
 }
-
-export const PRICING_TIERS: PricingTier[] = [
-  {
-    id: 'monthly',
-    name: 'Monthly',
-    price: 29,
-    period: '/month',
-    pricePerMonth: 29,
-    features: [
-      'Full access to all intel lists',
-      'New releases as they publish',
-      'Cancel anytime',
-    ],
-  },
-  {
-    id: 'yearly',
-    name: 'Yearly',
-    price: 249,
-    period: '/year',
-    pricePerMonth: 20.75,
-    popular: true,
-    savings: 'Save $99',
-    features: [
-      'Full access to all intel lists',
-      'New releases as they publish',
-      'Priority support',
-      '2 months free',
-    ],
-  },
-];
 
 // Static fallback trending content
 export interface TrendingItem {
@@ -122,5 +94,5 @@ export const EXPERTISE_CATEGORIES = [
 ] as const;
 
 // API URLs
-export const EXCHANGE_API_URL = import.meta.env.PUBLIC_EXCHANGE_API_URL || 'https://heartbeat-exchange-598945484330.us-central1.run.app';
+export const EXCHANGE_API_URL = import.meta.env.PUBLIC_EXCHANGE_API_URL || 'https://exchange-api-production-598945484330.us-central1.run.app';
 export const API_BASE_URL = import.meta.env.PUBLIC_API_BASE_URL || 'heartbeatintel.com';
