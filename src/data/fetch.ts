@@ -96,6 +96,8 @@ function toPublisherData(pub: ApiFeaturedPublisher): PublisherData {
       twitter: '#',
     },
     expertise: pub.expertise || [],
+    monthlyPriceCents: 0,
+    yearlyPriceCents: 0,
   };
 }
 
@@ -119,6 +121,8 @@ function detailToPublisherData(pub: ApiPublisherProfile): PublisherData {
       twitter: pub.twitter_url || '#',
     },
     expertise: pub.expertise || [],
+    monthlyPriceCents: pub.monthly_price_cents,
+    yearlyPriceCents: pub.yearly_price_cents,
   };
 }
 

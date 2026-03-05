@@ -34,8 +34,8 @@ const publisherCards = filteredPublishers.map((publisher) => ({
 function getTenantContentUrl(item: { type: string; listType?: string; id: string; publisherSlug: string }) {
   const tenant = getPublisherTenant(item.publisherSlug);
   const base = `https://${tenant}.heartbeatintel.com`;
-  if (item.type === 'article') return `${base}/library/${item.id}`;
-  return `${base}/lists/${item.listType || 'library'}/${item.id}`;
+  if (item.type === 'article') return `${base}/library/${item.id}?ref=exchange`;
+  return `${base}/lists/${item.listType || 'library'}/${item.id}?ref=exchange`;
 }
 
 // Fetch recent content from all publishers
@@ -164,3 +164,18 @@ const pageDescription = `Browse ${publisherCount} intelligence publishers on the
 
   <DarkFooter maxWidth="1400px" />
 </BaseLayout>
+
+<script>
+  // Inject current theme into all outbound tenant links so workspace matches exchange theme
+  function syncThemeToLinks() {
+    const theme = localStorage.getItem('hb-theme') || 'dark';
+    document.querySelectorAll('a[href*="heartbeatintel.com/lists/"], a[href*="heartbeatintel.com/library/"]').forEach((a) => {
+      const url = new URL(a.getAttribute('href')!, window.location.origin);
+      url.searchParams.set('theme', theme);
+      a.setAttribute('href', url.toString());
+    });
+  }
+  syncThemeToLinks();
+  const observer = new MutationObserver(() => syncThemeToLinks());
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+</script>

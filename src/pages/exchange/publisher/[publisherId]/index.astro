@@ -4,11 +4,9 @@ import DarkHeader from '../../../../components/astro/DarkHeader.astro';
 import DarkFooter from '../../../../components/astro/DarkFooter.astro';
 import Avatar from '../../../../components/ui/Avatar.astro';
 import Badge from '../../../../components/ui/Badge.astro';
-import TabbedContent from '../../../../components/react/TabbedContent';
 import SubscribeModalWrapper from '../../../../components/react/SubscribeModalWrapper';
-import { CONTENT_DATA } from '../../../../utils/constants';
+import { CONTENT_DATA, getPublisherTenant, API_BASE_URL } from '../../../../utils/constants';
 import { fetchPublisherProfile, fetchPublisherContent } from '../../../../data/fetch';
-import { formatViews } from '../../../../utils/formatters';
 
 export const prerender = false;
 
@@ -24,6 +22,12 @@ if (!publisher) {
 const staticContent = CONTENT_DATA[publisherId] || { lists: [], articles: [] };
 const lists = content?.lists?.length ? content.lists : staticContent.lists;
 const articles = content?.articles?.length ? content.articles : staticContent.articles;
+const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...articles.map(a => ({ ...a, _type: 'article' as const }))].sort((a, b) => {
+  if (!a.date && !b.date) return 0;
+  if (!a.date) return 1;
+  if (!b.date) return -1;
+  return new Date(b.date).getTime() - new Date(a.date).getTime();
+});
 ---
 
 <BaseLayout
@@ -73,22 +77,6 @@ const articles = content?.articles?.length ? content.articles : staticContent.ar
               )}
             </div>
 
-            <!-- Stats Grid -->
-            <div class="grid grid-cols-3 gap-3 w-full pt-2">
-              <div class="flex flex-col items-center p-3 bg-[var(--hb-pill-bg)] rounded-hb-xs">
-                <span class="text-[22px] font-bold text-[var(--hb-text-primary)]">{publisher.stats.lists}</span>
-                <span class="text-[11px] text-[var(--hb-text-muted)] uppercase">Lists</span>
-              </div>
-              <div class="flex flex-col items-center p-3 bg-[var(--hb-pill-bg)] rounded-hb-xs">
-                <span class="text-[22px] font-bold text-[var(--hb-text-primary)]">{publisher.stats.articles}</span>
-                <span class="text-[11px] text-[var(--hb-text-muted)] uppercase">Articles</span>
-              </div>
-              <div class="flex flex-col items-center p-3 bg-[var(--hb-pill-bg)] rounded-hb-xs">
-                <span class="text-[22px] font-bold text-[var(--hb-text-primary)]">{formatViews(publisher.stats.totalViews)}</span>
-                <span class="text-[11px] text-[var(--hb-text-muted)] uppercase">Views</span>
-              </div>
-            </div>
-
             <!-- Subscribe Button -->
             <button
               id="subscribe-btn"
@@ -117,15 +105,117 @@ const articles = content?.articles?.length ? content.articles : staticContent.ar
     </div>
   </section>
 
-  <!-- Tabbed Content -->
-  <TabbedContent
-    client:visible
-    publisherId={publisherId}
-    publisherColor={publisher.color}
-    lists={lists}
-    articles={articles}
-    theme="dark"
-  />
+  <!-- Pulses -->
+  <section class="max-w-[1200px] mx-auto px-6 py-10">
+    <div class="flex items-center gap-3 mb-8">
+      <h2 class="text-lg font-bold text-[var(--hb-text-primary)] flex items-center gap-3">
+        <!-- Pulsating dot -->
+        <span class="relative flex h-3 w-3">
+          <span class="pulse-ring absolute inline-flex h-full w-full rounded-full opacity-75" style={`background-color: ${publisher.color}`}></span>
+          <span class="relative inline-flex rounded-full h-3 w-3" style={`background-color: ${publisher.color}`}></span>
+        </span>
+        Pulses
+        <span class="text-xs font-normal text-[var(--hb-text-primary)]/30">{allPulses.length}</span>
+      </h2>
+      <!-- Animated heartbeat line -->
+      <div class="flex-1 h-px relative overflow-hidden ml-2">
+        <div class="absolute inset-0 bg-[var(--hb-border)]"></div>
+        <div class="heartbeat-line absolute h-full w-24" style={`background: linear-gradient(90deg, transparent, ${publisher.color}60, transparent)`}></div>
+      </div>
+    </div>
+
+    {allPulses.length > 0 ? (
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {allPulses.map((item, i) => {
+          const tenant = getPublisherTenant(publisherId);
+          const href = item._type === 'article'
+            ? `/exchange/publisher/${publisherId}/article/${item.id}`
+            : `https://${tenant}.heartbeatintel.com/lists/${item.listType || 'library'}/${item.id}?ref=exchange&publisher=${publisherId}`;
+          const isExternal = item._type === 'list';
+          return (
+            <a
+              href={href}
+              target={isExternal ? '_blank' : undefined}
+              rel={isExternal ? 'noopener noreferrer' : undefined}
+              class="pulse-card group relative bg-white/[0.03] rounded-xl p-5 border border-white/[0.06] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-white/[0.12] hover:shadow-lg hover:shadow-black/20 block overflow-hidden"
+              style={`animation-delay: ${i * 80}ms`}
+            >
+              <!-- Accent bar on left -->
+              <div class="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={`background-color: ${publisher.color}`}></div>
+
+              <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <!-- Mini pulse dot per card -->
+                  <span class="inline-flex h-1.5 w-1.5 rounded-full" style={`background-color: ${publisher.color}`}></span>
+                  <span class="text-[11px] text-white/30 font-semibold uppercase tracking-wide">
+                    {item._type === 'list' ? 'list' : 'article'}
+                  </span>
+                </div>
+                <div class="flex items-center gap-2">
+                  {item.isHot && (
+                    <span class="bg-red-500/15 text-red-400 text-[10px] font-semibold px-2 py-0.5 rounded-full animate-pulse">HOT</span>
+                  )}
+                  {item.isPremium && (
+                    <span class="bg-amber-500/15 text-amber-400 text-[10px] font-semibold px-2 py-0.5 rounded-full">PREMIUM</span>
+                  )}
+                </div>
+              </div>
+              <h3 class="text-[17px] font-semibold text-white mb-2 leading-snug group-hover:text-white transition-colors">{item.title}</h3>
+              <p class="text-sm text-white/40 mb-4 leading-relaxed line-clamp-2">{item.description}</p>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4 text-[13px] text-white/30">
+                  {item.date && <span>{item.date}</span>}
+                  {item.date && item.readTime && <span>&bull;</span>}
+                  {item.readTime && <span>{item.readTime}</span>}
+                </div>
+                <div class="flex items-center gap-1 text-[12px] opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-1 group-hover:translate-x-0" style={`color: ${publisher.color}`}>
+                  <span>{isExternal ? 'Open in workspace' : 'Read'}</span>
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </div>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    ) : (
+      <div class="glass-card p-8 text-center">
+        <span class="relative flex h-4 w-4 mx-auto mb-3">
+          <span class="pulse-ring absolute inline-flex h-full w-full rounded-full opacity-75 bg-white/20"></span>
+          <span class="relative inline-flex rounded-full h-4 w-4 bg-white/20"></span>
+        </span>
+        <p class="text-sm text-[var(--hb-text-primary)]/40">No pulses yet.</p>
+      </div>
+    )}
+  </section>
+
+  <style>
+    @keyframes pulse-ring {
+      0% { transform: scale(1); opacity: 0.75; }
+      70% { transform: scale(2.5); opacity: 0; }
+      100% { transform: scale(2.5); opacity: 0; }
+    }
+    .pulse-ring {
+      animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    @keyframes heartbeat-sweep {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(1200%); }
+    }
+    .heartbeat-line {
+      animation: heartbeat-sweep 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse-fade-in {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .pulse-card {
+      animation: pulse-fade-in 0.4s ease-out both;
+    }
+  </style>
 
   <DarkFooter maxWidth="1200px" />
 
@@ -133,14 +223,30 @@ const articles = content?.articles?.length ? content.articles : staticContent.ar
   <SubscribeModalWrapper client:load />
 </BaseLayout>
 
-<script define:vars={{ publisherUuid: publisher.id, publisherName: publisher.name, publisherColor: publisher.color }}>
+<script define:vars={{ publisherUuid: publisher.id, publisherName: publisher.name, publisherColor: publisher.color, monthlyPriceCents: publisher.monthlyPriceCents, yearlyPriceCents: publisher.yearlyPriceCents }}>
   const subscribeBtn = document.getElementById('subscribe-btn');
 
   if (subscribeBtn) {
     subscribeBtn.addEventListener('click', () => {
       window.dispatchEvent(new CustomEvent('openSubscribeModal', {
-        detail: { publisherId: publisherUuid, publisherName, publisherColor }
+        detail: { publisherId: publisherUuid, publisherName, publisherColor, monthlyPriceCents, yearlyPriceCents }
       }));
     });
   }
+</script>
+
+<script>
+  // Inject current theme into all outbound tenant links so workspace matches exchange theme
+  function syncThemeToLinks() {
+    const theme = localStorage.getItem('hb-theme') || 'dark';
+    document.querySelectorAll('a[href*="heartbeatintel.com/lists/"], a[href*="heartbeatintel.com/library/"]').forEach((a) => {
+      const url = new URL(a.getAttribute('href')!, window.location.origin);
+      url.searchParams.set('theme', theme);
+      a.setAttribute('href', url.toString());
+    });
+  }
+  syncThemeToLinks();
+  // Re-sync when theme toggles
+  const observer = new MutationObserver(() => syncThemeToLinks());
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 </script>
