@@ -11,5 +11,6 @@
     },
     "jsx": "react-jsx",
     "jsxImportSource": "react"
-  }
+  },
+  "exclude": ["playwright.config.ts", "e2e"]
 }

@@ -7,7 +7,7 @@ import DarkFooter from '../../components/astro/DarkFooter.astro';
 import CategoryPills from '../../components/astro/CategoryPills.astro';
 import PublisherCardDark from '../../components/astro/PublisherCardDark.astro';
 import { fetchAllPublishers, fetchExchangeFeed } from '../../data/fetch';
-import { getPublisherTenant } from '../../utils/constants';
+import { getPublisherTenant, API_BASE_URL } from '../../utils/constants';
 
 const categoryParam = Astro.url.searchParams.get('category') || undefined;
 
@@ -33,7 +33,7 @@ const publisherCards = filteredPublishers.map((publisher) => ({
 // Build tenant content URL for a feed item
 function getTenantContentUrl(item: { type: string; listType?: string; id: string; publisherSlug: string }) {
   const tenant = getPublisherTenant(item.publisherSlug);
-  const base = `https://${tenant}.heartbeatintel.com`;
+  const base = `https://${tenant}.${API_BASE_URL}`;
   if (item.type === 'article') return `${base}/library/${item.id}?ref=exchange`;
   return `${base}/lists/${item.listType || 'library'}/${item.id}?ref=exchange`;
 }
@@ -165,12 +165,12 @@ const pageDescription = `Browse ${publisherCount} intelligence publishers on the
   <DarkFooter maxWidth="1400px" />
 </BaseLayout>
 
-<script>
+<script define:vars={{ apiBaseDomain: API_BASE_URL }}>
   // Inject current theme into all outbound tenant links so workspace matches exchange theme
   function syncThemeToLinks() {
     const theme = localStorage.getItem('hb-theme') || 'dark';
-    document.querySelectorAll('a[href*="heartbeatintel.com/lists/"], a[href*="heartbeatintel.com/library/"]').forEach((a) => {
-      const url = new URL(a.getAttribute('href')!, window.location.origin);
+    document.querySelectorAll(`a[href*="${apiBaseDomain}/lists/"], a[href*="${apiBaseDomain}/library/"]`).forEach((a) => {
+      const url = new URL(a.getAttribute('href'), window.location.origin);
       url.searchParams.set('theme', theme);
       a.setAttribute('href', url.toString());
     });

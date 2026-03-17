@@ -2,7 +2,8 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { Icon } from '@iconify/react';
 import type { PricingTier } from '../../utils/constants';
 
-const API_BASE = import.meta.env.PUBLIC_EXCHANGE_API_URL || '';
+// Use relative paths so requests go through the Vercel proxy (vercel.json routes)
+const API_BASE = '';
 
 type Step = 'pricing' | 'email' | 'verify-code';
 
