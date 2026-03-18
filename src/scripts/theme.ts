@@ -1,11 +1,11 @@
 /**
  * Light/dark theme toggle.
  * Stores preference in localStorage and applies on load.
- * Default: dark.
+ * Default: light.
  */
 function initTheme() {
   const stored = localStorage.getItem('hb-theme');
-  const theme = stored === 'light' ? 'light' : 'dark';
+  const theme = stored === 'dark' ? 'dark' : 'light';
   applyTheme(theme);
 }
 
@@ -30,7 +30,7 @@ function applyTheme(theme: string) {
 }
 
 function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const current = document.documentElement.getAttribute('data-theme') || 'light';
   const next = current === 'dark' ? 'light' : 'dark';
   applyTheme(next);
 }
