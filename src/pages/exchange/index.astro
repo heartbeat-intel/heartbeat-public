@@ -168,7 +168,7 @@ const pageDescription = `Browse ${publisherCount} intelligence publishers on the
 <script>
   // Inject current theme into all outbound tenant links so workspace matches exchange theme
   function syncThemeToLinks() {
-    const theme = localStorage.getItem('hb-theme') || 'dark';
+    const theme = localStorage.getItem('hb-theme') || 'light';
     document.querySelectorAll('a[href*="heartbeatintel.com/lists/"], a[href*="heartbeatintel.com/library/"]').forEach((a) => {
       const url = new URL(a.getAttribute('href')!, window.location.origin);
       url.searchParams.set('theme', theme);

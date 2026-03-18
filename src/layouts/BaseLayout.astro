@@ -10,7 +10,7 @@ const {
   title,
   description = 'Trade in intelligence, not just information. Connect with publishers who curate and monetize exclusive intel.',
   ogImage = '/images/logos/heartbeatLogoBlack.svg',
-  theme = 'dark',
+  theme = 'light',
 } = Astro.props;
 ---
 
@@ -48,7 +48,7 @@ const {
     <script is:inline>
       (function() {
         var stored = localStorage.getItem('hb-theme');
-        var theme = stored === 'light' ? 'light' : 'dark';
+        var theme = stored === 'dark' ? 'dark' : 'light';
         document.documentElement.setAttribute('data-theme', theme);
       })();
     </script>
