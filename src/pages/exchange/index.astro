@@ -7,7 +7,7 @@ import DarkFooter from '../../components/astro/DarkFooter.astro';
 import CategoryPills from '../../components/astro/CategoryPills.astro';
 import PublisherCardDark from '../../components/astro/PublisherCardDark.astro';
 import { fetchAllPublishers, fetchExchangeFeed } from '../../data/fetch';
-import { getPublisherTenant, API_BASE_URL } from '../../utils/constants';
+import { getPublisherSubdomain, API_BASE_URL } from '../../utils/constants';
 
 const categoryParam = Astro.url.searchParams.get('category') || undefined;
 
@@ -32,8 +32,8 @@ const publisherCards = filteredPublishers.map((publisher) => ({
 
 // Build tenant content URL for a feed item
 function getTenantContentUrl(item: { type: string; listType?: string; id: string; publisherSlug: string }) {
-  const tenant = getPublisherTenant(item.publisherSlug);
-  const base = `https://${tenant}.${API_BASE_URL}`;
+  const subdomain = getPublisherSubdomain(item.publisherSlug);
+  const base = `https://${subdomain}.${API_BASE_URL}`;
   if (item.type === 'article') return `${base}/library/${item.id}?ref=exchange`;
   return `${base}/lists/${item.listType || 'library'}/${item.id}?ref=exchange`;
 }
