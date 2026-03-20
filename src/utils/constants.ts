@@ -87,6 +87,11 @@ export const getPublisherTenant = (publisherSlug: string): string => {
   return PUBLISHER_TENANTS[publisherSlug.toLowerCase()] || publisherSlug;
 };
 
+/** Get the DNS-safe subdomain for a publisher (hyphens, not underscores). */
+export const getPublisherSubdomain = (publisherSlug: string): string => {
+  return getPublisherTenant(publisherSlug).replace(/_/g, '-');
+};
+
 // Fixed expertise categories — must match backend ExpertiseCategory enum.
 export const EXPERTISE_CATEGORIES = [
   'Finance',

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Icon } from '@iconify/react';
 import type { ContentItem } from '../../utils/constants';
-import { getPublisherTenant, API_BASE_URL } from '../../utils/constants';
+import { getPublisherSubdomain, API_BASE_URL } from '../../utils/constants';
 interface TabbedContentProps {
   publisherId: string;
   publisherColor: string;
@@ -22,8 +22,8 @@ export default function TabbedContent({
 
   const handleListClick = (list: ContentItem) => {
     if (publisherId && list.listType) {
-      const tenant = getPublisherTenant(publisherId);
-      window.open(`https://${tenant}.${API_BASE_URL}/lists/${list.listType}/${list.id}?ref=exchange&publisher=${publisherId}`, '_blank');
+      const subdomain = getPublisherSubdomain(publisherId);
+      window.open(`https://${subdomain}.${API_BASE_URL}/lists/${list.listType}/${list.id}?ref=exchange&publisher=${publisherId}`, '_blank');
     }
   };
 

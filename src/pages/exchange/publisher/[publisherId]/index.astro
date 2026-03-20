@@ -5,7 +5,7 @@ import DarkFooter from '../../../../components/astro/DarkFooter.astro';
 import Avatar from '../../../../components/ui/Avatar.astro';
 import Badge from '../../../../components/ui/Badge.astro';
 import SubscribeModalWrapper from '../../../../components/react/SubscribeModalWrapper';
-import { CONTENT_DATA, getPublisherTenant, API_BASE_URL } from '../../../../utils/constants';
+import { CONTENT_DATA, getPublisherSubdomain, API_BASE_URL } from '../../../../utils/constants';
 import { fetchPublisherProfile, fetchPublisherContent } from '../../../../data/fetch';
 
 export const prerender = false;
@@ -127,10 +127,10 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
     {allPulses.length > 0 ? (
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         {allPulses.map((item, i) => {
-          const tenant = getPublisherTenant(publisherId);
+          const subdomain = getPublisherSubdomain(publisherId);
           const href = item._type === 'article'
             ? `/exchange/publisher/${publisherId}/article/${item.id}`
-            : `https://${tenant}.${API_BASE_URL}/lists/${item.listType || 'library'}/${item.id}?ref=exchange&publisher=${publisherId}`;
+            : `https://${subdomain}.${API_BASE_URL}/lists/${item.listType || 'library'}/${item.id}?ref=exchange&publisher=${publisherId}`;
           const isExternal = item._type === 'list';
           return (
             <a
