@@ -314,7 +314,7 @@ export async function fetchAllPublishers(category?: string): Promise<(PublisherD
     }
 
     const response = await fetch(url, {
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(15000),
       cache: 'no-store',
     });
 
