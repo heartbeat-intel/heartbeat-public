@@ -33,6 +33,8 @@ const listContent = !isArticle ? content as ListData : null;
 <BaseLayout
   title={`${content.title} - ${publisher.name} | Heartbeat Intelligence`}
   description={content.description}
+  ogImage={publisher.logo_url || '/images/logos/heartbeatLogoBlack.svg'}
+  ogType="article"
 >
   <!-- Header -->
   <DarkHeader

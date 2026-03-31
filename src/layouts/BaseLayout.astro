@@ -3,6 +3,7 @@ interface Props {
   title: string;
   description?: string;
   ogImage?: string;
+  ogType?: 'website' | 'article';
   theme?: 'dark' | 'light';
 }
 
@@ -10,8 +11,12 @@ const {
   title,
   description = 'Trade in intelligence, not just information. Connect with publishers who curate and monetize exclusive intel.',
   ogImage = '/images/logos/heartbeatLogoBlack.svg',
+  ogType = 'website',
   theme = 'light',
 } = Astro.props;
+
+const canonicalUrl = new URL(Astro.url.pathname, 'https://www.heartbeatintel.com').toString();
+const ogImageUrl = ogImage.startsWith('http') ? ogImage : new URL(ogImage, 'https://www.heartbeatintel.com').toString();
 ---
 
 <!DOCTYPE html>
@@ -20,18 +25,21 @@ const {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
 
     <!-- Open Graph -->
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={ogImage} />
-    <meta property="og:type" content="website" />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content="Heartbeat Intelligence" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image" content={ogImageUrl} />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/images/logos/heartbeatLogoBlack.svg" />
