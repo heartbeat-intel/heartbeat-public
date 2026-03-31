@@ -111,6 +111,8 @@ export const EXPERTISE_CATEGORIES = [
   'Crypto',
   'Macro',
   'ESG',
+  'Family Office',
+  'Investments',
 ] as const;
 
 // API URLs
