@@ -33,7 +33,7 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
 <BaseLayout
   title={`${publisher.name} - Heartbeat Intelligence`}
   description={publisher.description}
-  ogImage={publisher.logo_url || '/images/logos/heartbeatLogoBlack.svg'}
+  ogImage={publisher.avatarUrl || '/images/logos/heartbeatLogoBlack.svg'}
 >
   <!-- Header -->
   <DarkHeader
