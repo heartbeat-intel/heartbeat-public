@@ -45,8 +45,8 @@ const ogImageUrl = ogImage.startsWith('http') ? ogImage : new URL(ogImage, 'http
     <link rel="icon" type="image/svg+xml" href="/images/logos/heartbeatLogoBlack.svg" />
 
     <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DYXQ5WQC47"></script>
-    <script>
+    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-DYXQ5WQC47"></script>
+    <script is:inline>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
