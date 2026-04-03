@@ -77,23 +77,7 @@ export const getPublisherTenant = (publisherSlug: string): string => {
   return PUBLISHER_TENANTS[publisherSlug.toLowerCase()] || publisherSlug;
 };
 
-// Fixed expertise categories — must match backend ExpertiseCategory enum.
-export const EXPERTISE_CATEGORIES = [
-  'Finance',
-  'Tech',
-  'AI & Data',
-  'Strategy',
-  'Markets',
-  'Venture Capital',
-  'Healthcare',
-  'Energy',
-  'Real Estate',
-  'Crypto',
-  'Macro',
-  'ESG',
-  'Family Office',
-  'Investments',
-] as const;
+export { EXPERTISE_CATEGORIES, MAX_EXPERTISE_SELECTIONS } from '../constants/expertise';
 
 // API URLs
 export const EXCHANGE_API_URL = import.meta.env.PUBLIC_EXCHANGE_API_URL || 'https://exchange-api-production-598945484330.us-central1.run.app';
