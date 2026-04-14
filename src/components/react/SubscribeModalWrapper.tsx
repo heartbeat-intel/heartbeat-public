@@ -8,13 +8,14 @@ interface ModalState {
   publisherColor?: string;
   monthlyPriceCents?: number;
   yearlyPriceCents?: number;
+  billingOptions?: string;
 }
 
 export default function SubscribeModalWrapper() {
   const [modalState, setModalState] = useState<ModalState>({ isOpen: false });
 
   useEffect(() => {
-    const handleOpen = (event: CustomEvent<{ publisherId: string; publisherName: string; publisherColor: string; monthlyPriceCents: number; yearlyPriceCents: number }>) => {
+    const handleOpen = (event: CustomEvent<{ publisherId: string; publisherName: string; publisherColor: string; monthlyPriceCents: number; yearlyPriceCents: number; billingOptions?: string }>) => {
       setModalState({
         isOpen: true,
         publisherId: event.detail.publisherId,
@@ -22,6 +23,7 @@ export default function SubscribeModalWrapper() {
         publisherColor: event.detail.publisherColor,
         monthlyPriceCents: event.detail.monthlyPriceCents,
         yearlyPriceCents: event.detail.yearlyPriceCents,
+        billingOptions: event.detail.billingOptions,
       });
     };
 
@@ -42,6 +44,7 @@ export default function SubscribeModalWrapper() {
       accentColor={modalState.publisherColor}
       monthlyPriceCents={modalState.monthlyPriceCents}
       yearlyPriceCents={modalState.yearlyPriceCents}
+      billingOptions={modalState.billingOptions}
     />
   );
 }

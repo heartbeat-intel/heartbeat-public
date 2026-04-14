@@ -313,7 +313,7 @@ const listContent = !isArticle ? content as ListData : null;
   <SubscribeModalWrapper client:visible />
 </BaseLayout>
 
-<script define:vars={{ publisherUuid: publisher.id, publisherName: publisher.name, publisherColor: publisher.color }}>
+<script define:vars={{ publisherUuid: publisher.id, publisherName: publisher.name, publisherColor: publisher.color, monthlyPriceCents: publisher.monthlyPriceCents, yearlyPriceCents: publisher.yearlyPriceCents, billingOptions: publisher.billingOptions }}>
   const shareBtn = document.getElementById('share-btn');
   if (shareBtn) {
     shareBtn.addEventListener('click', () => {
@@ -328,7 +328,7 @@ const listContent = !isArticle ? content as ListData : null;
 
   const openModal = () => {
     window.dispatchEvent(new CustomEvent('openSubscribeModal', {
-      detail: { publisherId: publisherUuid, publisherName, publisherColor }
+      detail: { publisherId: publisherUuid, publisherName, publisherColor, monthlyPriceCents, yearlyPriceCents, billingOptions }
     }));
   };
 

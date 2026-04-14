@@ -98,6 +98,7 @@ function toPublisherData(pub: ApiFeaturedPublisher): PublisherData {
     expertise: pub.expertise || [],
     monthlyPriceCents: 0,
     yearlyPriceCents: 0,
+    billingOptions: 'both',
   };
 }
 
@@ -123,6 +124,7 @@ function detailToPublisherData(pub: ApiPublisherProfile): PublisherData {
     expertise: pub.expertise || [],
     monthlyPriceCents: pub.monthly_price_cents,
     yearlyPriceCents: pub.yearly_price_cents,
+    billingOptions: pub.billing_options || 'both',
   };
 }
 
