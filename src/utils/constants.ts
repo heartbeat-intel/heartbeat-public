@@ -20,6 +20,7 @@ export interface PublisherData {
   expertise: string[];
   monthlyPriceCents: number;
   yearlyPriceCents: number;
+  billingOptions: string;
 }
 
 // Pricing tier type (generated dynamically from publisher data)

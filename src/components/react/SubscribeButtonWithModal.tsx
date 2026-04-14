@@ -7,6 +7,7 @@ interface SubscribeButtonWithModalProps {
   publisherColor?: string;
   monthlyPriceCents?: number;
   yearlyPriceCents?: number;
+  billingOptions?: string;
   label?: string;
   className?: string;
   showArrow?: boolean;
@@ -19,6 +20,7 @@ export default function SubscribeButtonWithModal({
   publisherColor = '#FB4C02',
   monthlyPriceCents,
   yearlyPriceCents,
+  billingOptions,
   label = 'Subscribe to Intel',
   className = 'w-full py-2.5 px-4 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-opacity hover:opacity-90',
   showArrow = true,
@@ -51,6 +53,7 @@ export default function SubscribeButtonWithModal({
         accentColor={publisherColor}
         monthlyPriceCents={monthlyPriceCents}
         yearlyPriceCents={yearlyPriceCents}
+        billingOptions={billingOptions}
       />
     </>
   );

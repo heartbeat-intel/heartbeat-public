@@ -17,6 +17,7 @@ interface SubscribeModalProps {
   publisherId?: string;
   monthlyPriceCents?: number;
   yearlyPriceCents?: number;
+  billingOptions?: string;
 }
 
 export default function SubscribeModal({
@@ -27,6 +28,7 @@ export default function SubscribeModal({
   publisherId,
   monthlyPriceCents,
   yearlyPriceCents,
+  billingOptions = 'both',
 }: SubscribeModalProps) {
   const [selectedTier, setSelectedTier] = useState<string>('yearly');
   const [step, setStep] = useState<Step>('pricing');
@@ -63,7 +65,7 @@ export default function SubscribeModal({
   const pricingTiers = useMemo(() => {
     const tiers: PricingTier[] = [];
 
-    if (monthlyPriceCents) {
+    if (monthlyPriceCents && billingOptions !== 'yearly_only') {
       tiers.push({
         id: 'monthly',
         name: 'Monthly',
@@ -78,7 +80,7 @@ export default function SubscribeModal({
       });
     }
 
-    if (yearlyPriceCents) {
+    if (yearlyPriceCents && billingOptions !== 'monthly_only') {
       const yearlyPrice = yearlyPriceCents / 100;
       const monthlyEquiv = yearlyPrice / 12;
       const monthlyPrice = monthlyPriceCents ? monthlyPriceCents / 100 : 29;
@@ -102,7 +104,7 @@ export default function SubscribeModal({
     }
 
     return tiers;
-  }, [monthlyPriceCents, yearlyPriceCents]);
+  }, [billingOptions, monthlyPriceCents, yearlyPriceCents]);
 
   const selectedPricing = pricingTiers.find((t) => t.id === selectedTier);
 
