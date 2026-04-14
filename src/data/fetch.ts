@@ -18,6 +18,7 @@ export interface ApiPublisherProfile {
   billing_options: string | null;
   monthly_price_cents: number;
   yearly_price_cents: number;
+  billing_options?: string;
   stats: {
     lists_count: number;
     articles_count: number;
