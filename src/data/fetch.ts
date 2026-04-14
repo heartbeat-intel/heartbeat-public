@@ -17,6 +17,7 @@ export interface ApiPublisherProfile {
   expertise: string[];
   monthly_price_cents: number;
   yearly_price_cents: number;
+  billing_options?: string;
   stats: {
     lists_count: number;
     articles_count: number;
