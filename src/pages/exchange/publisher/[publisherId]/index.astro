@@ -130,9 +130,9 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
         {allPulses.map((item, i) => {
           const tenant = getPublisherTenant(publisherId);
           const href = item._type === 'article'
-            ? `/exchange/publisher/${publisherId}/article/${item.id}`
+            ? `https://${tenant}.heartbeatintel.com/library/${item.id}?ref=exchange&publisher=${publisherId}`
             : `https://${tenant}.heartbeatintel.com/lists/${item.listType || 'library'}/${item.id}?ref=exchange&publisher=${publisherId}`;
-          const isExternal = item._type === 'list';
+          const isExternal = true;
           return (
             <a
               href={href}
