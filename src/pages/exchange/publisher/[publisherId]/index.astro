@@ -130,21 +130,23 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
     {allPulses.length > 0 ? (
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         {allPulses.map((item, i) => {
-	          const subdomain = getPublisherSubdomain(publisherId);
-	          const href = item._type === 'article'
-	            ? `/exchange/publisher/${publisherId}/article/${item.id}`
-	            : buildTenantUrl(subdomain, `/lists/${item.listType || 'library'}/${item.id}`, {
-	                ref: 'exchange',
-	                publisher: publisherId,
-	              });
-	          const isExternal = item._type === 'list';
-	          return (
-	            <a
-	              href={href}
-	              data-tenant-content-link={isExternal ? true : undefined}
-	              class="pulse-card group relative bg-white/[0.03] rounded-xl p-5 border border-white/[0.06] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-white/[0.12] hover:shadow-lg hover:shadow-black/20 block overflow-hidden"
-	              style={`animation-delay: ${i * 80}ms`}
-	            >
+          const subdomain = getPublisherSubdomain(publisherId);
+          const href = item._type === 'article'
+            ? buildTenantUrl(subdomain, `/library/${item.id}`, { ref: 'exchange', publisher: publisherId })
+            : buildTenantUrl(subdomain, `/lists/${item.listType || 'library'}/${item.id}`, {
+                ref: 'exchange',
+                publisher: publisherId,
+              });
+          const isExternal = true;
+          return (
+            <a
+              href={href}
+              data-tenant-content-link
+              target={isExternal ? '_blank' : undefined}
+              rel={isExternal ? 'noopener noreferrer' : undefined}
+              class="pulse-card group relative bg-white/[0.03] rounded-xl p-5 border border-white/[0.06] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-white/[0.12] hover:shadow-lg hover:shadow-black/20 block overflow-hidden"
+              style={`animation-delay: ${i * 80}ms`}
+            >
               <!-- Accent bar on left -->
               <div class="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={`background-color: ${publisher.color}`}></div>
 
