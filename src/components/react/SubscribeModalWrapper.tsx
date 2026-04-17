@@ -5,9 +5,20 @@ interface ModalState {
   isOpen: boolean;
   publisherId?: string;
   publisherName?: string;
+  publisherLogoUrl?: string | null;
   publisherColor?: string;
   monthlyPriceCents?: number;
   yearlyPriceCents?: number;
+  billingOptions?: string;
+}
+
+interface OpenDetail {
+  publisherId: string;
+  publisherName: string;
+  publisherLogoUrl?: string | null;
+  publisherColor: string;
+  monthlyPriceCents: number;
+  yearlyPriceCents: number;
   billingOptions?: string;
 }
 
@@ -15,11 +26,12 @@ export default function SubscribeModalWrapper() {
   const [modalState, setModalState] = useState<ModalState>({ isOpen: false });
 
   useEffect(() => {
-    const handleOpen = (event: CustomEvent<{ publisherId: string; publisherName: string; publisherColor: string; monthlyPriceCents: number; yearlyPriceCents: number; billingOptions?: string }>) => {
+    const handleOpen = (event: CustomEvent<OpenDetail>) => {
       setModalState({
         isOpen: true,
         publisherId: event.detail.publisherId,
         publisherName: event.detail.publisherName,
+        publisherLogoUrl: event.detail.publisherLogoUrl ?? null,
         publisherColor: event.detail.publisherColor,
         monthlyPriceCents: event.detail.monthlyPriceCents,
         yearlyPriceCents: event.detail.yearlyPriceCents,
@@ -41,6 +53,7 @@ export default function SubscribeModalWrapper() {
       onClose={handleClose}
       publisherId={modalState.publisherId}
       publisherName={modalState.publisherName}
+      publisherLogoUrl={modalState.publisherLogoUrl}
       accentColor={modalState.publisherColor}
       monthlyPriceCents={modalState.monthlyPriceCents}
       yearlyPriceCents={modalState.yearlyPriceCents}

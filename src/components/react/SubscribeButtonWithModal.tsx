@@ -4,6 +4,7 @@ import SubscribeModal from './SubscribeModal';
 interface SubscribeButtonWithModalProps {
   publisherId?: string;
   publisherName?: string;
+  publisherLogoUrl?: string | null;
   publisherColor?: string;
   monthlyPriceCents?: number;
   yearlyPriceCents?: number;
@@ -17,6 +18,7 @@ interface SubscribeButtonWithModalProps {
 export default function SubscribeButtonWithModal({
   publisherId,
   publisherName,
+  publisherLogoUrl,
   publisherColor = '#FB4C02',
   monthlyPriceCents,
   yearlyPriceCents,
@@ -50,6 +52,7 @@ export default function SubscribeButtonWithModal({
         onClose={() => setIsOpen(false)}
         publisherId={publisherId}
         publisherName={publisherName}
+        publisherLogoUrl={publisherLogoUrl}
         accentColor={publisherColor}
         monthlyPriceCents={monthlyPriceCents}
         yearlyPriceCents={yearlyPriceCents}

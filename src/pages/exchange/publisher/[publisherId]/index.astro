@@ -85,6 +85,7 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
               client:load
               publisherId={publisher.id}
               publisherName={publisher.name}
+              publisherLogoUrl={publisher.avatarUrl || null}
               publisherColor={publisher.color}
               monthlyPriceCents={publisher.monthlyPriceCents}
               yearlyPriceCents={publisher.yearlyPriceCents}
