@@ -1,0 +1,342 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import DarkHeader from '../../components/astro/DarkHeader.astro';
+import DarkFooter from '../../components/astro/DarkFooter.astro';
+
+export const prerender = false;
+---
+
+<BaseLayout title="Become a Publisher — Heartbeat Intelligence">
+  <DarkHeader variant="exchange" maxWidth="900px" />
+
+  <main class="pt-24 pb-24 min-h-[70vh]">
+    <div class="max-w-[640px] mx-auto px-6">
+      <div class="mb-10">
+        <p class="text-xs font-semibold tracking-wider uppercase text-hb-orange-main">For publishers</p>
+        <h1 class="text-3xl font-bold text-white mt-2 tracking-tight">Become a Heartbeat publisher</h1>
+        <p class="text-white/50 mt-3 text-sm leading-relaxed">
+          Apply for a private workspace and an Exchange listing. We'll provision your workspace at
+          <span class="text-white/80 font-mono">{'<slug>'}.heartbeatintel.com</span>, connect Stripe,
+          and help you publish your first intel pack within 24 hours.
+        </p>
+      </div>
+
+      <!-- Progress -->
+      <div class="flex items-center gap-2 mb-8 text-[11px] text-white/40">
+        <span data-step-dot="1" class="step-dot active">1</span>
+        <span class="flex-1 h-px bg-white/10"></span>
+        <span data-step-dot="2" class="step-dot">2</span>
+        <span class="flex-1 h-px bg-white/10"></span>
+        <span data-step-dot="3" class="step-dot">3</span>
+      </div>
+
+      <form id="publisher-form" class="space-y-6">
+        <!-- Step 1: About you -->
+        <fieldset data-step="1" class="space-y-4">
+          <div>
+            <h2 class="text-lg font-semibold text-white">Tell us about you</h2>
+            <p class="text-xs text-white/40 mt-1">Basic info — this is what subscribers will see on the Exchange.</p>
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="block">
+              <span class="text-xs text-white/60 mb-1 block">Your name or brand *</span>
+              <input name="name" required class="field-input" placeholder="Family Capital" />
+            </label>
+            <label class="block">
+              <span class="text-xs text-white/60 mb-1 block">Workspace slug *</span>
+              <div class="flex items-stretch rounded-lg border border-white/10 bg-white/[0.02] overflow-hidden">
+                <input name="slug" required pattern="[a-z0-9][a-z0-9-]{1,30}" class="flex-1 bg-transparent px-3 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none" placeholder="famcap" />
+                <span class="px-3 flex items-center text-xs text-white/40 border-l border-white/10 bg-white/[0.02]">.heartbeatintel.com</span>
+              </div>
+              <span class="text-[10.5px] text-white/30 block mt-1">Lowercase letters, numbers, hyphens.</span>
+            </label>
+          </div>
+          <label class="block">
+            <span class="text-xs text-white/60 mb-1 block">Your email *</span>
+            <input name="email" type="email" required class="field-input" placeholder="you@yourdomain.com" />
+            <span class="text-[10.5px] text-white/30 block mt-1">We'll reach out here to finish provisioning.</span>
+          </label>
+          <label class="block">
+            <span class="text-xs text-white/60 mb-1 block">Your role / title</span>
+            <input name="role" class="field-input" placeholder="Editor, Founder, Analyst…" />
+          </label>
+          <label class="block">
+            <span class="text-xs text-white/60 mb-1 block">Short description</span>
+            <input name="description" maxlength="140" class="field-input" placeholder="Online house magazine" />
+            <span class="text-[10.5px] text-white/30 block mt-1">One-liner shown on the Exchange card. 140 chars max.</span>
+          </label>
+        </fieldset>
+
+        <!-- Step 2: Brand + profile -->
+        <fieldset data-step="2" class="space-y-4 hidden">
+          <div>
+            <h2 class="text-lg font-semibold text-white">Profile</h2>
+            <p class="text-xs text-white/40 mt-1">Optional — you can edit all of this later.</p>
+          </div>
+          <label class="block">
+            <span class="text-xs text-white/60 mb-1 block">Specialty</span>
+            <input name="specialty" class="field-input" placeholder="Global family enterprises" />
+          </label>
+          <label class="block">
+            <span class="text-xs text-white/60 mb-1 block">Long bio</span>
+            <textarea name="long_bio" rows="4" class="field-input resize-none" placeholder="A few paragraphs about what you cover and who it's for."></textarea>
+          </label>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="block">
+              <span class="text-xs text-white/60 mb-1 block">LinkedIn</span>
+              <input name="linkedin_url" type="url" class="field-input" placeholder="https://linkedin.com/in/…" />
+            </label>
+            <label class="block">
+              <span class="text-xs text-white/60 mb-1 block">X / Twitter</span>
+              <input name="twitter_url" type="url" class="field-input" placeholder="https://x.com/…" />
+            </label>
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="block">
+              <span class="text-xs text-white/60 mb-1 block">Logo URL</span>
+              <input name="logo_url" type="url" class="field-input" placeholder="https://…/logo.png" />
+            </label>
+            <label class="block">
+              <span class="text-xs text-white/60 mb-1 block">Brand color</span>
+              <div class="flex items-stretch rounded-lg border border-white/10 bg-white/[0.02] overflow-hidden">
+                <input name="color" type="text" class="flex-1 bg-transparent px-3 py-2 text-sm text-white font-mono focus:outline-none" placeholder="#FB4C02" value="#FB4C02" />
+                <input name="color_picker" type="color" class="w-10 border-l border-white/10" value="#FB4C02" />
+              </div>
+            </label>
+          </div>
+          <label class="block">
+            <span class="text-xs text-white/60 mb-1 block">Expertise tags</span>
+            <input name="expertise" class="field-input" placeholder="family office, capital markets, ESG (comma-separated)" />
+          </label>
+        </fieldset>
+
+        <!-- Step 3: Review -->
+        <fieldset data-step="3" class="space-y-4 hidden">
+          <div>
+            <h2 class="text-lg font-semibold text-white">Review</h2>
+            <p class="text-xs text-white/40 mt-1">Submitting creates your Exchange listing. Our team provisions the workspace within 24 hours.</p>
+          </div>
+          <div id="review-card" class="rounded-xl border border-white/10 bg-white/[0.02] p-5 space-y-3 text-sm"></div>
+          <div class="rounded-lg border border-hb-orange-main/30 bg-hb-orange-main/[0.05] p-4 text-[12.5px] text-white/70">
+            <p class="font-semibold text-white mb-1">What happens after you submit</p>
+            <ol class="list-decimal list-inside space-y-0.5 text-white/60">
+              <li>Your publisher profile goes live on the Exchange</li>
+              <li>We provision your workspace at <span class="font-mono text-white/80" id="slug-preview">slug</span>.heartbeatintel.com</li>
+              <li>Stripe connect email sent to you so we can route payouts</li>
+              <li>Quick onboarding call to configure pricing + first publish</li>
+            </ol>
+          </div>
+          <label class="flex items-start gap-2 cursor-pointer text-[12.5px] text-white/60">
+            <input type="checkbox" id="agree" required class="mt-0.5 accent-hb-orange-main" />
+            <span>I agree to Heartbeat's publisher terms and understand my application will be reviewed before workspace provisioning.</span>
+          </label>
+        </fieldset>
+
+        <!-- Error / status -->
+        <p id="form-error" class="hidden text-sm text-red-400"></p>
+
+        <!-- Navigation -->
+        <div class="flex items-center justify-between pt-2">
+          <button type="button" id="back-btn" class="text-sm text-white/50 hover:text-white hidden">← Back</button>
+          <div class="ml-auto flex items-center gap-2">
+            <button type="button" id="next-btn" class="rounded-lg bg-hb-orange-main px-5 py-2.5 text-sm font-semibold text-white hover:bg-hb-orange-1 transition-colors">Continue</button>
+            <button type="submit" id="submit-btn" class="hidden rounded-lg bg-hb-orange-main px-5 py-2.5 text-sm font-semibold text-white hover:bg-hb-orange-1 transition-colors">Submit application</button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Success state -->
+      <div id="success" class="hidden text-center py-16">
+        <div class="w-14 h-14 rounded-full bg-green-500/15 flex items-center justify-center mx-auto mb-5">
+          <svg class="w-7 h-7 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+        <h2 class="text-xl font-semibold text-white mb-2">Application received</h2>
+        <p class="text-white/50 text-sm max-w-md mx-auto">Your publisher profile is live on the Exchange. We'll provision your workspace within 24 hours and email <span id="success-email" class="text-white">you</span> with the next steps.</p>
+        <div class="flex items-center justify-center gap-3 mt-6">
+          <a id="view-profile" href="#" class="rounded-lg bg-hb-orange-main px-4 py-2 text-sm font-semibold text-white hover:bg-hb-orange-1 transition-colors">View your Exchange listing →</a>
+          <a href="/exchange" class="text-sm text-white/60 hover:text-white">Browse Exchange</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <DarkFooter />
+</BaseLayout>
+
+<style>
+  .field-input {
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.02);
+    padding: 0.55rem 0.75rem;
+    font-size: 0.875rem;
+    color: white;
+    outline: none;
+    transition: border-color 120ms, background 120ms;
+  }
+  .field-input::placeholder { color: rgba(255,255,255,0.25); }
+  .field-input:focus { border-color: #FB4C02; background: rgba(251,76,2,0.04); }
+  .step-dot {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 9999px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.02);
+    color: rgba(255,255,255,0.4);
+    font-weight: 600;
+    transition: all 120ms;
+  }
+  .step-dot.active { background: #FB4C02; color: white; border-color: transparent; }
+  .step-dot.done { background: rgba(34,197,94,0.15); color: rgb(74,222,128); border-color: transparent; }
+</style>
+
+<script>
+  const EXCHANGE_API = (import.meta as any).env.PUBLIC_EXCHANGE_API_URL
+    || 'https://exchange-api-production-598945484330.us-central1.run.app';
+
+  const form = document.getElementById('publisher-form') as HTMLFormElement;
+  const nextBtn = document.getElementById('next-btn') as HTMLButtonElement;
+  const backBtn = document.getElementById('back-btn') as HTMLButtonElement;
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+  const errorEl = document.getElementById('form-error') as HTMLElement;
+  const success = document.getElementById('success') as HTMLElement;
+  const reviewCard = document.getElementById('review-card') as HTMLElement;
+  const slugPreview = document.getElementById('slug-preview') as HTMLElement;
+
+  let step = 1;
+
+  function showStep(n: number) {
+    step = n;
+    document.querySelectorAll<HTMLFieldSetElement>('fieldset[data-step]').forEach((fs) => {
+      fs.classList.toggle('hidden', fs.dataset.step !== String(n));
+    });
+    document.querySelectorAll<HTMLSpanElement>('[data-step-dot]').forEach((dot) => {
+      const d = Number(dot.dataset.stepDot);
+      dot.classList.toggle('active', d === n);
+      dot.classList.toggle('done', d < n);
+    });
+    backBtn.classList.toggle('hidden', n === 1);
+    nextBtn.classList.toggle('hidden', n === 3);
+    submitBtn.classList.toggle('hidden', n !== 3);
+    if (n === 3) renderReview();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function getValues() {
+    const fd = new FormData(form);
+    return Object.fromEntries(fd.entries()) as Record<string, string>;
+  }
+
+  function validateStep(n: number): boolean {
+    errorEl.classList.add('hidden');
+    if (n === 1) {
+      const v = getValues();
+      if (!v.name || !v.slug || !v.email) { fail('Name, slug, and email are required.'); return false; }
+      if (!/^[a-z0-9][a-z0-9-]{1,30}$/.test(v.slug)) { fail('Slug must be lowercase letters, numbers, hyphens.'); return false; }
+    }
+    if (n === 3) {
+      const agree = (document.getElementById('agree') as HTMLInputElement).checked;
+      if (!agree) { fail('Please agree to the publisher terms.'); return false; }
+    }
+    return true;
+  }
+
+  function fail(msg: string) {
+    errorEl.textContent = msg;
+    errorEl.classList.remove('hidden');
+  }
+
+  function renderReview() {
+    const v = getValues();
+    slugPreview.textContent = v.slug || 'slug';
+    reviewCard.innerHTML = `
+      <div class="flex items-center gap-3 pb-3 border-b border-white/5">
+        ${v.logo_url
+          ? `<img src="${v.logo_url}" class="w-12 h-12 rounded-lg object-cover" alt=""/>`
+          : `<div class="w-12 h-12 rounded-lg" style="background:${v.color || '#FB4C02'}30;color:${v.color || '#FB4C02'};display:flex;align-items:center;justify-content:center;font-weight:700;">${(v.name || '?')[0]}</div>`}
+        <div>
+          <p class="font-semibold text-white">${v.name || '—'}</p>
+          <p class="text-xs text-white/40">${v.slug || 'slug'}.heartbeatintel.com · ${v.email || ''}</p>
+        </div>
+      </div>
+      ${v.description ? `<p class="text-white/70">${v.description}</p>` : ''}
+      ${v.specialty ? `<p class="text-xs text-white/40"><span class="uppercase tracking-wide text-white/40 mr-1">Specialty:</span>${v.specialty}</p>` : ''}
+      ${v.role ? `<p class="text-xs text-white/40"><span class="uppercase tracking-wide text-white/40 mr-1">Role:</span>${v.role}</p>` : ''}
+      ${v.expertise ? `<p class="text-xs text-white/40"><span class="uppercase tracking-wide text-white/40 mr-1">Expertise:</span>${v.expertise}</p>` : ''}
+    `;
+  }
+
+  nextBtn.addEventListener('click', () => {
+    if (!validateStep(step)) return;
+    if (step < 3) showStep(step + 1);
+  });
+  backBtn.addEventListener('click', () => {
+    if (step > 1) showStep(step - 1);
+  });
+
+  // Keep slug field lowercased and keep color picker + hex in sync
+  const slugInput = form.querySelector<HTMLInputElement>('input[name="slug"]')!;
+  slugInput.addEventListener('input', () => {
+    slugInput.value = slugInput.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+  });
+  const colorHex = form.querySelector<HTMLInputElement>('input[name="color"]')!;
+  const colorPicker = form.querySelector<HTMLInputElement>('input[name="color_picker"]')!;
+  colorPicker.addEventListener('input', () => { colorHex.value = colorPicker.value.toUpperCase(); });
+  colorHex.addEventListener('input', () => { if (/^#[0-9a-f]{6}$/i.test(colorHex.value)) colorPicker.value = colorHex.value; });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!validateStep(3)) return;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting…';
+    errorEl.classList.add('hidden');
+
+    const v = getValues();
+    const body = {
+      name: v.name,
+      slug: v.slug,
+      description: v.description || null,
+      specialty: v.specialty || null,
+      role: v.role || null,
+      long_bio: v.long_bio || null,
+      logo_url: v.logo_url || null,
+      color: v.color || null,
+      linkedin_url: v.linkedin_url || null,
+      twitter_url: v.twitter_url || null,
+      expertise: v.expertise
+        ? v.expertise.split(',').map((s: string) => s.trim()).filter(Boolean)
+        : null,
+    };
+
+    try {
+      const r = await fetch(`${EXCHANGE_API}/api/v1/publisher/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        const msg = Array.isArray(err.detail)
+          ? err.detail.map((d: any) => d.msg).join('; ')
+          : (err.detail || `Register failed (${r.status})`);
+        throw new Error(msg);
+      }
+      const data = await r.json();
+      // Show success
+      form.classList.add('hidden');
+      (document.querySelector('.flex.items-center.gap-2.mb-8') as HTMLElement)?.classList.add('hidden');
+      success.classList.remove('hidden');
+      (document.getElementById('success-email') as HTMLElement).textContent = v.email;
+      const viewProfile = document.getElementById('view-profile') as HTMLAnchorElement;
+      viewProfile.href = `/exchange/publisher/${data.slug || v.slug}`;
+    } catch (err) {
+      fail(err instanceof Error ? err.message : 'Submission failed');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit application';
+    }
+  });
+
+  showStep(1);
+</script>
