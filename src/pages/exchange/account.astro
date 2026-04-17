@@ -1,0 +1,289 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import DarkHeader from '../../components/astro/DarkHeader.astro';
+import DarkFooter from '../../components/astro/DarkFooter.astro';
+
+export const prerender = false;
+---
+
+<BaseLayout title="Account — Heartbeat Intelligence">
+  <DarkHeader variant="exchange" maxWidth="900px" />
+
+  <main class="pt-24 pb-20 min-h-[70vh]">
+    <div class="max-w-[900px] mx-auto px-6">
+      <!-- Loading state -->
+      <div id="loading" class="text-center py-20">
+        <div class="w-10 h-10 border-3 border-hb-orange-main border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p class="text-white/40 text-sm">Loading your account…</p>
+      </div>
+
+      <!-- Signed-out state -->
+      <div id="signed-out" class="hidden text-center py-20">
+        <div class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+          <svg class="w-6 h-6 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/>
+          </svg>
+        </div>
+        <h1 class="text-xl font-semibold text-white mb-2">You're not signed in</h1>
+        <p class="text-white/40 text-sm mb-5">Sign in by subscribing to any publisher on the Exchange.</p>
+        <a href="/exchange" class="inline-flex items-center gap-2 bg-hb-orange-main text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-hb-orange-1 transition-colors">
+          Browse publishers
+        </a>
+      </div>
+
+      <!-- Signed-in state -->
+      <div id="account" class="hidden space-y-8">
+        <!-- Profile header -->
+        <section class="flex items-center justify-between gap-4 pb-6 border-b border-white/5">
+          <div class="flex items-center gap-4">
+            <div id="avatar" class="w-14 h-14 rounded-full bg-hb-orange-main/20 flex items-center justify-center text-hb-orange-main text-xl font-semibold"></div>
+            <div>
+              <h1 class="text-xl font-semibold text-white" id="email">—</h1>
+              <p class="text-xs text-white/40">Heartbeat account</p>
+            </div>
+          </div>
+          <button id="signout" class="text-xs text-white/40 hover:text-white transition-colors">Sign out</button>
+        </section>
+
+        <!-- Subscriptions -->
+        <section>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-sm font-semibold text-white/80 tracking-wide uppercase">Subscriptions</h2>
+            <a href="/exchange" class="text-xs text-white/40 hover:text-white">Browse more →</a>
+          </div>
+          <div id="subs-empty" class="hidden rounded-xl border border-white/5 bg-white/[0.02] p-6 text-center">
+            <p class="text-white/40 text-sm">No active subscriptions yet.</p>
+          </div>
+          <div id="subs-list" class="grid gap-3"></div>
+        </section>
+
+        <!-- Followed publishers -->
+        <section>
+          <h2 class="text-sm font-semibold text-white/80 tracking-wide uppercase mb-4">Following</h2>
+          <div id="follow-empty" class="hidden rounded-xl border border-white/5 bg-white/[0.02] p-6 text-center">
+            <p class="text-white/40 text-sm">You're not following any publishers yet.</p>
+            <p class="text-white/30 text-xs mt-1">Follow a publisher from their page to see updates here.</p>
+          </div>
+          <div id="follow-list" class="flex flex-wrap gap-2"></div>
+        </section>
+
+        <!-- Reading history -->
+        <section>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-sm font-semibold text-white/80 tracking-wide uppercase">Recently viewed</h2>
+            <button id="clear-history" class="text-xs text-white/40 hover:text-white">Clear</button>
+          </div>
+          <div id="history-empty" class="hidden rounded-xl border border-white/5 bg-white/[0.02] p-6 text-center">
+            <p class="text-white/40 text-sm">Nothing yet — articles you open from the Exchange show up here.</p>
+          </div>
+          <div id="history-list" class="flex flex-col divide-y divide-white/5 border border-white/5 rounded-xl overflow-hidden"></div>
+        </section>
+
+        <!-- Preferences -->
+        <section>
+          <h2 class="text-sm font-semibold text-white/80 tracking-wide uppercase mb-4">Preferences</h2>
+          <div class="rounded-xl border border-white/5 bg-white/[0.02] divide-y divide-white/5">
+            <label class="flex items-center justify-between px-5 py-4 cursor-pointer">
+              <div>
+                <p class="text-sm text-white">Email digest</p>
+                <p class="text-xs text-white/40">Weekly summary of new content from your subscriptions</p>
+              </div>
+              <input id="pref-digest" type="checkbox" class="h-4 w-4 accent-hb-orange-main" />
+            </label>
+            <label class="flex items-center justify-between px-5 py-4 cursor-pointer">
+              <div>
+                <p class="text-sm text-white">Dark theme in workspaces</p>
+                <p class="text-xs text-white/40">Tenant workspaces inherit your Exchange theme</p>
+              </div>
+              <input id="pref-dark" type="checkbox" class="h-4 w-4 accent-hb-orange-main" />
+            </label>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <DarkFooter />
+</BaseLayout>
+
+<script>
+  const EXCHANGE_API = (import.meta as any).env.PUBLIC_EXCHANGE_API_URL
+    || 'https://exchange-api-production-598945484330.us-central1.run.app';
+
+  const token = localStorage.getItem('exchange_access_token');
+
+  const loading = document.getElementById('loading')!;
+  const signedOut = document.getElementById('signed-out')!;
+  const account = document.getElementById('account')!;
+
+  function show(which: 'loading' | 'signedOut' | 'account') {
+    loading.classList.toggle('hidden', which !== 'loading');
+    signedOut.classList.toggle('hidden', which !== 'signedOut');
+    account.classList.toggle('hidden', which !== 'account');
+  }
+
+  if (!token) { show('signedOut'); }
+  else {
+    init();
+  }
+
+  interface Sub {
+    id: string;
+    publisher_slug: string;
+    publisher_name: string;
+    publisher_logo_url: string | null;
+    status: string;
+    plan: string;
+    cancel_at_period_end: boolean;
+    current_period_end: string;
+  }
+
+  async function init() {
+    try {
+      const [me, subs] = await Promise.all([
+        fetch(`${EXCHANGE_API}/api/v1/auth/me`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : null),
+        fetch(`${EXCHANGE_API}/api/v1/me/subscriptions`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : { subscriptions: [] }),
+      ]);
+      if (!me) { localStorage.removeItem('exchange_access_token'); show('signedOut'); return; }
+
+      renderProfile(me);
+      renderSubscriptions(subs.subscriptions || []);
+      renderFollow();
+      renderHistory();
+      renderPrefs();
+      show('account');
+    } catch (e) {
+      console.error(e);
+      show('signedOut');
+    }
+  }
+
+  function renderProfile(me: { email: string }) {
+    document.getElementById('email')!.textContent = me.email;
+    document.getElementById('avatar')!.textContent = (me.email[0] || '?').toUpperCase();
+    try { localStorage.setItem('hb_account_email', me.email); } catch {}
+  }
+
+  function renderSubscriptions(subs: Sub[]) {
+    const list = document.getElementById('subs-list')!;
+    const empty = document.getElementById('subs-empty')!;
+    if (subs.length === 0) { empty.classList.remove('hidden'); return; }
+    list.innerHTML = subs.map(s => `
+      <div class="flex items-center justify-between gap-4 p-4 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
+        <div class="flex items-center gap-3 min-w-0">
+          ${s.publisher_logo_url
+            ? `<img src="${s.publisher_logo_url}" alt="" class="w-10 h-10 rounded-lg object-cover"/>`
+            : `<div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center text-white/60 text-sm font-semibold">${s.publisher_name[0] || '·'}</div>`}
+          <div class="min-w-0">
+            <p class="text-sm font-medium text-white truncate">${s.publisher_name}</p>
+            <p class="text-xs text-white/40">
+              <span class="inline-flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full ${s.status === 'active' || s.status === 'trialing' ? 'bg-green-400' : 'bg-amber-400'}"></span>
+                ${s.status} · ${s.plan || '—'}
+              </span>
+              ${s.cancel_at_period_end ? '· cancels soon' : ''}
+            </p>
+          </div>
+        </div>
+        <button data-sub-id="${s.id}" data-slug="${s.publisher_slug}" class="open-ws text-xs bg-white/10 hover:bg-white/15 text-white px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">
+          Open workspace →
+        </button>
+      </div>
+    `).join('');
+    list.querySelectorAll<HTMLButtonElement>('button.open-ws').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        btn.textContent = 'Opening…';
+        try {
+          const r = await fetch(
+            `${EXCHANGE_API}/api/v1/me/subscriptions/${btn.dataset.subId}/login-link`,
+            { method: 'POST', headers: { Authorization: `Bearer ${token}` } }
+          );
+          const data = await r.json();
+          if (data.login_url) window.location.href = data.login_url;
+          else btn.textContent = 'Try again';
+        } catch { btn.textContent = 'Try again'; }
+      });
+    });
+  }
+
+  // --- Preferences (localStorage-backed) ---
+  const PREFS_KEY = 'hb_prefs';
+  interface Prefs { digest?: boolean; dark?: boolean; follow?: string[] }
+  function getPrefs(): Prefs {
+    try { return JSON.parse(localStorage.getItem(PREFS_KEY) || '{}'); } catch { return {}; }
+  }
+  function setPrefs(p: Prefs) { localStorage.setItem(PREFS_KEY, JSON.stringify(p)); }
+
+  function renderPrefs() {
+    const p = getPrefs();
+    const digest = document.getElementById('pref-digest') as HTMLInputElement;
+    const dark = document.getElementById('pref-dark') as HTMLInputElement;
+    digest.checked = !!p.digest;
+    dark.checked = p.dark !== false;
+    digest.addEventListener('change', () => setPrefs({ ...getPrefs(), digest: digest.checked }));
+    dark.addEventListener('change', () => {
+      setPrefs({ ...getPrefs(), dark: dark.checked });
+      localStorage.setItem('hb-theme', dark.checked ? 'dark' : 'light');
+    });
+  }
+
+  function renderFollow() {
+    const p = getPrefs();
+    const list = document.getElementById('follow-list')!;
+    const empty = document.getElementById('follow-empty')!;
+    const slugs = (p.follow || []);
+    if (slugs.length === 0) { empty.classList.remove('hidden'); return; }
+    list.innerHTML = slugs.map(slug => `
+      <a href="/exchange/publisher/${slug}" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 text-sm text-white/80 hover:bg-white/5 hover:text-white transition-colors">
+        ${slug}
+        <button data-slug="${slug}" class="unfollow text-white/30 hover:text-white" aria-label="Unfollow">×</button>
+      </a>
+    `).join('');
+    list.querySelectorAll<HTMLButtonElement>('button.unfollow').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const slug = btn.dataset.slug!;
+        const p = getPrefs();
+        p.follow = (p.follow || []).filter(s => s !== slug);
+        setPrefs(p);
+        renderFollow();
+      });
+    });
+  }
+
+  // --- Reading history (localStorage) ---
+  const HIST_KEY = 'hb_reading_history';
+  interface HistItem { href: string; title: string; publisher: string; ts: number; kind: 'article' | 'list' }
+  function getHist(): HistItem[] {
+    try { return JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); } catch { return []; }
+  }
+
+  function renderHistory() {
+    const items = getHist().slice(0, 15);
+    const list = document.getElementById('history-list')!;
+    const empty = document.getElementById('history-empty')!;
+    if (items.length === 0) { empty.classList.remove('hidden'); return; }
+    list.innerHTML = items.map(i => `
+      <a href="${i.href}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between gap-4 px-5 py-3 hover:bg-white/[0.02] transition-colors">
+        <div class="min-w-0 flex-1">
+          <p class="text-sm text-white truncate">${i.title}</p>
+          <p class="text-xs text-white/40 truncate">${i.publisher} · ${i.kind} · ${new Date(i.ts).toLocaleDateString()}</p>
+        </div>
+        <svg class="w-3 h-3 text-white/30 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+        </svg>
+      </a>
+    `).join('');
+    document.getElementById('clear-history')!.addEventListener('click', () => {
+      localStorage.removeItem(HIST_KEY);
+      renderHistory();
+      empty.classList.remove('hidden');
+      list.innerHTML = '';
+    });
+  }
+
+  document.getElementById('signout')?.addEventListener('click', () => {
+    localStorage.removeItem('exchange_access_token');
+    window.location.href = '/exchange';
+  });
+</script>

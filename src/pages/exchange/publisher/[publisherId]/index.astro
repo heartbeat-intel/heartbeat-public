@@ -89,6 +89,14 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
             </button>
+
+            <!-- Follow (saves to Heartbeat account) -->
+            <button
+              id="follow-btn"
+              class="mt-2 w-full py-2 px-4 text-sm font-medium rounded-lg border border-white/10 text-white/70 hover:bg-white/5 hover:text-white transition-colors"
+            >
+              + Follow
+            </button>
           </div>
 
           <!-- Bio & Expertise -->
@@ -237,8 +245,7 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
 </script>
 
 <script>
-  // Inject current theme + Exchange bridge token into all outbound tenant links so
-  // (a) workspace matches exchange theme and (b) subscribers seamlessly auth on the tenant.
+  // Inject current theme + Exchange bridge token into all outbound tenant links.
   function enhanceTenantLinks() {
     const theme = localStorage.getItem('hb-theme') || 'dark';
     const bridge = localStorage.getItem('exchange_access_token') || '';
@@ -250,11 +257,51 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
     });
   }
   enhanceTenantLinks();
-  // Re-enhance when theme toggles
   const observer = new MutationObserver(() => enhanceTenantLinks());
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-  // Re-enhance if a subscribe flow stores a fresh token later
   window.addEventListener('storage', (e) => {
     if (e.key === 'exchange_access_token') enhanceTenantLinks();
   });
+
+  // Track clicks into reading history (Exchange-side, localStorage-backed).
+  const HIST_KEY = 'hb_reading_history';
+  document.querySelectorAll<HTMLAnchorElement>('.pulse-card').forEach((a) => {
+    a.addEventListener('click', () => {
+      try {
+        const title = a.querySelector('h3')?.textContent?.trim() || a.href;
+        const kind = a.querySelector('span.uppercase')?.textContent?.trim() === 'list' ? 'list' : 'article';
+        const publisher = document.querySelector<HTMLElement>('[data-publisher-name]')?.dataset.publisherName
+          || window.location.pathname.split('/').pop() || '';
+        const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+        const next = [{ href: a.href, title, publisher, ts: Date.now(), kind }, ...hist.filter((x: any) => x.href !== a.href)].slice(0, 50);
+        localStorage.setItem(HIST_KEY, JSON.stringify(next));
+      } catch { /* ignore */ }
+    });
+  });
+
+  // Follow / unfollow this publisher (localStorage).
+  const PREFS_KEY = 'hb_prefs';
+  const publisherSlug = window.location.pathname.split('/').filter(Boolean).pop() || '';
+  const followBtn = document.getElementById('follow-btn');
+  function getPrefs() {
+    try { return JSON.parse(localStorage.getItem(PREFS_KEY) || '{}'); } catch { return {}; }
+  }
+  function isFollowing() {
+    const p = getPrefs();
+    return Array.isArray(p.follow) && p.follow.includes(publisherSlug);
+  }
+  function renderFollowBtn() {
+    if (!followBtn) return;
+    followBtn.textContent = isFollowing() ? '✓ Following' : '+ Follow';
+    followBtn.classList.toggle('bg-white/10', isFollowing());
+  }
+  followBtn?.addEventListener('click', () => {
+    const p = getPrefs();
+    const set = new Set(p.follow || []);
+    if (set.has(publisherSlug)) set.delete(publisherSlug);
+    else set.add(publisherSlug);
+    localStorage.setItem(PREFS_KEY, JSON.stringify({ ...p, follow: Array.from(set) }));
+    renderFollowBtn();
+  });
+  renderFollowBtn();
 </script>
