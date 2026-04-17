@@ -39,24 +39,41 @@ export default function SignInModal() {
 
   if (!open) return null;
 
+  /** Pick any active publisher_id — subscribe-init requires one but the resulting
+   * account / OTP isn't tied to that publisher; this is purely a sign-in vehicle. */
+  async function getAnyPublisherId(): Promise<string | null> {
+    try {
+      const r = await fetch(`${EXCHANGE_API_URL}/api/v1/publishers`);
+      if (!r.ok) return null;
+      const d = await r.json();
+      const list = d.items || d.results || [];
+      const p = list[0];
+      return p?.id || null;
+    } catch {
+      return null;
+    }
+  }
+
   async function sendCode(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
-      const r = await fetch(
-        `${EXCHANGE_API_URL}/api/v1/auth/workspace/token/request`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ workspace_email: email }),
-        }
-      );
+      const publisherId = await getAnyPublisherId();
+      if (!publisherId) throw new Error("Sign-in unavailable. Try again shortly.");
+      const r = await fetch(`${EXCHANGE_API_URL}/api/v1/auth/subscribe-init`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, publisher_id: publisherId }),
+      });
       if (!r.ok) {
         const err = await r.json().catch(() => ({}));
         throw new Error(err.detail || "We couldn't send a code to that email.");
       }
+      const data = (await r.json()) as { dev_code?: string; is_new_user?: boolean };
       setStep("code");
+      // In dev the code is returned — auto-fill so we can test end-to-end.
+      if (data.dev_code) setCode(data.dev_code);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong");
     } finally {
@@ -69,32 +86,23 @@ export default function SignInModal() {
     setError(null);
     setLoading(true);
     try {
-      const r = await fetch(
-        `${EXCHANGE_API_URL}/api/v1/auth/workspace/token/verify`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ workspace_email: email, callback_token: code }),
-        }
-      );
+      const r = await fetch(`${EXCHANGE_API_URL}/api/v1/auth/subscribe-verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code }),
+      });
       if (!r.ok) {
         const err = await r.json().catch(() => ({}));
-        throw new Error(err.detail || "Invalid code — try again.");
+        throw new Error(err.detail || "Invalid or expired code.");
       }
       const data = (await r.json()) as {
-        access_token?: string;
-        exchange_access_token?: string;
-        session_token?: string;
-        email?: string;
+        access_token: string;
+        user_id: string;
+        email: string;
       };
-      const token =
-        data.exchange_access_token || data.access_token || data.session_token;
-      if (!token) throw new Error("Signed in, but no token returned.");
-      localStorage.setItem("exchange_access_token", token);
-      if (data.email || email) {
-        localStorage.setItem("hb_account_email", data.email || email);
-      }
-      // Navigate to account
+      if (!data.access_token) throw new Error("Signed in but no token returned.");
+      localStorage.setItem("exchange_access_token", data.access_token);
+      localStorage.setItem("hb_account_email", data.email || email);
       window.location.href = "/exchange/account";
     } catch (e) {
       setError(e instanceof Error ? e.message : "Invalid code");
