@@ -232,13 +232,13 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
   <SubscribeModalWrapper client:load />
 </BaseLayout>
 
-<script define:vars={{ publisherUuid: publisher.id, publisherName: publisher.name, publisherColor: publisher.color, monthlyPriceCents: publisher.monthlyPriceCents, yearlyPriceCents: publisher.yearlyPriceCents, billingOptions: publisher.billingOptions }}>
+<script define:vars={{ publisherUuid: publisher.id, publisherName: publisher.name, publisherLogoUrl: publisher.avatarUrl || null, publisherColor: publisher.color, monthlyPriceCents: publisher.monthlyPriceCents, yearlyPriceCents: publisher.yearlyPriceCents, billingOptions: publisher.billingOptions }}>
   const subscribeBtn = document.getElementById('subscribe-btn');
 
   if (subscribeBtn) {
     subscribeBtn.addEventListener('click', () => {
       window.dispatchEvent(new CustomEvent('openSubscribeModal', {
-        detail: { publisherId: publisherUuid, publisherName, publisherColor, monthlyPriceCents, yearlyPriceCents, billingOptions }
+        detail: { publisherId: publisherUuid, publisherName, publisherLogoUrl, publisherColor, monthlyPriceCents, yearlyPriceCents, billingOptions }
       }));
     });
   }
