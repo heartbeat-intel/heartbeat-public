@@ -71,6 +71,35 @@ const {
         </svg>
       </button>
 
+      <!-- Account link (hidden until client-side detects a signed-in user) -->
+      <a
+        id="hb-account-link"
+        href="/exchange/account"
+        class="hidden w-9 h-9 rounded-full bg-hb-orange-main/15 text-hb-orange-main flex items-center justify-center text-sm font-semibold hover:bg-hb-orange-main/25 transition-colors"
+        aria-label="Account"
+        title="Your account"
+      >
+        ·
+      </a>
     </div>
   </div>
 </header>
+
+<script>
+  // Reveal the account chip when the user has an Exchange session.
+  (function showAccount() {
+    const link = document.getElementById('hb-account-link');
+    const signup = document.getElementById('hb-signup-link');
+    const token = localStorage.getItem('exchange_access_token');
+    if (!token || !link) return;
+    link.classList.remove('hidden');
+    link.classList.add('flex');
+    // Derive initial from email if cached
+    try {
+      const email = localStorage.getItem('hb_account_email') || '';
+      if (email) link.textContent = email[0].toUpperCase();
+    } catch { /* ignore */ }
+    // Hide signup CTA since you're already in
+    signup?.classList.add('hidden');
+  })();
+</script>
