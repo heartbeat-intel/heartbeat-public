@@ -44,11 +44,12 @@ export const prerender = false;
             </label>
             <label class="block">
               <span class="text-xs text-white/60 mb-1 block">Workspace slug *</span>
-              <div class="flex items-stretch rounded-lg border border-white/10 bg-white/[0.02] overflow-hidden">
-                <input name="slug" required pattern="[a-z0-9][a-z0-9-]{1,30}" class="flex-1 bg-transparent px-3 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none" placeholder="famcap" />
+              <div id="slug-wrap" class="flex items-stretch rounded-lg border border-white/10 bg-white/[0.02] overflow-hidden transition-colors">
+                <input name="slug" required pattern="[a-z0-9][a-z0-9-]{1,30}" class="flex-1 bg-transparent px-3 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none" placeholder="famcap" autocomplete="off" />
+                <span id="slug-status" class="w-9 border-l border-white/10 bg-white/[0.02] flex items-center justify-center text-xs"></span>
                 <span class="px-3 flex items-center text-xs text-white/40 border-l border-white/10 bg-white/[0.02]">.heartbeatintel.com</span>
               </div>
-              <span class="text-[10.5px] text-white/30 block mt-1">Lowercase letters, numbers, hyphens.</span>
+              <span id="slug-hint" class="text-[10.5px] text-white/30 block mt-1">Lowercase letters, numbers, hyphens.</span>
             </label>
           </div>
           <label class="block">
@@ -235,6 +236,12 @@ export const prerender = false;
       const v = getValues();
       if (!v.name || !v.slug || !v.email) { fail('Name, slug, and email are required.'); return false; }
       if (!/^[a-z0-9][a-z0-9-]{1,30}$/.test(v.slug)) { fail('Slug must be lowercase letters, numbers, hyphens.'); return false; }
+      if (slugState === 'taken') { fail('That workspace slug is already taken. Pick another.'); return false; }
+      if (slugState === 'reserved') { fail('That slug is reserved. Pick another.'); return false; }
+      if (slugState === 'invalid') { fail('Slug must start with a letter/number and be 2–31 chars.'); return false; }
+      if (slugState === 'checking') { fail('Hang tight — still checking slug availability.'); return false; }
+      if (slugState === 'idle') { fail('Enter a workspace slug.'); return false; }
+      // 'available' or 'error' both proceed (error is soft; server will reject duplicates on submit).
     }
     if (n === 3) {
       const agree = (document.getElementById('agree') as HTMLInputElement).checked;
@@ -276,10 +283,90 @@ export const prerender = false;
     if (step > 1) showStep(step - 1);
   });
 
-  // Keep slug field lowercased and keep color picker + hex in sync
+  // Reserved slugs we never want anyone to take (platform subdomains)
+  const RESERVED_SLUGS = new Set([
+    'www','api','admin','app','v2','exchange','exchange-api','static','assets',
+    'mail','email','blog','docs','help','support','status','root','internal',
+    'heartbeat','heartbeatintel','test','staging','dev','production',
+  ]);
+
+  // Slug field: lowercase-only + async availability check against the Exchange API
   const slugInput = form.querySelector<HTMLInputElement>('input[name="slug"]')!;
+  const slugWrap = document.getElementById('slug-wrap')!;
+  const slugStatus = document.getElementById('slug-status')!;
+  const slugHint = document.getElementById('slug-hint')!;
+
+  type SlugState = 'idle' | 'invalid' | 'reserved' | 'checking' | 'available' | 'taken' | 'error';
+  let slugState: SlugState = 'idle';
+  let slugReqId = 0;
+  let slugTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function setSlugState(state: SlugState, message?: string) {
+    slugState = state;
+    // Border color
+    slugWrap.classList.remove('border-green-500/40','border-red-500/40','border-hb-orange-main/40');
+    if (state === 'available') slugWrap.classList.add('border-green-500/40');
+    else if (state === 'taken' || state === 'invalid' || state === 'reserved') slugWrap.classList.add('border-red-500/40');
+    else if (state === 'checking') slugWrap.classList.add('border-hb-orange-main/40');
+
+    // Right-side indicator
+    const icons: Record<SlugState, string> = {
+      idle: '',
+      checking: `<svg class="w-3.5 h-3.5 animate-spin text-white/50" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="42 100"/></svg>`,
+      available: `<svg class="w-3.5 h-3.5 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`,
+      taken: `<svg class="w-3.5 h-3.5 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>`,
+      invalid: `<svg class="w-3.5 h-3.5 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86l-8.18 14.14A2 2 0 004 21h16a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>`,
+      reserved: `<svg class="w-3.5 h-3.5 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 118 0v4"/></svg>`,
+      error: `<svg class="w-3.5 h-3.5 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 8v4m0 4h.01"/></svg>`,
+    };
+    slugStatus.innerHTML = icons[state];
+
+    // Hint line
+    const hints: Record<SlugState, string> = {
+      idle: 'Lowercase letters, numbers, hyphens.',
+      checking: 'Checking availability…',
+      available: `${slugInput.value}.heartbeatintel.com is available ✓`,
+      taken: `${slugInput.value}.heartbeatintel.com is already taken — try another.`,
+      invalid: 'Slug must start with a letter or number and be 2–31 chars.',
+      reserved: `${slugInput.value} is reserved. Try a brand-specific slug.`,
+      error: message || 'Could not check availability. Proceed with caution.',
+    };
+    slugHint.textContent = hints[state];
+    const colors: Record<SlugState, string> = {
+      idle: 'text-white/30',
+      checking: 'text-white/50',
+      available: 'text-green-400/80',
+      taken: 'text-red-400/90',
+      invalid: 'text-red-400/90',
+      reserved: 'text-red-400/90',
+      error: 'text-white/40',
+    };
+    slugHint.className = `text-[10.5px] block mt-1 ${colors[state]}`;
+  }
+
+  async function checkSlug(slug: string) {
+    const reqId = ++slugReqId;
+    setSlugState('checking');
+    try {
+      const r = await fetch(`${EXCHANGE_API}/api/v1/publishers/${encodeURIComponent(slug)}`);
+      if (reqId !== slugReqId) return; // superseded
+      if (r.status === 404) setSlugState('available');
+      else if (r.ok) setSlugState('taken');
+      else setSlugState('error');
+    } catch {
+      if (reqId === slugReqId) setSlugState('error');
+    }
+  }
+
   slugInput.addEventListener('input', () => {
-    slugInput.value = slugInput.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    const clean = slugInput.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    if (clean !== slugInput.value) slugInput.value = clean;
+
+    if (slugTimer) clearTimeout(slugTimer);
+    if (!clean) { setSlugState('idle'); return; }
+    if (!/^[a-z0-9][a-z0-9-]{1,30}$/.test(clean)) { setSlugState('invalid'); return; }
+    if (RESERVED_SLUGS.has(clean)) { setSlugState('reserved'); return; }
+    slugTimer = setTimeout(() => checkSlug(clean), 350);
   });
   const colorHex = form.querySelector<HTMLInputElement>('input[name="color"]')!;
   const colorPicker = form.querySelector<HTMLInputElement>('input[name="color_picker"]')!;
