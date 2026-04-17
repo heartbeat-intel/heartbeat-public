@@ -237,17 +237,24 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
 </script>
 
 <script>
-  // Inject current theme into all outbound tenant links so workspace matches exchange theme
-  function syncThemeToLinks() {
+  // Inject current theme + Exchange bridge token into all outbound tenant links so
+  // (a) workspace matches exchange theme and (b) subscribers seamlessly auth on the tenant.
+  function enhanceTenantLinks() {
     const theme = localStorage.getItem('hb-theme') || 'dark';
+    const bridge = localStorage.getItem('exchange_access_token') || '';
     document.querySelectorAll('a[href*="heartbeatintel.com/lists/"], a[href*="heartbeatintel.com/library/"]').forEach((a) => {
       const url = new URL(a.getAttribute('href')!, window.location.origin);
       url.searchParams.set('theme', theme);
+      if (bridge) url.searchParams.set('bridge', bridge);
       a.setAttribute('href', url.toString());
     });
   }
-  syncThemeToLinks();
-  // Re-sync when theme toggles
-  const observer = new MutationObserver(() => syncThemeToLinks());
+  enhanceTenantLinks();
+  // Re-enhance when theme toggles
+  const observer = new MutationObserver(() => enhanceTenantLinks());
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  // Re-enhance if a subscribe flow stores a fresh token later
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'exchange_access_token') enhanceTenantLinks();
+  });
 </script>
