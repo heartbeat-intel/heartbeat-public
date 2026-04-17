@@ -1,4 +1,6 @@
 ---
+import SignInModal from '../react/SignInModal';
+
 interface Props {
   variant?: 'home' | 'exchange' | 'publisher' | 'content';
   showBack?: boolean;
@@ -71,11 +73,20 @@ const {
         </svg>
       </button>
 
+      <!-- Sign in button (hidden once a session exists) -->
+      <button
+        id="hb-signin-btn"
+        type="button"
+        class="text-sm font-medium text-white/70 hover:text-white transition-colors px-3 py-2"
+      >
+        Sign in
+      </button>
+
       <!-- Account link (hidden until client-side detects a signed-in user) -->
       <a
         id="hb-account-link"
         href="/exchange/account"
-        class="hidden w-9 h-9 rounded-full bg-hb-orange-main/15 text-hb-orange-main flex items-center justify-center text-sm font-semibold hover:bg-hb-orange-main/25 transition-colors"
+        class="hidden w-9 h-9 rounded-full bg-hb-orange-main/15 text-hb-orange-main items-center justify-center text-sm font-semibold hover:bg-hb-orange-main/25 transition-colors"
         aria-label="Account"
         title="Your account"
       >
@@ -87,29 +98,45 @@ const {
           id="hb-signup-link"
           href="mailto:human@heartbeatintel.com?subject=New%20Publisher%20Sign%20Up&body=Hi%2C%20I%27d%20like%20to%20create%20a%20workspace%20and%20become%20a%20publisher%20on%20the%20Heartbeat%20Exchange."
           class="inline-flex items-center gap-2 bg-hb-orange-main text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-hb-orange-1 transition-colors"
+          title="Become a publisher on the Heartbeat Exchange"
         >
-          Sign Up
+          Become a publisher
         </a>
       )}
     </div>
   </div>
 </header>
 
+<SignInModal client:load />
+
 <script>
-  // Reveal the account chip when the user has an Exchange session.
-  (function showAccount() {
-    const link = document.getElementById('hb-account-link');
-    const signup = document.getElementById('hb-signup-link');
+  // Reveal account chip when signed in; otherwise keep Sign in button visible.
+  function syncAuthUI() {
+    const accountLink = document.getElementById('hb-account-link');
+    const signinBtn = document.getElementById('hb-signin-btn');
     const token = localStorage.getItem('exchange_access_token');
-    if (!token || !link) return;
-    link.classList.remove('hidden');
-    link.classList.add('flex');
-    // Derive initial from email if cached
-    try {
-      const email = localStorage.getItem('hb_account_email') || '';
-      if (email) link.textContent = email[0].toUpperCase();
-    } catch { /* ignore */ }
-    // Hide signup CTA since you're already in
-    signup?.classList.add('hidden');
-  })();
+    if (token) {
+      accountLink?.classList.remove('hidden');
+      accountLink?.classList.add('flex');
+      signinBtn?.classList.add('hidden');
+      try {
+        const email = localStorage.getItem('hb_account_email') || '';
+        if (email && accountLink) accountLink.textContent = email[0].toUpperCase();
+      } catch { /* ignore */ }
+    } else {
+      accountLink?.classList.add('hidden');
+      accountLink?.classList.remove('flex');
+      signinBtn?.classList.remove('hidden');
+    }
+  }
+  syncAuthUI();
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'exchange_access_token' || e.key === 'hb_account_email') syncAuthUI();
+  });
+
+  // Wire Sign in button to open the SignInModal island
+  document.getElementById('hb-signin-btn')?.addEventListener('click', () => {
+    const open = (window as any).hbOpenSignIn;
+    if (typeof open === 'function') open();
+  });
 </script>
