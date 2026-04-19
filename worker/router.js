@@ -1,4 +1,4 @@
-const VERCEL_ORIGIN = 'https://heartbeat-public.vercel.app';
+const DEFAULT_VERCEL_ORIGIN = 'https://heartbeat-public.vercel.app';
 
 // Only these hostnames get routed to heartbeat-public (marketing site).
 // All other subdomains (e.g. pirque.heartbeatintel.com) are tenant
@@ -6,6 +6,8 @@ const VERCEL_ORIGIN = 'https://heartbeat-public.vercel.app';
 const MARKETING_HOSTS = [
   'heartbeatintel.com',
   'www.heartbeatintel.com',
+  'heartbeat-staging.com',
+  'www.heartbeat-staging.com',
 ];
 
 // Routes on the marketing site served from heartbeat-public on Vercel
@@ -33,7 +35,8 @@ export default {
 
     // Marketing site: route specific paths to heartbeat-public on Vercel
     if (shouldServeFromVercel(path)) {
-      const vercelUrl = new URL(path + url.search, VERCEL_ORIGIN);
+      const vercelOrigin = env.HEARTBEAT_PUBLIC_VERCEL_ORIGIN || DEFAULT_VERCEL_ORIGIN;
+      const vercelUrl = new URL(path + url.search, vercelOrigin);
       const vercelRequest = new Request(vercelUrl, {
         method: request.method,
         headers: request.headers,

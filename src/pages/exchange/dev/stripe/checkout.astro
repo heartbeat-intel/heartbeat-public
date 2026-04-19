@@ -1,0 +1,95 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import DarkHeader from '../../../../components/astro/DarkHeader.astro';
+import DarkFooter from '../../../../components/astro/DarkFooter.astro';
+
+export const prerender = false;
+
+const hostname = Astro.url.hostname.toLowerCase();
+const isLocalHost =
+  hostname === 'localhost' ||
+  hostname === '127.0.0.1' ||
+  hostname.endsWith('.localhost');
+
+if (!isLocalHost) {
+  return Astro.redirect('/exchange');
+}
+
+const sessionId = Astro.url.searchParams.get('session_id') || '';
+const returnUrl = Astro.url.searchParams.get('returnUrl') || '';
+---
+
+<BaseLayout title="Local Stripe Checkout — Heartbeat Intelligence">
+  <DarkHeader variant="exchange" maxWidth="760px" />
+
+  <main class="pt-24 min-h-[70vh] flex items-center justify-center px-6">
+    <section class="w-full max-w-[480px] bg-white text-slate-950 rounded-2xl shadow-2xl overflow-hidden">
+      <div class="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Local mock checkout</p>
+          <h1 class="text-xl font-bold">Heartbeat Intel Subscription</h1>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-[#635bff] flex items-center justify-center text-white font-bold">
+          S
+        </div>
+      </div>
+
+      <div class="px-6 py-6 space-y-5">
+        <div class="rounded-xl border border-slate-200 p-4">
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-slate-500">Test card</span>
+            <span class="text-sm font-semibold">4242 4242 4242 4242</span>
+          </div>
+          <div class="flex items-center justify-between mt-2">
+            <span class="text-sm text-slate-500">Session</span>
+            <span class="text-xs font-mono text-slate-500 truncate max-w-[240px]" id="session-label">
+              {sessionId || 'missing'}
+            </span>
+          </div>
+        </div>
+
+        <button
+          id="pay-button"
+          type="button"
+          class="w-full h-12 rounded-lg bg-[#635bff] text-white font-semibold hover:bg-[#5548e8] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={!sessionId}
+        >
+          Pay test card
+        </button>
+
+        <button
+          id="cancel-button"
+          type="button"
+          class="w-full h-11 rounded-lg border border-slate-200 text-slate-600 font-medium hover:bg-slate-50 transition-colors"
+        >
+          Cancel checkout
+        </button>
+
+        <p class="text-xs text-slate-400 leading-relaxed">
+          This page is only available on localhost. It simulates Stripe's hosted checkout
+          and returns through the same success callback as real test-mode Stripe.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <DarkFooter maxWidth="760px" />
+</BaseLayout>
+
+<script define:vars={{ sessionId, returnUrl }}>
+  const payButton = document.getElementById('pay-button');
+  const cancelButton = document.getElementById('cancel-button');
+
+  payButton?.addEventListener('click', () => {
+    const successUrl = new URL('/exchange/checkout/success', window.location.origin);
+    successUrl.searchParams.set('session_id', sessionId);
+    if (returnUrl) {
+      successUrl.searchParams.set('returnUrl', returnUrl);
+    }
+    window.location.href = successUrl.toString();
+  });
+
+  cancelButton?.addEventListener('click', () => {
+    window.location.href = new URL('/exchange/checkout/cancel', window.location.origin).toString();
+  });
+</script>

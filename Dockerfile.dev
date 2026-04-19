@@ -1,0 +1,21 @@
+# Dockerfile.dev - Development container for heartbeat-public (Astro)
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Copy package files for dependency installation
+COPY package.json pnpm-lock.yaml* ./
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile || pnpm install
+
+# Copy the rest of the application
+COPY . .
+
+EXPOSE 4321
+
+# Astro dev server
+CMD ["pnpm", "dev", "--host", "0.0.0.0", "--port", "4321"]

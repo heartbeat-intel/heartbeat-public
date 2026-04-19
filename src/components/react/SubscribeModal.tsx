@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { Icon } from '@iconify/react';
 import type { PricingTier } from '../../utils/constants';
+import { buildCurrentReturnPath } from '../../utils/environmentUrls';
 
 // Use relative paths so requests go through the Vercel proxy (vercel.json routes)
 const API_BASE = '';
@@ -32,7 +34,25 @@ export default function SubscribeModal({
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
   const codeInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setPortalTarget(document.body);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return undefined;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (step === 'verify-code' && codeInputRef.current) {
@@ -168,6 +188,7 @@ export default function SubscribeModal({
         body: JSON.stringify({
           publisher_id: publisherId,
           price_type: selectedTier,
+          return_url: buildCurrentReturnPath(),
         }),
       });
 
@@ -204,16 +225,16 @@ export default function SubscribeModal({
     onClose();
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !portalTarget) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+  return createPortal(
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         onClick={handleClose}
       />
 
-      <div className="relative bg-hb-black-2 rounded-2xl mx-4 max-w-lg w-full shadow-xl border border-white/10">
+      <div className="relative bg-hb-black-2 rounded-2xl max-w-lg w-full max-h-[calc(100vh-2rem)] overflow-y-auto shadow-xl border border-white/10">
         {/* Close button */}
         <button
           onClick={handleClose}
@@ -413,6 +434,7 @@ export default function SubscribeModal({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    portalTarget,
   );
 }

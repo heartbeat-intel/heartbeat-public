@@ -81,13 +81,7 @@ test.describe('Publisher Profile Page', () => {
       const btn = page.getByText('Subscribe to Intel');
       if (await btn.isVisible()) {
         await btn.click();
-        // Modal should appear (React component mounted with client:load)
-        await page.waitForTimeout(500);
-        // Check for modal overlay or subscribe form elements
-        const modalVisible =
-          (await page.locator('[role="dialog"]').isVisible().catch(() => false)) ||
-          (await page.getByText('Subscribe').nth(1).isVisible().catch(() => false));
-        expect(modalVisible).toBeTruthy();
+        await expect(page.getByText('Subscribe to Premium Intel')).toBeVisible();
       }
     });
   });
