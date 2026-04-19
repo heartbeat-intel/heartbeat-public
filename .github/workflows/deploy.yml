@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - develop
+      - staging
   workflow_dispatch:
 
 jobs:
@@ -32,6 +32,11 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Build
+        env:
+          PUBLIC_EXCHANGE_API_URL: ${{ github.ref_name == 'staging' && 'https://exchange-api-staging-598945484330.us-central1.run.app' || 'https://exchange-api-production-598945484330.us-central1.run.app' }}
+          PUBLIC_API_BASE_URL: ${{ github.ref_name == 'staging' && 'heartbeat-staging.com' || 'heartbeatintel.com' }}
+          PUBLIC_TENANT_BASE_DOMAIN: ${{ github.ref_name == 'staging' && 'heartbeat-staging.com' || 'heartbeatintel.com' }}
+          PUBLIC_TENANT_PROTOCOL: https
         run: pnpm build
 
       - name: Deploy to Cloudflare Pages

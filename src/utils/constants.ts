@@ -68,6 +68,11 @@ export const CONTENT_DATA: Record<string, { lists: ContentItem[]; articles: Cont
 // Mapping of publisher slugs to tenant subdomains for workspace list/article links.
 export const PUBLISHER_TENANTS: Record<string, string> = {
   'diego-alcaino': 'pirque',
+  atlasai: 'atlasai',
+  fintechlab: 'fintechlab',
+  climatecap: 'climatecap',
+  healthsignal: 'healthsignal',
+  defenseintel: 'defenseintel',
   'andres-bucchi': 'bucchi',
   jpaldea: 'jpaldea',
   pirque: 'pirque',

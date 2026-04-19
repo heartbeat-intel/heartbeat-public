@@ -76,13 +76,59 @@ import DarkFooter from '../../../components/astro/DarkFooter.astro';
   <DarkFooter maxWidth="800px" />
 </BaseLayout>
 
-<script>
-  const API_BASE = '';
+	<script>
+	  import { normalizeTenantUrlForCurrentEnvironment } from '../../../utils/environmentUrls';
+
+	  const API_BASE = '';
+
+  function isWorkspaceRedirectPath(path: string): boolean {
+    return path !== '/exchange' && !path.startsWith('/exchange/');
+  }
+
+  function getSafeRelativeRedirect(value: string | null): string | null {
+    if (!value || !value.startsWith('/') || value.startsWith('//')) {
+      return null;
+    }
+
+    try {
+      const decoded = decodeURIComponent(value);
+      if (
+        !decoded.startsWith('/') ||
+        decoded.startsWith('//') ||
+        /^[a-z][a-z0-9+.-]*:/i.test(decoded) ||
+        !isWorkspaceRedirectPath(decoded)
+      ) {
+        return null;
+      }
+      return decoded;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function appendRedirectToLoginUrl(
+    loginUrl: string | null | undefined,
+    returnUrl: string | null,
+  ): string | null | undefined {
+    const safeReturnUrl = getSafeRelativeRedirect(returnUrl);
+    if (!loginUrl || !safeReturnUrl) {
+      return loginUrl;
+    }
+
+    try {
+      const url = new URL(loginUrl, window.location.origin);
+      url.searchParams.set('redirect', safeReturnUrl);
+      return url.toString();
+    } catch (_) {
+      return loginUrl;
+    }
+  }
 
   async function completeCheckout() {
     const params = new URLSearchParams(window.location.search);
     const sessionId = params.get('session_id');
     const cancelled = params.get('cancelled');
+    const returnUrl = params.get('returnUrl');
 
     if (cancelled !== null) {
       showState('error');
@@ -137,12 +183,13 @@ import DarkFooter from '../../../components/astro/DarkFooter.astro';
       }
     }
 
-    if (data && data.tenant_url) {
-      showState('success');
-      const link = document.getElementById('workspace-link') as HTMLAnchorElement;
-      link.href = data.login_url || data.tenant_url;
-      document.getElementById('success-message')!.textContent =
-        `Your subscription to ${data.workspace_name || 'the workspace'} is now active.`;
+	    if (data && data.tenant_url) {
+	      showState('success');
+	      const link = document.getElementById('workspace-link') as HTMLAnchorElement;
+	      const workspaceUrl = normalizeTenantUrlForCurrentEnvironment(data.login_url || data.tenant_url);
+	      link.href = appendRedirectToLoginUrl(workspaceUrl, returnUrl) || '/exchange';
+	      document.getElementById('success-message')!.textContent =
+	        `Your subscription to ${data.workspace_name || 'the workspace'} is now active.`;
     } else if (data && data.provisioning_status === 'pending') {
       showState('provisioning');
     } else if (data) {

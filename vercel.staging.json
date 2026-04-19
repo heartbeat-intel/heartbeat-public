@@ -1,0 +1,175 @@
+{
+  "framework": "astro",
+  "buildCommand": "pnpm build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/api/v1/publishers/:path*",
+      "destination": "https://exchange-api-staging-598945484330.us-central1.run.app/api/v1/publishers/:path*"
+    },
+    {
+      "source": "/api/v1/catalog/:path*",
+      "destination": "https://exchange-api-staging-598945484330.us-central1.run.app/api/v1/catalog/:path*"
+    },
+    {
+      "source": "/api/v1/products/:path*",
+      "destination": "https://exchange-api-staging-598945484330.us-central1.run.app/api/v1/products/:path*"
+    },
+    {
+      "source": "/api/v1/collections/:path*",
+      "destination": "https://exchange-api-staging-598945484330.us-central1.run.app/api/v1/collections/:path*"
+    },
+    {
+      "source": "/api/v1/payments/:path*",
+      "destination": "https://exchange-api-staging-598945484330.us-central1.run.app/api/v1/payments/:path*"
+    },
+    {
+      "source": "/api/v1/auth/:path*",
+      "destination": "https://exchange-api-staging-598945484330.us-central1.run.app/api/v1/auth/:path*"
+    },
+    {
+      "source": "/api/v1/me/:path*",
+      "destination": "https://exchange-api-staging-598945484330.us-central1.run.app/api/v1/me/:path*"
+    },
+    {
+      "source": "/api/v1/workspace/:path*",
+      "destination": "https://aorta-api-web-staging-598945484330.us-central1.run.app/api/v1/:path*"
+    },
+    {
+      "source": "/api/v1/:path*",
+      "destination": "https://aorta-api-web-staging-598945484330.us-central1.run.app/api/v1/:path*"
+    },
+    {
+      "source": "/login",
+      "destination": "https://www.heartbeat-staging.com/login"
+    },
+    {
+      "source": "/instant-login",
+      "destination": "https://www.heartbeat-staging.com/instant-login"
+    },
+    {
+      "source": "/keywords/:path*",
+      "destination": "https://www.heartbeat-staging.com/keywords/:path*"
+    },
+    {
+      "source": "/people/:path*",
+      "destination": "https://www.heartbeat-staging.com/people/:path*"
+    },
+    {
+      "source": "/organizations/:path*",
+      "destination": "https://www.heartbeat-staging.com/organizations/:path*"
+    },
+    {
+      "source": "/library/:path*",
+      "destination": "https://www.heartbeat-staging.com/library/:path*"
+    },
+    {
+      "source": "/lists/:path*",
+      "destination": "https://www.heartbeat-staging.com/lists/:path*"
+    },
+    {
+      "source": "/ledger/:path*",
+      "destination": "https://www.heartbeat-staging.com/ledger/:path*"
+    },
+    {
+      "source": "/search/:path*",
+      "destination": "https://www.heartbeat-staging.com/search/:path*"
+    },
+    {
+      "source": "/search",
+      "destination": "https://www.heartbeat-staging.com/search"
+    },
+    {
+      "source": "/geos/:path*",
+      "destination": "https://www.heartbeat-staging.com/geos/:path*"
+    },
+    {
+      "source": "/menu/:path*",
+      "destination": "https://www.heartbeat-staging.com/menu/:path*"
+    },
+    {
+      "source": "/operator",
+      "destination": "https://www.heartbeat-staging.com/operator"
+    },
+    {
+      "source": "/checkout",
+      "destination": "https://www.heartbeat-staging.com/checkout"
+    },
+    {
+      "source": "/emails/:path*",
+      "destination": "https://www.heartbeat-staging.com/emails/:path*"
+    },
+    {
+      "source": "/cagr",
+      "destination": "https://www.heartbeat-staging.com/cagr"
+    },
+    {
+      "source": "/facts/:path*",
+      "destination": "https://www.heartbeat-staging.com/facts/:path*"
+    },
+    {
+      "source": "/s/:path*",
+      "destination": "https://www.heartbeat-staging.com/s/:path*"
+    },
+    {
+      "source": "/terminology/:path*",
+      "destination": "https://www.heartbeat-staging.com/terminology/:path*"
+    },
+    {
+      "source": "/publisher/:path*",
+      "destination": "https://www.heartbeat-staging.com/publisher/:path*"
+    },
+    {
+      "source": "/rawdata/:path*",
+      "destination": "https://www.heartbeat-staging.com/rawdata/:path*"
+    },
+    {
+      "source": "/shortcuts",
+      "destination": "https://www.heartbeat-staging.com/shortcuts"
+    },
+    {
+      "source": "/urls/:path*",
+      "destination": "https://www.heartbeat-staging.com/urls/:path*"
+    },
+    {
+      "source": "/suggested-entities/:path*",
+      "destination": "https://www.heartbeat-staging.com/suggested-entities/:path*"
+    },
+    {
+      "source": "/taggingrules/:path*",
+      "destination": "https://www.heartbeat-staging.com/taggingrules/:path*"
+    },
+    {
+      "source": "/categories/:path*",
+      "destination": "https://www.heartbeat-staging.com/categories/:path*"
+    },
+    {
+      "source": "/sections/:path*",
+      "destination": "https://www.heartbeat-staging.com/sections/:path*"
+    },
+    {
+      "source": "/settings",
+      "destination": "https://www.heartbeat-staging.com/settings"
+    },
+    {
+      "source": "/users/:path*",
+      "destination": "https://www.heartbeat-staging.com/users/:path*"
+    },
+    {
+      "source": "/clients/:path*",
+      "destination": "https://www.heartbeat-staging.com/clients/:path*"
+    },
+    {
+      "source": "/cities/:path*",
+      "destination": "https://www.heartbeat-staging.com/cities/:path*"
+    },
+    {
+      "source": "/exchange/subscriptions",
+      "destination": "https://www.heartbeat-staging.com/exchange/subscriptions"
+    },
+    {
+      "source": "/exchange/checkout/cancel",
+      "destination": "https://www.heartbeat-staging.com/exchange/checkout/cancel"
+    }
+  ]
+}

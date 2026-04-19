@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Icon } from '@iconify/react';
 import type { ContentItem } from '../../utils/constants';
-import { getPublisherSubdomain, API_BASE_URL } from '../../utils/constants';
+import { getPublisherSubdomain } from '../../utils/constants';
+import { buildTenantUrl } from '../../utils/environmentUrls';
 interface TabbedContentProps {
   publisherId: string;
   publisherColor: string;
@@ -20,12 +21,16 @@ export default function TabbedContent({
   const [activeTab, setActiveTab] = useState<'lists' | 'articles'>('lists');
   const isDark = theme === 'dark';
 
-  const handleListClick = (list: ContentItem) => {
-    if (publisherId && list.listType) {
-      const subdomain = getPublisherSubdomain(publisherId);
-      window.open(`https://${subdomain}.${API_BASE_URL}/lists/${list.listType}/${list.id}?ref=exchange&publisher=${publisherId}`, '_blank');
-    }
-  };
+	  const handleListClick = (list: ContentItem) => {
+	    if (publisherId && list.listType) {
+	      const subdomain = getPublisherSubdomain(publisherId);
+	      window.location.assign(buildTenantUrl(subdomain, `/lists/${list.listType}/${list.id}`, {
+	        ref: 'exchange',
+	        publisher: publisherId,
+	        theme: localStorage.getItem('hb-theme') || theme,
+	      }));
+	    }
+	  };
 
   const borderColor = isDark ? 'border-white/10' : 'border-hb-gray-6';
   const textPrimary = isDark ? 'text-white' : 'text-hb-black-1';
