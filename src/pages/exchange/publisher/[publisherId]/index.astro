@@ -34,6 +34,7 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
 <BaseLayout
   title={`${publisher.name} - Heartbeat Intelligence`}
   description={publisher.description}
+  ogImage={publisher.avatarUrl || '/images/logos/heartbeatLogoBlack.svg'}
 >
   <!-- Header -->
   <DarkHeader
@@ -49,6 +50,7 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
     <div
       class="publisher-hero py-12 border-b border-[var(--hb-border)] relative overflow-hidden"
       data-publisher-color={publisher.color}
+      data-publisher-name={publisher.name}
     >
       <div class="max-w-[1200px] mx-auto px-6">
         <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 items-start reveal">
@@ -83,12 +85,22 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
               client:load
               publisherId={publisher.id}
               publisherName={publisher.name}
+              publisherLogoUrl={publisher.avatarUrl || null}
               publisherColor={publisher.color}
               monthlyPriceCents={publisher.monthlyPriceCents}
               yearlyPriceCents={publisher.yearlyPriceCents}
+              billingOptions={publisher.billingOptions}
               label="Subscribe to Intel"
               className="w-full py-2.5 px-4 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
             />
+
+            <!-- Follow (saves to Heartbeat account) -->
+            <button
+              id="follow-btn"
+              class="mt-2 w-full py-2 px-4 text-sm font-medium rounded-lg border border-white/10 text-white/70 hover:bg-white/5 hover:text-white transition-colors"
+            >
+              + Follow
+            </button>
           </div>
 
           <!-- Bio & Expertise -->
@@ -128,21 +140,23 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
     {allPulses.length > 0 ? (
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         {allPulses.map((item, i) => {
-	          const subdomain = getPublisherSubdomain(publisherId);
-	          const href = item._type === 'article'
-	            ? `/exchange/publisher/${publisherId}/article/${item.id}`
-	            : buildTenantUrl(subdomain, `/lists/${item.listType || 'library'}/${item.id}`, {
-	                ref: 'exchange',
-	                publisher: publisherId,
-	              });
-	          const isExternal = item._type === 'list';
-	          return (
-	            <a
-	              href={href}
-	              data-tenant-content-link={isExternal ? true : undefined}
-	              class="pulse-card group relative bg-white/[0.03] rounded-xl p-5 border border-white/[0.06] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-white/[0.12] hover:shadow-lg hover:shadow-black/20 block overflow-hidden"
-	              style={`animation-delay: ${i * 80}ms`}
-	            >
+          const subdomain = getPublisherSubdomain(publisherId);
+          const href = item._type === 'article'
+            ? buildTenantUrl(subdomain, `/library/${item.id}`, { ref: 'exchange', publisher: publisherId })
+            : buildTenantUrl(subdomain, `/lists/${item.listType || 'library'}/${item.id}`, {
+                ref: 'exchange',
+                publisher: publisherId,
+              });
+          const isExternal = true;
+          return (
+            <a
+              href={href}
+              data-tenant-content-link
+              target={isExternal ? '_blank' : undefined}
+              rel={isExternal ? 'noopener noreferrer' : undefined}
+              class="pulse-card group relative bg-white/[0.03] rounded-xl p-5 border border-white/[0.06] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-white/[0.12] hover:shadow-lg hover:shadow-black/20 block overflow-hidden"
+              style={`animation-delay: ${i * 80}ms`}
+            >
               <!-- Accent bar on left -->
               <div class="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={`background-color: ${publisher.color}`}></div>
 
@@ -224,20 +238,66 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
 
 </BaseLayout>
 
-	<script>
-	  // Inject current theme into all outbound tenant links so workspace matches exchange theme
-	  function syncThemeToLinks() {
-	    const theme = localStorage.getItem('hb-theme') || 'dark';
-	    document.querySelectorAll('a[data-tenant-content-link]').forEach((a) => {
-	      const href = a.getAttribute('href');
-	      if (!href) return;
-	      const url = new URL(href, window.location.origin);
-	      url.searchParams.set('theme', theme);
-	      a.setAttribute('href', url.toString());
+<script>
+  // Inject current theme + Exchange bridge token into outbound tenant links.
+  function enhanceTenantLinks() {
+    const theme = localStorage.getItem('hb-theme') || 'light';
+    const bridge = localStorage.getItem('exchange_access_token') || '';
+    document.querySelectorAll('a[data-tenant-content-link]').forEach((a) => {
+      const href = a.getAttribute('href');
+      if (!href) return;
+      const url = new URL(href, window.location.origin);
+      url.searchParams.set('theme', theme);
+      if (bridge) url.searchParams.set('bridge', bridge);
+      a.setAttribute('href', url.toString());
     });
   }
-  syncThemeToLinks();
-  // Re-sync when theme toggles
-  const observer = new MutationObserver(() => syncThemeToLinks());
+  enhanceTenantLinks();
+  const observer = new MutationObserver(() => enhanceTenantLinks());
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'exchange_access_token') enhanceTenantLinks();
+  });
+
+  // Track clicks into reading history (Exchange-side, localStorage-backed).
+  const HIST_KEY = 'hb_reading_history';
+  document.querySelectorAll<HTMLAnchorElement>('.pulse-card').forEach((a) => {
+    a.addEventListener('click', () => {
+      try {
+        const title = a.querySelector('h3')?.textContent?.trim() || a.href;
+        const kind = a.querySelector('span.uppercase')?.textContent?.trim() === 'list' ? 'list' : 'article';
+        const publisher = document.querySelector<HTMLElement>('[data-publisher-name]')?.dataset.publisherName
+          || window.location.pathname.split('/').pop() || '';
+        const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+        const next = [{ href: a.href, title, publisher, ts: Date.now(), kind }, ...hist.filter((x: any) => x.href !== a.href)].slice(0, 50);
+        localStorage.setItem(HIST_KEY, JSON.stringify(next));
+      } catch { /* ignore */ }
+    });
+  });
+
+  // Follow / unfollow this publisher (localStorage).
+  const PREFS_KEY = 'hb_prefs';
+  const publisherSlug = window.location.pathname.split('/').filter(Boolean).pop() || '';
+  const followBtn = document.getElementById('follow-btn');
+  function getPrefs() {
+    try { return JSON.parse(localStorage.getItem(PREFS_KEY) || '{}'); } catch { return {}; }
+  }
+  function isFollowing() {
+    const p = getPrefs();
+    return Array.isArray(p.follow) && p.follow.includes(publisherSlug);
+  }
+  function renderFollowBtn() {
+    if (!followBtn) return;
+    followBtn.textContent = isFollowing() ? '✓ Following' : '+ Follow';
+    followBtn.classList.toggle('bg-white/10', isFollowing());
+  }
+  followBtn?.addEventListener('click', () => {
+    const p = getPrefs();
+    const set = new Set(p.follow || []);
+    if (set.has(publisherSlug)) set.delete(publisherSlug);
+    else set.add(publisherSlug);
+    localStorage.setItem(PREFS_KEY, JSON.stringify({ ...p, follow: Array.from(set) }));
+    renderFollowBtn();
+  });
+  renderFollowBtn();
 </script>

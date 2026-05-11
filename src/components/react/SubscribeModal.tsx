@@ -13,20 +13,24 @@ interface SubscribeModalProps {
   isOpen: boolean;
   onClose: () => void;
   publisherName?: string;
+  publisherLogoUrl?: string | null;
   accentColor?: string;
   publisherId?: string;
   monthlyPriceCents?: number;
   yearlyPriceCents?: number;
+  billingOptions?: string;
 }
 
 export default function SubscribeModal({
   isOpen,
   onClose,
   publisherName,
+  publisherLogoUrl,
   accentColor = '#FB4C02',
   publisherId,
   monthlyPriceCents,
   yearlyPriceCents,
+  billingOptions = 'both',
 }: SubscribeModalProps) {
   const [selectedTier, setSelectedTier] = useState<string>('yearly');
   const [step, setStep] = useState<Step>('pricing');
@@ -63,7 +67,7 @@ export default function SubscribeModal({
   const pricingTiers = useMemo(() => {
     const tiers: PricingTier[] = [];
 
-    if (monthlyPriceCents) {
+    if (monthlyPriceCents && billingOptions !== 'yearly_only') {
       tiers.push({
         id: 'monthly',
         name: 'Monthly',
@@ -78,7 +82,7 @@ export default function SubscribeModal({
       });
     }
 
-    if (yearlyPriceCents) {
+    if (yearlyPriceCents && billingOptions !== 'monthly_only') {
       const yearlyPrice = yearlyPriceCents / 100;
       const monthlyEquiv = yearlyPrice / 12;
       const monthlyPrice = monthlyPriceCents ? monthlyPriceCents / 100 : 29;
@@ -102,7 +106,7 @@ export default function SubscribeModal({
     }
 
     return tiers;
-  }, [monthlyPriceCents, yearlyPriceCents]);
+  }, [billingOptions, monthlyPriceCents, yearlyPriceCents]);
 
   const selectedPricing = pricingTiers.find((t) => t.id === selectedTier);
 
@@ -256,17 +260,37 @@ export default function SubscribeModal({
         {/* Header */}
         <div className="pt-8 pb-0 text-center px-6">
           <div
-            className="inline-flex p-3 rounded-full mb-4"
-            style={{ backgroundColor: `${accentColor}15` }}
+            className="inline-flex items-center justify-center p-3 rounded-full mb-4 overflow-hidden"
+            style={{
+              backgroundColor: `${accentColor}15`,
+              width: 64,
+              height: 64,
+            }}
           >
-            <Icon
-              icon={step === 'email' ? 'mdi:email-outline' : step === 'verify-code' ? 'mdi:shield-check-outline' : 'mdi:crown'}
-              width={28}
-              color={accentColor}
-            />
+            {/* On the pricing step show the publisher's logo (falls back to a
+                neutral crown if no logo); keep the step icons for email/verify. */}
+            {step === 'pricing' && publisherLogoUrl ? (
+              <img
+                src={publisherLogoUrl}
+                alt={publisherName || ''}
+                className="w-full h-full object-cover rounded-full"
+              />
+            ) : (
+              <Icon
+                icon={step === 'email' ? 'mdi:email-outline' : step === 'verify-code' ? 'mdi:shield-check-outline' : 'mdi:crown'}
+                width={28}
+                color={accentColor}
+              />
+            )}
           </div>
           <h2 className="text-2xl font-bold text-white tracking-tight">
-            {step === 'email' ? 'Continue with Email' : step === 'verify-code' ? 'Enter Verification Code' : 'Subscribe to Premium Intel'}
+            {step === 'email'
+              ? 'Continue with Email'
+              : step === 'verify-code'
+                ? 'Enter Verification Code'
+                : publisherName
+                  ? `Subscribe to ${publisherName}`
+                  : 'Subscribe to Premium Intel'}
           </h2>
           <p className="text-[15px] text-white/40 mt-2">
             {step === 'email'
