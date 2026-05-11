@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [develop, staging, main]
+  pull_request:
+    branches: [develop, staging, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    env:
+      TARGET_BRANCH: ${{ github.base_ref || github.ref_name }}
+      PUBLIC_TENANT_PROTOCOL: https
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        env:
+          PUBLIC_EXCHANGE_API_URL: ${{ env.TARGET_BRANCH == 'main' && 'https://exchange-api-production-598945484330.us-central1.run.app' || 'https://exchange-api-staging-598945484330.us-central1.run.app' }}
+          PUBLIC_API_BASE_URL: ${{ env.TARGET_BRANCH == 'main' && 'heartbeatintel.com' || 'heartbeat-staging.com' }}
+          PUBLIC_TENANT_BASE_DOMAIN: ${{ env.TARGET_BRANCH == 'main' && 'heartbeatintel.com' || 'heartbeat-staging.com' }}
+        run: pnpm build
