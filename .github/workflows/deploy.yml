@@ -33,12 +33,6 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Deploy edge router
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: pnpm exec wrangler deploy --config worker/wrangler.toml
-
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
