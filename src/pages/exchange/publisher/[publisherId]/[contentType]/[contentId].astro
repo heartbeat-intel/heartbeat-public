@@ -2,7 +2,7 @@
 // This route previously rendered article/list content on the Exchange.
 // Content now lives on the tenant's own subdomain — this file redirects.
 import { fetchArticle, fetchList, getArticle, getList } from '../../../../../data/content';
-import { getPublisherTenant } from '../../../../../utils/constants';
+import { buildTenantUrl, getPublisherTenant } from '../../../../../utils/constants';
 
 export const prerender = false;
 
@@ -30,7 +30,7 @@ const targetPath =
     : `/lists/${listType}/${id}`;
 
 const target = tenant
-  ? `https://${tenant}.heartbeatintel.com${targetPath}?ref=exchange&publisher=${publisherId}`
+  ? buildTenantUrl(tenant, targetPath, { ref: 'exchange', publisher: publisherId })
   : `/exchange/publisher/${publisherId}`;
 
 return Astro.redirect(target, 301);

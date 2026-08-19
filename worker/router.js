@@ -11,6 +11,8 @@ const MARKETING_HOSTS = [
 // Routes on the marketing site served from heartbeat-public on Vercel
 const HEARTBEAT_PUBLIC_ROUTES = [
   '/',
+  '/privacy',
+  '/terms',
 ];
 
 const HEARTBEAT_PUBLIC_PREFIXES = [
@@ -53,7 +55,8 @@ export default {
 };
 
 function shouldServeFromVercel(path) {
-  if (HEARTBEAT_PUBLIC_ROUTES.includes(path) || HEARTBEAT_PUBLIC_ROUTES.includes(path + '/')) {
+  const normalizedPath = path === '/' ? path : path.replace(/\/+$/, '');
+  if (HEARTBEAT_PUBLIC_ROUTES.includes(normalizedPath)) {
     return true;
   }
   for (const prefix of HEARTBEAT_PUBLIC_PREFIXES) {

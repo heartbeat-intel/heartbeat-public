@@ -22,6 +22,7 @@ export interface ListItem {
 
 export interface ListData {
   id: string;
+  listType: string;
   title: string;
   description: string;
   date: string;
@@ -97,6 +98,7 @@ export async function fetchList(publisherSlug: string, listSlug: string): Promis
 
     return {
       id: list.id || listSlug,
+      listType: list.list_type || 'library',
       title: list.title || '',
       description: list.description || '',
       date: list.date || '',
@@ -131,4 +133,3 @@ export function getAllContentPaths(): { publisherId: string; contentType: string
 
   return paths;
 }
-

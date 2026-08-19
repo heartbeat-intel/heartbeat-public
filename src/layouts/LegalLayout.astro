@@ -1,0 +1,186 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import DarkHeader from '../components/astro/DarkHeader.astro';
+import DarkFooter from '../components/astro/DarkFooter.astro';
+
+interface Frontmatter {
+  title: string;
+  description: string;
+  effectiveDate: string;
+  lastUpdated: string;
+}
+
+const { frontmatter } = Astro.props as { frontmatter: Frontmatter };
+---
+
+<BaseLayout title={`${frontmatter.title} | Heartbeat Intelligence`} description={frontmatter.description}>
+  <DarkHeader variant="home" />
+
+  <main class="legal-page pt-16">
+    <header class="legal-hero border-b border-[var(--hb-border)]">
+      <div class="max-w-[900px] mx-auto px-6 py-16 md:py-20">
+        <a
+          href="/"
+          class="inline-flex items-center gap-2 text-sm text-[var(--hb-text-tertiary)] hover:text-hb-orange-main transition-colors mb-8"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Heartbeat
+        </a>
+
+        <p class="text-xs font-semibold text-hb-orange-main uppercase tracking-[0.16em] mb-4">Legal</p>
+        <h1 class="text-4xl md:text-5xl font-bold text-[var(--hb-text-primary)] tracking-tight text-balance">
+          {frontmatter.title}
+        </h1>
+        <div class="flex flex-wrap gap-x-6 gap-y-2 mt-6 text-sm text-[var(--hb-text-tertiary)]">
+          <span>Effective {frontmatter.effectiveDate}</span>
+          <span>Last updated {frontmatter.lastUpdated}</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="max-w-[900px] mx-auto px-6 py-12 md:py-16">
+      <article class="legal-content rounded-2xl border border-[var(--hb-border)] bg-[var(--hb-bg-secondary)] px-6 py-8 md:px-12 md:py-12 shadow-[var(--hb-card-shadow)]">
+        <slot />
+      </article>
+    </div>
+  </main>
+
+  <DarkFooter showValueProps={false} maxWidth="900px" />
+</BaseLayout>
+
+<style is:global>
+  .legal-page {
+    background:
+      radial-gradient(circle at 50% -10%, rgba(251, 76, 2, 0.12), transparent 30rem),
+      var(--hb-bg-primary);
+  }
+
+  .legal-hero {
+    background: color-mix(in srgb, var(--hb-bg-secondary) 82%, transparent);
+  }
+
+  .legal-content {
+    color: var(--hb-text-secondary);
+    font-size: 0.975rem;
+    line-height: 1.8;
+  }
+
+  .legal-content > :first-child {
+    margin-top: 0;
+  }
+
+  .legal-content > :last-child {
+    margin-bottom: 0;
+  }
+
+  .legal-content h2 {
+    margin: 3rem 0 1rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--hb-border);
+    color: var(--hb-text-primary);
+    font-size: 1.55rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+  }
+
+  .legal-content h2:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .legal-content h3 {
+    margin: 2rem 0 0.75rem;
+    color: var(--hb-text-primary);
+    font-size: 1.08rem;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .legal-content p,
+  .legal-content ul,
+  .legal-content table,
+  .legal-content blockquote {
+    margin: 0 0 1.25rem;
+  }
+
+  .legal-content ul {
+    padding-left: 1.4rem;
+    list-style: disc;
+  }
+
+  .legal-content li {
+    padding-left: 0.25rem;
+    margin: 0.4rem 0;
+  }
+
+  .legal-content li::marker {
+    color: #FB4C02;
+  }
+
+  .legal-content a {
+    color: #FB4C02;
+    text-decoration: underline;
+    text-decoration-color: rgba(251, 76, 2, 0.35);
+    text-underline-offset: 0.18em;
+  }
+
+  .legal-content a:hover {
+    text-decoration-color: currentColor;
+  }
+
+  .legal-content strong {
+    color: var(--hb-text-primary);
+    font-weight: 650;
+  }
+
+  .legal-content blockquote {
+    padding: 1.25rem 1.5rem;
+    border: 1px solid rgba(251, 76, 2, 0.25);
+    border-left: 4px solid #FB4C02;
+    border-radius: 0.75rem;
+    background: rgba(251, 76, 2, 0.07);
+    color: var(--hb-text-primary);
+  }
+
+  .legal-content blockquote p {
+    margin: 0;
+  }
+
+  .legal-content table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  .legal-content th,
+  .legal-content td {
+    min-width: 12rem;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--hb-border);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .legal-content th {
+    color: var(--hb-text-primary);
+    background: var(--hb-bg-primary);
+    font-weight: 650;
+  }
+
+  @media (max-width: 640px) {
+    .legal-content {
+      font-size: 0.925rem;
+      line-height: 1.72;
+    }
+
+    .legal-content h2 {
+      font-size: 1.3rem;
+    }
+  }
+</style>
