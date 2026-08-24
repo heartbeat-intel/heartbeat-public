@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { Icon } from '@iconify/react';
 import type { PricingTier } from '../../utils/constants';
+import { DEFAULT_PAID_VALUE_PROPS } from '../../utils/valueProps';
 
 const API_BASE = import.meta.env.PUBLIC_EXCHANGE_API_URL || '';
 
@@ -16,6 +17,7 @@ interface SubscribeModalProps {
   monthlyPriceCents?: number;
   yearlyPriceCents?: number;
   billingOptions?: string;
+  valueProps?: { paid?: string[]; free?: string[] } | null;
 }
 
 export default function SubscribeModal({
@@ -28,6 +30,7 @@ export default function SubscribeModal({
   monthlyPriceCents,
   yearlyPriceCents,
   billingOptions = 'both',
+  valueProps,
 }: SubscribeModalProps) {
   const [selectedTier, setSelectedTier] = useState<string>('yearly');
   const [step, setStep] = useState<Step>('pricing');
@@ -45,6 +48,11 @@ export default function SubscribeModal({
 
   const pricingTiers = useMemo(() => {
     const tiers: PricingTier[] = [];
+    // Publisher-authored bullets when set, otherwise the Heartbeat defaults.
+    // Monthly and yearly share one list — "Cancel anytime" still reaches the
+    // reader via the Stripe footer below.
+    const paidFeatures =
+      valueProps?.paid && valueProps.paid.length > 0 ? valueProps.paid : DEFAULT_PAID_VALUE_PROPS;
 
     if (monthlyPriceCents && billingOptions !== 'yearly_only') {
       tiers.push({
@@ -53,11 +61,7 @@ export default function SubscribeModal({
         price: monthlyPriceCents / 100,
         period: '/month',
         pricePerMonth: monthlyPriceCents / 100,
-        features: [
-          'Full access to all intel lists',
-          'New releases as they publish',
-          'Cancel anytime',
-        ],
+        features: paidFeatures,
       });
     }
 
@@ -75,17 +79,12 @@ export default function SubscribeModal({
         pricePerMonth: monthlyEquiv,
         popular: true,
         savings: savings > 0 ? `Save $${Math.round(savings)}` : undefined,
-        features: [
-          'Full access to all intel lists',
-          'New releases as they publish',
-          'Priority support',
-          '2 months free',
-        ],
+        features: paidFeatures,
       });
     }
 
     return tiers;
-  }, [monthlyPriceCents, yearlyPriceCents]);
+  }, [monthlyPriceCents, yearlyPriceCents, billingOptions, valueProps]);
 
   const selectedPricing = pricingTiers.find((t) => t.id === selectedTier);
 
