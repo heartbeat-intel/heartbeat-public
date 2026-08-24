@@ -10,6 +10,7 @@ interface ModalState {
   monthlyPriceCents?: number;
   yearlyPriceCents?: number;
   billingOptions?: string;
+  valueProps?: { paid?: string[]; free?: string[] } | null;
 }
 
 interface OpenDetail {
@@ -20,6 +21,7 @@ interface OpenDetail {
   monthlyPriceCents: number;
   yearlyPriceCents: number;
   billingOptions?: string;
+  valueProps?: { paid?: string[]; free?: string[] } | null;
 }
 
 export default function SubscribeModalWrapper() {
@@ -36,6 +38,7 @@ export default function SubscribeModalWrapper() {
         monthlyPriceCents: event.detail.monthlyPriceCents,
         yearlyPriceCents: event.detail.yearlyPriceCents,
         billingOptions: event.detail.billingOptions,
+        valueProps: event.detail.valueProps ?? null,
       });
     };
 
@@ -58,6 +61,7 @@ export default function SubscribeModalWrapper() {
       monthlyPriceCents={modalState.monthlyPriceCents}
       yearlyPriceCents={modalState.yearlyPriceCents}
       billingOptions={modalState.billingOptions}
+      valueProps={modalState.valueProps}
     />
   );
 }

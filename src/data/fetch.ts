@@ -14,10 +14,12 @@ export interface ApiPublisherProfile {
   long_bio: string | null;
   linkedin_url: string | null;
   twitter_url: string | null;
+  website_url: string | null;
   expertise: string[];
   monthly_price_cents: number;
   yearly_price_cents: number;
   billing_options?: string;
+  value_props?: { paid?: string[]; free?: string[] } | null;
   stats: {
     lists_count: number;
     articles_count: number;
@@ -122,6 +124,12 @@ function detailToPublisherData(pub: ApiPublisherProfile): PublisherData {
       linkedin: pub.linkedin_url || '#',
       twitter: pub.twitter_url || '#',
     },
+    // Mirrors heartbeat-web's PublisherProfile.tsx: one Display URL, preferring
+    // website_url and falling back to the social fields for rows written before
+    // website_url existed. The two cards must agree or the same publisher looks
+    // different on the apex and on a tenant host.
+    websiteUrl: pub.website_url || pub.linkedin_url || pub.twitter_url || null,
+    valueProps: pub.value_props ?? null,
     expertise: pub.expertise || [],
     monthlyPriceCents: pub.monthly_price_cents,
     yearlyPriceCents: pub.yearly_price_cents,

@@ -17,6 +17,10 @@ export interface PublisherData {
     linkedin: string;
     twitter: string;
   };
+  // Optional because toPublisherData (the featured-card builder) and the static
+  // CONTENT_DATA fixtures build PublisherData without them.
+  websiteUrl?: string | null;
+  valueProps?: { paid?: string[]; free?: string[] } | null;
   expertise: string[];
   monthlyPriceCents: number;
   yearlyPriceCents: number;
