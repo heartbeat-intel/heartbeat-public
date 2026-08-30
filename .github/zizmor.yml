@@ -1,0 +1,5 @@
+# .github/zizmor.yml — waivers for DELIBERATE behavior the zizmor job would
+# flag. Keep a why-comment on every entry. (Inline waivers also work but the
+# comment must START with `zizmor: ignore[rule]` — trailing it after other
+# text silently fails.) No waivers needed yet.
+rules: {}
