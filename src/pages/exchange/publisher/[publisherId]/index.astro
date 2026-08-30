@@ -63,7 +63,7 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
             />
             <div class="text-center">
               <h1 class="text-2xl font-bold text-[var(--hb-text-primary)]">{publisher.name}</h1>
-              <p class="text-sm text-[var(--hb-text-tertiary)] mt-1">{publisher.role}</p>
+              {publisher.description && <p class="text-sm text-[var(--hb-text-tertiary)] mt-1">{publisher.description}</p>}
               {publisher.expertise.length > 0 && (
                 <div class="flex flex-wrap gap-1 mt-2 justify-center">
                   {publisher.expertise.slice(0, 3).map((tag) => (
@@ -84,18 +84,10 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
               class="w-full py-2.5 px-4 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
               style={`background-color: ${publisher.color}`}
             >
-              Subscribe to Intel
+              Subscribe to {publisher.name} for access
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
-            </button>
-
-            <!-- Follow (saves to Heartbeat account) -->
-            <button
-              id="follow-btn"
-              class="mt-2 w-full py-2 px-4 text-sm font-medium rounded-lg border border-white/10 text-white/70 hover:bg-white/5 hover:text-white transition-colors"
-            >
-              + Follow
             </button>
           </div>
 
@@ -140,7 +132,7 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
     </div>
   </section>
 
-  <!-- Pulses -->
+  <!-- Highlights -->
   <section class="max-w-[1200px] mx-auto px-6 py-10">
     <div class="flex items-center gap-3 mb-8">
       <h2 class="text-lg font-bold text-[var(--hb-text-primary)] flex items-center gap-3">
@@ -149,7 +141,7 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
           <span class="pulse-ring absolute inline-flex h-full w-full rounded-full opacity-75" style={`background-color: ${publisher.color}`}></span>
           <span class="relative inline-flex rounded-full h-3 w-3" style={`background-color: ${publisher.color}`}></span>
         </span>
-        Pulses
+        Highlights
         <span class="text-xs font-normal text-[var(--hb-text-primary)]/30">{allPulses.length}</span>
       </h2>
       <!-- Animated heartbeat line -->
@@ -221,7 +213,7 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
           <span class="pulse-ring absolute inline-flex h-full w-full rounded-full opacity-75 bg-white/20"></span>
           <span class="relative inline-flex rounded-full h-4 w-4 bg-white/20"></span>
         </span>
-        <p class="text-sm text-[var(--hb-text-primary)]/40">No pulses yet.</p>
+        <p class="text-sm text-[var(--hb-text-primary)]/40">No highlights yet.</p>
       </div>
     )}
   </section>
@@ -305,30 +297,4 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
       } catch { /* ignore */ }
     });
   });
-
-  // Follow / unfollow this publisher (localStorage).
-  const PREFS_KEY = 'hb_prefs';
-  const publisherSlug = window.location.pathname.split('/').filter(Boolean).pop() || '';
-  const followBtn = document.getElementById('follow-btn');
-  function getPrefs() {
-    try { return JSON.parse(localStorage.getItem(PREFS_KEY) || '{}'); } catch { return {}; }
-  }
-  function isFollowing() {
-    const p = getPrefs();
-    return Array.isArray(p.follow) && p.follow.includes(publisherSlug);
-  }
-  function renderFollowBtn() {
-    if (!followBtn) return;
-    followBtn.textContent = isFollowing() ? '✓ Following' : '+ Follow';
-    followBtn.classList.toggle('bg-white/10', isFollowing());
-  }
-  followBtn?.addEventListener('click', () => {
-    const p = getPrefs();
-    const set = new Set(p.follow || []);
-    if (set.has(publisherSlug)) set.delete(publisherSlug);
-    else set.add(publisherSlug);
-    localStorage.setItem(PREFS_KEY, JSON.stringify({ ...p, follow: Array.from(set) }));
-    renderFollowBtn();
-  });
-  renderFollowBtn();
 </script>
