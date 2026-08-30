@@ -57,39 +57,10 @@ export const prerender = false;
           <div id="subs-list" class="grid gap-3"></div>
         </section>
 
-        <!-- Followed publishers -->
-        <section>
-          <h2 class="text-sm font-semibold text-white/80 tracking-wide uppercase mb-4">Following</h2>
-          <div id="follow-empty" class="hidden rounded-xl border border-white/5 bg-white/[0.02] p-6 text-center">
-            <p class="text-white/40 text-sm">You're not following any publishers yet.</p>
-            <p class="text-white/30 text-xs mt-1">Follow a publisher from their page to see updates here.</p>
-          </div>
-          <div id="follow-list" class="flex flex-wrap gap-2"></div>
-        </section>
-
-        <!-- Reading history -->
-        <section>
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-sm font-semibold text-white/80 tracking-wide uppercase">Recently viewed</h2>
-            <button id="clear-history" class="text-xs text-white/40 hover:text-white">Clear</button>
-          </div>
-          <div id="history-empty" class="hidden rounded-xl border border-white/5 bg-white/[0.02] p-6 text-center">
-            <p class="text-white/40 text-sm">Nothing yet — articles you open from the Exchange show up here.</p>
-          </div>
-          <div id="history-list" class="flex flex-col divide-y divide-white/5 border border-white/5 rounded-xl overflow-hidden"></div>
-        </section>
-
         <!-- Preferences -->
         <section>
           <h2 class="text-sm font-semibold text-white/80 tracking-wide uppercase mb-4">Preferences</h2>
           <div class="rounded-xl border border-white/5 bg-white/[0.02] divide-y divide-white/5">
-            <label class="flex items-center justify-between px-5 py-4 cursor-pointer">
-              <div>
-                <p class="text-sm text-white">Email digest</p>
-                <p class="text-xs text-white/40">Weekly summary of new content from your subscriptions</p>
-              </div>
-              <input id="pref-digest" type="checkbox" class="h-4 w-4 accent-hb-orange-main" />
-            </label>
             <label class="flex items-center justify-between px-5 py-4 cursor-pointer">
               <div>
                 <p class="text-sm text-white">Dark theme in workspaces</p>
@@ -148,8 +119,6 @@ export const prerender = false;
 
       renderProfile(me);
       renderSubscriptions(subs.subscriptions || []);
-      renderFollow();
-      renderHistory();
       renderPrefs();
       show('account');
     } catch (e) {
@@ -181,13 +150,18 @@ export const prerender = false;
                 <span class="w-1.5 h-1.5 rounded-full ${s.status === 'active' || s.status === 'trialing' ? 'bg-green-400' : 'bg-amber-400'}"></span>
                 ${s.status} · ${s.plan || '—'}
               </span>
-              ${s.cancel_at_period_end ? '· cancels soon' : ''}
+              ${s.cancel_at_period_end ? `· cancels ${new Date(s.current_period_end).toLocaleDateString()}` : ''}
             </p>
           </div>
         </div>
-        <button data-sub-id="${s.id}" data-slug="${s.publisher_slug}" class="open-ws text-xs bg-white/10 hover:bg-white/15 text-white px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">
-          Open workspace →
-        </button>
+        <div class="flex items-center gap-2">
+          ${['active', 'trialing'].includes(s.status)
+            ? `<button data-sub-id="${s.id}" class="manage-sub text-xs border border-white/10 hover:bg-white/5 text-white/70 hover:text-white px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">${s.cancel_at_period_end ? 'Manage' : 'Cancel'}</button>`
+            : ''}
+          <button data-sub-id="${s.id}" data-slug="${s.publisher_slug}" class="open-ws text-xs bg-white/10 hover:bg-white/15 text-white px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">
+            Open workspace →
+          </button>
+        </div>
       </div>
     `).join('');
     list.querySelectorAll<HTMLButtonElement>('button.open-ws').forEach(btn => {
@@ -204,11 +178,33 @@ export const prerender = false;
         } catch { btn.textContent = 'Try again'; }
       });
     });
+    list.querySelectorAll<HTMLButtonElement>('button.manage-sub').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        btn.textContent = 'Opening…';
+        btn.disabled = true;
+        try {
+          const r = await fetch(
+            `${EXCHANGE_API}/api/v1/me/subscriptions/${btn.dataset.subId}/portal`,
+            { method: 'POST', headers: { Authorization: `Bearer ${token}` } }
+          );
+          if (r.status === 401) {
+            localStorage.removeItem('exchange_access_token');
+            show('signedOut');
+            return;
+          }
+          const data = r.ok ? await r.json() : null;
+          if (data && data.portal_url) window.location.href = data.portal_url;
+          else if (r.status === 400) btn.textContent = 'Unavailable';
+          else btn.textContent = 'Try again';
+        } catch { btn.textContent = 'Try again'; }
+        finally { btn.disabled = false; }
+      });
+    });
   }
 
   // --- Preferences (localStorage-backed) ---
   const PREFS_KEY = 'hb_prefs';
-  interface Prefs { digest?: boolean; dark?: boolean; follow?: string[] }
+  interface Prefs { dark?: boolean }
   function getPrefs(): Prefs {
     try { return JSON.parse(localStorage.getItem(PREFS_KEY) || '{}'); } catch { return {}; }
   }
@@ -216,69 +212,11 @@ export const prerender = false;
 
   function renderPrefs() {
     const p = getPrefs();
-    const digest = document.getElementById('pref-digest') as HTMLInputElement;
     const dark = document.getElementById('pref-dark') as HTMLInputElement;
-    digest.checked = !!p.digest;
     dark.checked = p.dark !== false;
-    digest.addEventListener('change', () => setPrefs({ ...getPrefs(), digest: digest.checked }));
     dark.addEventListener('change', () => {
       setPrefs({ ...getPrefs(), dark: dark.checked });
       localStorage.setItem('hb-theme', dark.checked ? 'dark' : 'light');
-    });
-  }
-
-  function renderFollow() {
-    const p = getPrefs();
-    const list = document.getElementById('follow-list')!;
-    const empty = document.getElementById('follow-empty')!;
-    const slugs = (p.follow || []);
-    if (slugs.length === 0) { empty.classList.remove('hidden'); return; }
-    list.innerHTML = slugs.map(slug => `
-      <a href="/exchange/publisher/${slug}" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 text-sm text-white/80 hover:bg-white/5 hover:text-white transition-colors">
-        ${slug}
-        <button data-slug="${slug}" class="unfollow text-white/30 hover:text-white" aria-label="Unfollow">×</button>
-      </a>
-    `).join('');
-    list.querySelectorAll<HTMLButtonElement>('button.unfollow').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const slug = btn.dataset.slug!;
-        const p = getPrefs();
-        p.follow = (p.follow || []).filter(s => s !== slug);
-        setPrefs(p);
-        renderFollow();
-      });
-    });
-  }
-
-  // --- Reading history (localStorage) ---
-  const HIST_KEY = 'hb_reading_history';
-  interface HistItem { href: string; title: string; publisher: string; ts: number; kind: 'article' | 'list' }
-  function getHist(): HistItem[] {
-    try { return JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); } catch { return []; }
-  }
-
-  function renderHistory() {
-    const items = getHist().slice(0, 15);
-    const list = document.getElementById('history-list')!;
-    const empty = document.getElementById('history-empty')!;
-    if (items.length === 0) { empty.classList.remove('hidden'); return; }
-    list.innerHTML = items.map(i => `
-      <a href="${i.href}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between gap-4 px-5 py-3 hover:bg-white/[0.02] transition-colors">
-        <div class="min-w-0 flex-1">
-          <p class="text-sm text-white truncate">${i.title}</p>
-          <p class="text-xs text-white/40 truncate">${i.publisher} · ${i.kind} · ${new Date(i.ts).toLocaleDateString()}</p>
-        </div>
-        <svg class="w-3 h-3 text-white/30 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-        </svg>
-      </a>
-    `).join('');
-    document.getElementById('clear-history')!.addEventListener('click', () => {
-      localStorage.removeItem(HIST_KEY);
-      renderHistory();
-      empty.classList.remove('hidden');
-      list.innerHTML = '';
     });
   }
 
