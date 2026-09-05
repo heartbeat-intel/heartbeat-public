@@ -5,18 +5,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import DarkHeader from '../components/astro/DarkHeader.astro';
 import DarkFooter from '../components/astro/DarkFooter.astro';
 import HeartbeatPulse from '../components/react/HeartbeatPulse';
-import AnimatedCounter from '../components/react/AnimatedCounter';
 import PublisherCardDark from '../components/astro/PublisherCardDark.astro';
 import Badge from '../components/ui/Badge.astro';
 import { fetchAllPublishers } from '../data/fetch';
 
 // Fetch real data at build time
 const allPublishers = await fetchAllPublishers();
-
-// Compute real stats from fetched data
-const totalLists = allPublishers.reduce((sum, e) => sum + (e.stats?.lists || 0), 0);
-const totalPublishers = allPublishers.length;
-const totalViews = allPublishers.reduce((sum, e) => sum + (e.stats?.totalViews || 0), 0);
 ---
 
 <BaseLayout title="Heartbeat Intelligence — Trade in intelligence, not just information">
@@ -72,49 +66,6 @@ const totalViews = allPublishers.reduce((sum, e) => sum + (e.stats?.totalViews |
       <!-- Bottom gradient fade -->
       <div class="absolute bottom-0 left-0 right-0 h-32 hero-bottom-fade"></div>
     </section>
-
-    <!-- ============================================
-         SOCIAL PROOF - Animated Stats (only if data exists)
-         ============================================ -->
-    {(totalPublishers > 0 || totalLists > 0) && (
-      <section class="bg-hb-black-1 py-20">
-        <div class="max-w-[1200px] mx-auto px-6 reveal">
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="stat-card p-8 text-center" data-reveal-delay="0">
-              <div class="text-4xl lg:text-5xl font-bold text-white tracking-tight mb-2">
-                <AnimatedCounter client:visible end={totalLists} suffix="+" />
-              </div>
-              <p class="text-sm text-white/40 font-medium uppercase tracking-wider">Intel Lists Published</p>
-            </div>
-
-            <div class="stat-card p-8 text-center" data-reveal-delay="100">
-              <div class="text-4xl lg:text-5xl font-bold text-hb-orange-main tracking-tight mb-2">
-                <AnimatedCounter client:visible end={totalPublishers} />
-              </div>
-              <p class="text-sm text-white/40 font-medium uppercase tracking-wider">Publishers</p>
-            </div>
-
-            <div class="stat-card p-8 text-center" data-reveal-delay="200">
-              <div class="text-4xl lg:text-5xl font-bold text-white tracking-tight mb-2">
-                {totalViews >= 1000 ? (
-                  <AnimatedCounter client:visible end={Math.round(totalViews / 1000)} suffix="k+" />
-                ) : (
-                  <AnimatedCounter client:visible end={totalViews} />
-                )}
-              </div>
-              <p class="text-sm text-white/40 font-medium uppercase tracking-wider">Total Views</p>
-            </div>
-
-            <div class="stat-card p-8 text-center" data-reveal-delay="300">
-              <div class="text-4xl lg:text-5xl font-bold text-white tracking-tight mb-2">
-                <AnimatedCounter client:visible end={2} />
-              </div>
-              <p class="text-sm text-white/40 font-medium uppercase tracking-wider">Live Databases</p>
-            </div>
-          </div>
-        </div>
-      </section>
-    )}
 
     <!-- ============================================
          HOW IT WORKS - 3 Step Flow
@@ -224,5 +175,5 @@ const totalViews = allPublishers.reduce((sum, e) => sum + (e.stats?.totalViews |
     </section>
   </main>
 
-  <DarkFooter />
+  <DarkFooter showValueProps={false} />
 </BaseLayout>
