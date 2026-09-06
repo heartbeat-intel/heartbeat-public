@@ -1,16 +1,8 @@
-# Auto-approves and auto-merges ONLY Dependabot patch updates. Everything else
-# waits for a human.
+# Enables auto-merge ONLY for Dependabot patch updates. Everything else waits
+# for a human. Required status checks still gate the merge.
 #
-# Three things that are easy to get wrong:
-#  * The actor gate. Without it, anyone can open a PR that this workflow approves.
-#  * Explicit `permissions:`. Dependabot-triggered runs get a READ-ONLY token
-#    regardless of the repo default, so the write scopes must be requested here.
-#  * "Allow auto-merge" must be enabled on the repo or `gh pr merge --auto` errors.
-#
-# The bot's own approval satisfies a 1-required-approval rule — that is the
-# intended pattern, not a loophole. The repo's required checks still gate the
-# merge; --auto only lands the PR once they pass — so land this only AFTER the
-# checks ruleset exists, or patch updates merge unreviewed AND ungated.
+# The author gate is mandatory: without it, an arbitrary PR could trigger this
+# workflow. "Allow auto-merge" must also remain enabled on the repository.
 
 name: dependabot-auto-merge
 
@@ -38,6 +30,4 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR: ${{ github.event.pull_request.html_url }}
-        run: |
-          gh pr review --approve "$PR"
-          gh pr merge --auto --squash "$PR"
+        run: gh pr merge --auto --squash "$PR"

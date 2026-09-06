@@ -1,8 +1,6 @@
-# .github/dependabot.yml — pnpm repos (greekcore api/web/landing, mavri).
-#
-# Grouped so a week of patches is ONE PR, not thirty. `cooldown` keeps Dependabot off a
-# release for a few days, which is the cheapest available defence against a compromised
-# publish.
+# Dependabot groups weekly patch updates for auto-merge. Minor and major
+# upgrades stay individual so dependency, framework, and runtime migrations do
+# not hide each other's failures. `cooldown` delays newly published releases.
 #
 # NOTE: `gh pr merge --auto` in the companion auto-merge workflow requires the repo's
 # "Allow auto-merge" setting to be ON. It is off by default.
@@ -12,14 +10,12 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 10
     cooldown:
       default-days: 3
     groups:
-      patch-and-minor:
-        update-types: [patch, minor]
-      major:
-        update-types: [major]
+      patch:
+        update-types: [patch]
 
   - package-ecosystem: github-actions
     directory: "/"

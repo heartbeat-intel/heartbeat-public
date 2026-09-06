@@ -57,4 +57,4 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
       - name: Audit workflows
-        run: uvx zizmor --persona=regular --config .github/zizmor.yml .github/workflows/
+        run: uvx "zizmor@1.30.0" --persona=regular --config .github/zizmor.yml .github/workflows/
