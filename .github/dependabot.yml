@@ -1,9 +1,9 @@
-# Dependabot groups weekly patch updates for auto-merge. Minor and major
-# upgrades stay individual so dependency, framework, and runtime migrations do
-# not hide each other's failures. `cooldown` delays newly published releases.
+# Dependabot groups weekly patch updates. Minor and major upgrades stay
+# individual so dependency, framework, and runtime migrations do not hide each
+# other's failures. `cooldown` delays newly published releases.
 #
-# NOTE: `gh pr merge --auto` in the companion auto-merge workflow requires the repo's
-# "Allow auto-merge" setting to be ON. It is off by default.
+# A human performs merges: GITHUB_TOKEN merges suppress push workflows and
+# would bypass the deployment pipeline.
 version: 2
 updates:
   - package-ecosystem: npm          # covers pnpm workspaces
