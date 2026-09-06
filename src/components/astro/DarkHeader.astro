@@ -46,10 +46,16 @@ const {
     </div>
 
     <!-- Center nav -->
-    {(variant === 'home' || variant === 'exchange') && (
+    {variant === 'home' && (
       <nav class="hidden md:flex items-center gap-8">
         <a href="/" class="text-sm text-white/40 hover:text-white transition-colors">Home</a>
         <a href="/exchange" class="text-sm text-white/40 hover:text-white transition-colors">Exchange</a>
+      </nav>
+    )}
+
+    {variant === 'exchange' && (
+      <nav class="hidden md:flex items-center">
+        <a href="/exchange/become-a-publisher" class="text-sm text-white/40 hover:text-white transition-colors">Become a publisher</a>
       </nav>
     )}
 

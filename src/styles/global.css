@@ -108,11 +108,6 @@
   box-shadow: var(--hb-card-hover-shadow);
 }
 
-[data-theme="light"] .stat-card {
-  background: white;
-  border-color: var(--hb-border);
-}
-
 [data-theme="light"] .gradient-cta {
   background: linear-gradient(135deg, #1D1D1F 0%, #222426 100%);
 }
@@ -499,41 +494,6 @@
 
 .ticker-track:hover {
   animation-play-state: paused;
-}
-
-/* ========================================
-   HOMEPAGE - Stats counter glow (dark)
-   ======================================== */
-
-.stat-card {
-  position: relative;
-  border-radius: 16px;
-  overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #FB4C02, transparent);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 40px rgba(251, 76, 2, 0.08);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.stat-card:hover::before {
-  opacity: 1;
 }
 
 /* ========================================
