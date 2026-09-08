@@ -156,7 +156,7 @@ export const prerender = false;
         </div>
         <div class="flex items-center gap-2">
           ${['active', 'trialing'].includes(s.status)
-            ? `<button data-sub-id="${s.id}" class="manage-sub text-xs border border-white/10 hover:bg-white/5 text-white/70 hover:text-white px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">${s.cancel_at_period_end ? 'Manage' : 'Cancel'}</button>`
+            ? `<button data-sub-id="${s.id}" class="manage-sub text-xs border border-white/10 hover:bg-white/5 text-white/70 hover:text-white px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">Manage billing</button>`
             : ''}
           <button data-sub-id="${s.id}" data-slug="${s.publisher_slug}" class="open-ws text-xs bg-white/10 hover:bg-white/15 text-white px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">
             Open workspace →
@@ -172,9 +172,15 @@ export const prerender = false;
             `${EXCHANGE_API}/api/v1/me/subscriptions/${btn.dataset.subId}/login-link`,
             { method: 'POST', headers: { Authorization: `Bearer ${token}` } }
           );
-          const data = await r.json();
+          if (r.status === 401) {
+            localStorage.removeItem('exchange_access_token');
+            show('signedOut');
+            return;
+          }
+          const data = await r.json().catch(() => ({}));
           if (data.login_url) window.location.href = data.login_url;
-          else btn.textContent = 'Try again';
+          // Surface the server's reason (e.g. access still provisioning) instead of a bare retry.
+          else btn.textContent = typeof data.detail === 'string' && data.detail ? data.detail : 'Try again';
         } catch { btn.textContent = 'Try again'; }
       });
     });
