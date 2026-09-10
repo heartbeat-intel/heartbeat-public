@@ -30,6 +30,20 @@ import type { TierId } from '../../utils/subscribeModalCopy';
 
 const API_BASE = import.meta.env.PUBLIC_EXCHANGE_API_URL || '';
 
+/** DarkHeader reads this for the account chip's initial; SignInModal writes the same key. */
+const ACCOUNT_EMAIL_STORAGE_KEY = 'hb_account_email';
+
+// Persist the Exchange session for the rest of this page. DarkHeader (the
+// account chip) and the publisher page (the bridge token on tenant links)
+// re-read localStorage on `storage` events, and browsers fire those only in
+// other tabs — never in the tab that wrote the key. Dispatching one here tells
+// this tab too; both listeners inspect only `key`.
+const storeExchangeSession = (accessToken: string, accountEmail: string) => {
+  localStorage.setItem(EXCHANGE_TOKEN_STORAGE_KEY, accessToken);
+  localStorage.setItem(ACCOUNT_EMAIL_STORAGE_KEY, accountEmail);
+  window.dispatchEvent(new StorageEvent('storage', { key: EXCHANGE_TOKEN_STORAGE_KEY, newValue: accessToken }));
+};
+
 // The Exchange implementation of the subscribe widget. heartbeat-web's
 // SubscribeModal (Chakra) is the spec: same steps, same test ids, same copy
 // module, same timers — only the styling follows this host's theme.
@@ -196,6 +210,9 @@ const OtpInput = ({
   const handleInput = (idx: number, raw: string) => {
     const digits = raw.replace(/\D/g, '');
     if (!digits) {
+      // A non-digit typed over a filled box is rejected and the digit kept,
+      // as Chakra's PinInput does; only an actual deletion empties the box.
+      if (raw !== '') return;
       const next = [...chars];
       next[idx] = '';
       commit(next);
@@ -482,12 +499,13 @@ export default function SubscribeModal({
         throw new Error(error.detail || SUBSCRIBE_COPY.verify.errorInvalid);
       }
 
-      const { access_token } = await response.json();
+      const data: { access_token: string; email?: string } = await response.json();
+      const { access_token } = data;
 
       // The Exchange JWT bridges to Stripe checkout and to the post-signup
-      // pages on both paths (DarkHeader reads it to show the account chip),
-      // so it is stored before the tier decides what happens next.
-      localStorage.setItem(EXCHANGE_TOKEN_STORAGE_KEY, access_token);
+      // pages on both paths, so the session is stored (and this tab told)
+      // before the tier decides what happens next.
+      storeExchangeSession(access_token, data.email || email);
 
       if (selectedTier === 'free') {
         // Free tier: create subscription directly, no Stripe

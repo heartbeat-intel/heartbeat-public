@@ -360,7 +360,9 @@ describe('SubscribeModal (Exchange)', () => {
 
   describe('Verification Step', () => {
     it('renders six boxes and a verify button disabled until every digit is in', async () => {
-      vi.stubGlobal('fetch', vi.fn().mockImplementation(codeSent));
+      // A full paid mock: the sixth digit arms the auto-submit, and waiting
+      // for its redirect keeps every state update inside act().
+      vi.stubGlobal('fetch', createPaidMockFetch());
       const { user } = renderModal();
       await goToVerify(user);
 
@@ -383,7 +385,9 @@ describe('SubscribeModal (Exchange)', () => {
       await user.type(screen.getByTestId('code-input-6'), '6');
       expect(screen.getByTestId('verify-button')).not.toBeDisabled();
 
-      await settleAutoSubmit();
+      await waitFor(() => {
+        expect(mockLocationHref).toHaveBeenCalledWith('https://checkout.stripe.com/test');
+      });
     });
 
     it('auto-advances, and Backspace on an empty box clears the previous one', async () => {
@@ -402,6 +406,10 @@ describe('SubscribeModal (Exchange)', () => {
 
       expect(screen.getByTestId('code-input-2')).toHaveValue('');
       expect(screen.getByTestId('code-input-2')).toHaveFocus();
+      expect(screen.getByTestId('code-input-1')).toHaveValue('1');
+
+      // A non-digit typed over a filled box is rejected, not a clear
+      await user.type(screen.getByTestId('code-input-1'), 'x', { initialSelectionStart: 0, initialSelectionEnd: 1 });
       expect(screen.getByTestId('code-input-1')).toHaveValue('1');
     });
 
@@ -536,9 +544,14 @@ describe('SubscribeModal (Exchange)', () => {
         expect(mockLocationHref).toHaveBeenCalledWith('https://checkout.stripe.com/session123');
       });
       expect(localStorage.getItem(EXCHANGE_TOKEN_STORAGE_KEY)).toBe('verified-token-123');
+      expect(localStorage.getItem('hb_account_email')).toBe('test@example.com');
       expect(callsTo(mockFetch, '/payments/free-subscribe')).toHaveLength(0);
 
+      // The auto-submit timer and the click both fired for this one code:
+      // one verify call and one checkout session, not two.
       await settleAutoSubmit();
+      expect(callsTo(mockFetch, '/subscribe-verify')).toHaveLength(1);
+      expect(callsTo(mockFetch, '/payments/checkout')).toHaveLength(1);
     });
 
     it('sends the selected price_type when yearly is chosen', async () => {
@@ -557,6 +570,8 @@ describe('SubscribeModal (Exchange)', () => {
       expect(JSON.parse(callsTo(mockFetch, '/subscribe-init')[0][1].body).tier).toBe('yearly');
 
       await settleAutoSubmit();
+      expect(callsTo(mockFetch, '/subscribe-verify')).toHaveLength(1);
+      expect(callsTo(mockFetch, '/payments/checkout')).toHaveLength(1);
     });
 
     it('shows Redirecting to checkout... while the session is created', async () => {
@@ -708,6 +723,49 @@ describe('SubscribeModal (Exchange)', () => {
       expect(screen.getByTestId('success-close-button')).toHaveTextContent('Done');
       await user.click(screen.getByTestId('success-close-button'));
       expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('tells this tab about the new session with the storage event DarkHeader and the tenant links listen for', async () => {
+      // Browsers fire `storage` only in other tabs. DarkHeader (account chip)
+      // and the publisher page (bridge token on tenant links) re-read
+      // localStorage in their listeners, so both keys must already be written
+      // when the event arrives.
+      const mockFetch = createFreeMockFetch();
+      vi.stubGlobal('fetch', mockFetch);
+      const seen: Array<{ key: string | null; newValue: string | null; token: string | null; email: string | null }> = [];
+      const onStorage = (e: StorageEvent) => {
+        seen.push({
+          key: e.key,
+          newValue: e.newValue,
+          token: localStorage.getItem(EXCHANGE_TOKEN_STORAGE_KEY),
+          email: localStorage.getItem('hb_account_email'),
+        });
+      };
+      window.addEventListener('storage', onStorage);
+
+      try {
+        const { user } = renderFree();
+        await goToVerifyAsFree(user);
+        expect(seen).toEqual([]);
+
+        await typeCode(user, '123456');
+        await waitFor(() => {
+          expect(screen.getByTestId('success-step')).toBeInTheDocument();
+        });
+
+        expect(seen).toEqual([
+          {
+            key: EXCHANGE_TOKEN_STORAGE_KEY,
+            newValue: 'verified-token-123',
+            token: 'verified-token-123',
+            email: 'test@example.com',
+          },
+        ]);
+
+        await settleAutoSubmit();
+      } finally {
+        window.removeEventListener('storage', onStorage);
+      }
     });
 
     it('surfaces a free-subscribe failure', async () => {
