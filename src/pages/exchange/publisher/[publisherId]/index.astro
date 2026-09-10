@@ -6,6 +6,7 @@ import Avatar from '../../../../components/ui/Avatar.astro';
 import Badge from '../../../../components/ui/Badge.astro';
 import SubscribeModalWrapper from '../../../../components/react/SubscribeModalWrapper';
 import { buildTenantUrl, CONTENT_DATA, getPublisherTenant } from '../../../../utils/constants';
+import { subscribeCtaLabel } from '../../../../utils/subscribeModalCopy';
 import { fetchPublisherProfile, fetchPublisherContent } from '../../../../data/fetch';
 
 export const prerender = false;
@@ -81,10 +82,11 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
             <!-- Subscribe Button -->
             <button
               id="subscribe-btn"
+              type="button"
               class="w-full py-2.5 px-4 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
               style={`background-color: ${publisher.color}`}
             >
-              Subscribe to {publisher.name} for access
+              {subscribeCtaLabel(publisher.name)}
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
@@ -251,13 +253,13 @@ const allPulses = [...lists.map(l => ({ ...l, _type: 'list' as const })), ...art
   <SubscribeModalWrapper client:load />
 </BaseLayout>
 
-<script define:vars={{ publisherUuid: publisher.id, publisherName: publisher.name, publisherLogoUrl: publisher.avatarUrl || null, publisherColor: publisher.color, monthlyPriceCents: publisher.monthlyPriceCents, yearlyPriceCents: publisher.yearlyPriceCents, billingOptions: publisher.billingOptions, valueProps: publisher.valueProps ?? null }}>
+<script define:vars={{ publisherUuid: publisher.id, publisherName: publisher.name, publisherLogoUrl: publisher.avatarUrl || null, publisherColor: publisher.color, monthlyPriceCents: publisher.monthlyPriceCents, yearlyPriceCents: publisher.yearlyPriceCents, billingOptions: publisher.billingOptions, freeTierEnabled: publisher.freeTierEnabled ?? false, valueProps: publisher.valueProps ?? null }}>
   const subscribeBtn = document.getElementById('subscribe-btn');
 
   if (subscribeBtn) {
     subscribeBtn.addEventListener('click', () => {
       window.dispatchEvent(new CustomEvent('openSubscribeModal', {
-        detail: { publisherId: publisherUuid, publisherName, publisherLogoUrl, publisherColor, monthlyPriceCents, yearlyPriceCents, billingOptions, valueProps }
+        detail: { publisherId: publisherUuid, publisherName, publisherLogoUrl, publisherColor, monthlyPriceCents, yearlyPriceCents, billingOptions, freeTierEnabled, valueProps }
       }));
     });
   }

@@ -36,9 +36,10 @@ http://localhost:4321
 
 ## Tests And Build
 
-There is no dedicated unit test command in `package.json` yet. Use the production build as the baseline check:
+Unit tests (vitest + jsdom, for the React islands) and the production build are the baseline checks:
 
 ```bash
+npm test
 npm run build
 npm run preview
 ```

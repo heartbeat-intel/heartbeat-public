@@ -1,3 +1,5 @@
+import type { TierId } from './subscribeModalCopy';
+
 // Publisher profile data
 export interface PublisherData {
   id: string;
@@ -21,6 +23,7 @@ export interface PublisherData {
   // CONTENT_DATA fixtures build PublisherData without them.
   websiteUrl?: string | null;
   valueProps?: { paid?: string[]; free?: string[] } | null;
+  freeTierEnabled?: boolean;
   expertise: string[];
   monthlyPriceCents: number;
   yearlyPriceCents: number;
@@ -29,7 +32,7 @@ export interface PublisherData {
 
 // Pricing tier type (generated dynamically from publisher data)
 export interface PricingTier {
-  id: string;
+  id: TierId;
   name: string;
   price: number;
   period: string;
