@@ -37,6 +37,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
+      # vitest (jsdom) — the React islands' unit tests
+      - name: Test
+        run: pnpm test
+
       # astro check (type checking) + astro build
       - name: Build
         run: pnpm build

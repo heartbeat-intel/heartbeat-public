@@ -19,6 +19,7 @@ export interface ApiPublisherProfile {
   monthly_price_cents: number;
   yearly_price_cents: number;
   billing_options?: string;
+  free_tier_enabled?: boolean;
   value_props?: { paid?: string[]; free?: string[] } | null;
   stats: {
     lists_count: number;
@@ -105,7 +106,7 @@ function toPublisherData(pub: ApiFeaturedPublisher): PublisherData {
   };
 }
 
-function detailToPublisherData(pub: ApiPublisherProfile): PublisherData {
+export function detailToPublisherData(pub: ApiPublisherProfile): PublisherData {
   return {
     id: pub.id,
     slug: pub.slug,
@@ -134,6 +135,7 @@ function detailToPublisherData(pub: ApiPublisherProfile): PublisherData {
     monthlyPriceCents: pub.monthly_price_cents,
     yearlyPriceCents: pub.yearly_price_cents,
     billingOptions: pub.billing_options || 'both',
+    freeTierEnabled: pub.free_tier_enabled ?? false,
   };
 }
 

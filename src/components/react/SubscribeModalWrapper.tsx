@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import SubscribeModal from './SubscribeModal';
+import type { ValueProps } from '../../utils/valueProps';
 
 interface ModalState {
   isOpen: boolean;
@@ -10,7 +11,8 @@ interface ModalState {
   monthlyPriceCents?: number;
   yearlyPriceCents?: number;
   billingOptions?: string;
-  valueProps?: { paid?: string[]; free?: string[] } | null;
+  freeTierEnabled?: boolean;
+  valueProps?: ValueProps;
 }
 
 interface OpenDetail {
@@ -21,7 +23,8 @@ interface OpenDetail {
   monthlyPriceCents: number;
   yearlyPriceCents: number;
   billingOptions?: string;
-  valueProps?: { paid?: string[]; free?: string[] } | null;
+  freeTierEnabled?: boolean;
+  valueProps?: ValueProps;
 }
 
 export default function SubscribeModalWrapper() {
@@ -38,6 +41,7 @@ export default function SubscribeModalWrapper() {
         monthlyPriceCents: event.detail.monthlyPriceCents,
         yearlyPriceCents: event.detail.yearlyPriceCents,
         billingOptions: event.detail.billingOptions,
+        freeTierEnabled: event.detail.freeTierEnabled ?? false,
         valueProps: event.detail.valueProps ?? null,
       });
     };
@@ -61,6 +65,7 @@ export default function SubscribeModalWrapper() {
       monthlyPriceCents={modalState.monthlyPriceCents}
       yearlyPriceCents={modalState.yearlyPriceCents}
       billingOptions={modalState.billingOptions}
+      freeTierEnabled={modalState.freeTierEnabled}
       valueProps={modalState.valueProps}
     />
   );
