@@ -62,3 +62,19 @@ jobs:
       - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
       - name: Audit workflows
         run: uvx "zizmor@1.30.0" --persona=regular --config .github/zizmor.yml .github/workflows/
+
+  # The single required status check, for every repo in every org. Rulesets require the
+  # name `gate`, so CI job names stay free to differ per repo. `if: always()` is
+  # load-bearing: without it a failed dependency SKIPS this job, and a skipped required
+  # check counts as passing. Advisory jobs (zizmor) stay out of `needs` so they can never
+  # block. Composite: it fails unless every listed result is success or skipped.
+  gate:
+    needs: [build]
+    if: always()
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    permissions:
+      contents: read
+    steps:
+      - uses: paris-phan/platform-actions/actions/gate@c3916228bc066b4868667e08746ef99867a57edf # 2026-09-11
+        with:
+          needs: ${{ toJSON(needs) }}
