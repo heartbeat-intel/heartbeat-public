@@ -3,20 +3,40 @@ interface Props {
   title: string;
   description?: string;
   ogImage?: string;
+  ogImageAlt?: string;
+  ogImageWidth?: number;
+  ogImageHeight?: number;
   ogType?: 'website' | 'article';
+  twitterCard?: 'summary' | 'summary_large_image';
   theme?: 'dark' | 'light';
 }
 
+const SITE_ORIGIN = 'https://www.heartbeatintel.com';
+const DEFAULT_OG_IMAGE = '/images/social/heartbeat-preview-v1.png';
+
+const props: Props = Astro.props;
 const {
   title,
   description = 'Trade in intelligence, not just information. Connect with publishers who curate and monetize exclusive intel.',
-  ogImage = '/images/logos/heartbeatLogoBlack.svg',
+  ogImage = DEFAULT_OG_IMAGE,
+  ogImageAlt = 'Heartbeat Intelligence — Designed to traffic in intelligence.',
   ogType = 'website',
+  twitterCard = 'summary_large_image',
   theme = 'light',
-} = Astro.props;
+} = props;
 
-const canonicalUrl = new URL(Astro.url.pathname, 'https://www.heartbeatintel.com').toString();
-const ogImageUrl = ogImage.startsWith('http') ? ogImage : new URL(ogImage, 'https://www.heartbeatintel.com').toString();
+const canonicalUrl = new URL(Astro.url.pathname, SITE_ORIGIN).toString();
+const ogImageUrl = new URL(ogImage, SITE_ORIGIN).toString();
+const imagePath = new URL(ogImageUrl).pathname.toLowerCase();
+const ogImageType = imagePath.endsWith('.png')
+  ? 'image/png'
+  : imagePath.match(/\.jpe?g$/)
+    ? 'image/jpeg'
+    : imagePath.endsWith('.webp')
+      ? 'image/webp'
+      : undefined;
+const ogImageWidth = props.ogImageWidth ?? (ogImage === DEFAULT_OG_IMAGE ? 1200 : undefined);
+const ogImageHeight = props.ogImageHeight ?? (ogImage === DEFAULT_OG_IMAGE ? 630 : undefined);
 ---
 
 <!DOCTYPE html>
@@ -31,15 +51,22 @@ const ogImageUrl = ogImage.startsWith('http') ? ogImage : new URL(ogImage, 'http
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:secure_url" content={ogImageUrl} />
+    {ogImageType && <meta property="og:image:type" content={ogImageType} />}
+    {ogImageWidth && <meta property="og:image:width" content={ogImageWidth.toString()} />}
+    {ogImageHeight && <meta property="og:image:height" content={ogImageHeight.toString()} />}
+    <meta property="og:image:alt" content={ogImageAlt} />
     <meta property="og:type" content={ogType} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:site_name" content="Heartbeat Intelligence" />
+    <meta property="og:locale" content="en_US" />
 
     <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:card" content={twitterCard} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/images/logos/heartbeatLogoBlack.svg" />
