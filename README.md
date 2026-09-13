@@ -42,6 +42,18 @@ npm run preview
 
 The build runs `astro check` before `astro build`, so type and Astro template issues should fail before deployment.
 
+## Link sharing previews
+
+`src/layouts/BaseLayout.astro` is the single owner of canonical, Open Graph,
+and Twitter Card metadata for rendered public pages. Its default image is the
+1200×630 PNG at `public/images/social/heartbeat-preview-v1.png`; the adjacent
+SVG is the editable source. Publisher profiles may replace that default with
+the publisher logo and use a compact summary card.
+
+Keep default image dimensions and alt text in `BaseLayout` synchronized with
+the asset. `/images/*` responses are immutable for one year, so publish revised
+artwork under a new versioned filename rather than replacing a deployed file.
+
 ## Deployment
 
 ```bash
