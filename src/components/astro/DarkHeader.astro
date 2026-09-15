@@ -7,6 +7,7 @@ interface Props {
   backHref?: string;
   backLabel?: string;
   maxWidth?: string;
+  showCenterNav?: boolean;
 }
 
 const {
@@ -15,6 +16,7 @@ const {
   backHref = '/exchange',
   backLabel = 'Back',
   maxWidth = '1200px',
+  showCenterNav = true,
 } = Astro.props;
 ---
 
@@ -46,7 +48,7 @@ const {
     </div>
 
     <!-- Center nav -->
-    {variant === 'home' && (
+    {variant === 'home' && showCenterNav && (
       <nav class="hidden md:flex items-center gap-8">
         <a href="/" class="text-sm text-white/40 hover:text-white transition-colors">Home</a>
         <a href="/exchange" class="text-sm text-white/40 hover:text-white transition-colors">Exchange</a>
