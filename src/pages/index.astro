@@ -6,7 +6,6 @@ import DarkHeader from '../components/astro/DarkHeader.astro';
 import DarkFooter from '../components/astro/DarkFooter.astro';
 import HeartbeatPulse from '../components/react/HeartbeatPulse';
 import PublisherCardDark from '../components/astro/PublisherCardDark.astro';
-import Badge from '../components/ui/Badge.astro';
 import { fetchAllPublishers } from '../data/fetch';
 
 // Fetch real data at build time
@@ -17,7 +16,7 @@ const allPublishers = await fetchAllPublishers();
   <!-- ============================================
        STICKY NAVIGATION
        ============================================ -->
-  <DarkHeader variant="home" />
+  <DarkHeader variant="home" showCenterNav={false} />
 
   <main>
     <!-- ============================================
@@ -28,13 +27,6 @@ const allPublishers = await fetchAllPublishers();
 
       <div class="max-w-[1200px] mx-auto px-6 py-24 lg:py-32 relative z-10 w-full">
         <div class="max-w-[800px]">
-          <!-- Badge -->
-          <div class="animate-fade-up mb-8">
-            <Badge variant="specialty" color="#FB4C02" class="animate-pulse-glow">
-              Intelligence Exchange Platform
-            </Badge>
-          </div>
-
           <!-- Main headline -->
           <h1 class="animate-fade-up-delay-1 text-4xl md:text-5xl lg:text-title-3xl font-bold text-white tracking-tight leading-[1.1] mb-6">
             If it were a fact,<br />
@@ -44,17 +36,16 @@ const allPublishers = await fetchAllPublishers();
 
           <!-- Sub-headline -->
           <p class="animate-fade-up-delay-2 text-lg lg:text-xl text-white/60 max-w-[600px] leading-relaxed mb-10">
-            A technology layer that structures your data and produces private intelligence.
-            Connect with publishers. Subscribe to insights that give you an edge.
+            A technology layer to produce private intelligence and enable its monetization.
           </p>
 
           <!-- CTA Buttons -->
           <div class="animate-fade-up-delay-3 flex flex-wrap gap-4">
             <a
-              href="/exchange"
+              href="/exchange/become-a-publisher"
               class="inline-flex items-center gap-2 bg-hb-orange-main text-white px-8 py-3.5 rounded-lg text-base font-semibold hover:bg-hb-orange-1 transition-all hover:shadow-hb-glow"
             >
-              Explore Exchange
+              Become a publisher
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
